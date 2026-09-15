@@ -92,7 +92,7 @@ function renderProgress() {
   const node = $('#feed-progress');
   node.replaceChildren();
   if (refreshing) node.append(el('span', 'refresh-status', `Checking feeds · ${done} of ${total}`));
-  else node.append(el('span', '', 'Updates are checked at most every 15 minutes per feed.'));
+  else node.append(el('span', '', 'Healthy feeds are checked at most every 15 minutes. Refresh retries unavailable feeds.'));
   if (failures) node.append(button(`${failures} feed${failures === 1 ? '' : 's'} unavailable · View sources`, 'text-button status-link', () => {view = 'sources'; unavailableOnly = true; query = ''; $('#search').value = ''; render();}));
 }
 
@@ -246,11 +246,12 @@ async function prune() {
   await removeArticles(remove);
 }
 
-async function refreshFeeds() {
+async function refreshFeeds(retryFailed = false) {
   if (!catalog) return;
   if (refreshing) {refreshAgain = true; return;}
   if (!navigator.onLine) {notice('You’re offline. Previously loaded stories are still available.'); return;}
-  const queue = selectedFeeds().filter(feed => !health.get(feed.id)?.nextCheck || health.get(feed.id).nextCheck <= Date.now());
+  const due = feed => (retryFailed && health.get(feed.id)?.error) || !health.get(feed.id)?.nextCheck || health.get(feed.id).nextCheck <= Date.now();
+  const queue = selectedFeeds().filter(due);
   if (!queue.length) {renderProgress(); return;}
   refreshing = true; done = 0; total = queue.length;
   $('#refresh').disabled = true; $('#refresh').textContent = '↻ Refreshing'; render();
@@ -260,7 +261,7 @@ async function refreshFeeds() {
     for (const item of library.articles) if (!articles.has(item.id)) articles.set(item.id, item);
     for (const item of library.state) if (!states.has(item.id)) states.set(item.id, item);
     for (const item of library.feeds) if ((item.nextCheck || 0) > (health.get(item.id)?.nextCheck || 0)) health.set(item.id, item);
-    await inBatches(queue, async feed => {if ((health.get(feed.id)?.nextCheck || 0) <= Date.now()) await fetchFeed(feed); else done++;});
+    await inBatches(queue, async feed => {if (due(feed)) await fetchFeed(feed); else done++;});
   };
   try {
     if (navigator.locks) await navigator.locks.request('sound-and-state-refresh', run); else await run();
@@ -286,7 +287,7 @@ function setupNavigation() {
   $('#clear-section').addEventListener('click', () => {category = ''; source = ''; limit = 60; render();});
   $('#source-filter').addEventListener('change', event => {source = event.target.value; category = ''; limit = 60; render(); if (feedMap.get(source)?.category === 'bluesky' && view !== 'sources') refreshFeeds();});
   $('#search').addEventListener('input', event => {query = event.target.value.toLocaleLowerCase().trim(); limit = 60; render();});
-  $('#refresh').addEventListener('click', refreshFeeds);
+  $('#refresh').addEventListener('click', () => refreshFeeds(true));
   $('#load-more').addEventListener('click', () => {limit += 60; render();});
   $('#mark-read').addEventListener('click', async () => {
     const updates = filteredArticles().map(article => ({...states.get(article.id), id: article.id, read: true}));

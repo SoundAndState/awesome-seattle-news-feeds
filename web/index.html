@@ -49,7 +49,7 @@
       <p>A browser-based RSS and Atom reader for <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds</a>. Bluesky posts load in their own section.</p>
       <h3>Storage and refresh</h3>
       <p>Reading state and cached articles are stored locally in IndexedDB, with no account or server sync. Clearing browser data removes them. Backups are local JSON files.</p>
-      <p>Feeds refresh on opening or request, at most every 15 minutes; failures retry less often. Unsaved content is kept for 30 days, up to 150 items per feed. Saved items remain until removed.</p>
+      <p>Healthy feeds refresh at most every 15 minutes. Failed feeds retry less often automatically; Refresh retries them immediately. Unsaved content is kept for 30 days, up to 150 items per feed. Saved items remain until removed.</p>
       <div class="backup-actions"><button id="export-state" class="secondary-button">Export reading backup</button><button id="import-state" class="secondary-button">Restore backup</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div>
       <p id="backup-status" role="status"></p>
       <h3>Privacy and security</h3>

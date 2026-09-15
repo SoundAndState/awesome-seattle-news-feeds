@@ -61,7 +61,11 @@ test('failed refresh preserves cached stories and shows source errors', async ({
     await expect(card.locator('.source-detail')).toContainText(reasons.get(feed.id));
     await expect(card.locator('.source-detail')).toContainText('Last loaded');
   }
+  const retries=[];
+  page.on('request',request=>{if(request.url().includes('/feed/'))retries.push(request.url().split('/').pop());});
   await page.getByRole('button',{name:'Refresh',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Refresh',exact:true})).toBeEnabled();
+  expect(retries.sort()).toEqual(failedFeeds.map(feed=>feed.id).sort());
   await expect(page.getByRole('button',{name:'2 feeds unavailable · View sources'})).toBeVisible();
   await page.getByRole('button',{name:'Show all sources',exact:true}).click();
   await expect(page.locator('.source-card')).toHaveCount(totalCount);
