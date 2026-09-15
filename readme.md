@@ -25,6 +25,7 @@
 - [Government and Public Services](#government-and-public-services)
 - [Community Organizations](#community-organizations)
 - [Satire](#satire)
+- [Bluesky](#bluesky)
 - [Reading and Archiving Articles](#reading-and-archiving-articles)
 
 ## Seattle and Regional Reporting
@@ -182,6 +183,38 @@ Neighborhood associations and nonprofit announcements.
 Local humor and satirical news.
 
 - [The Needling](https://theneedling.com) - Seattle-focused satirical stories and fictional headlines. [RSS](https://theneedling.com/feed/).
+
+## Bluesky
+
+Social feeds from Seattle-region journalists, publications, and commentators.
+
+- [Amy Sundberg (Bluesky)](https://bsky.app/profile/amysundberg.bsky.social) - Seattle government, policing, and surveillance coverage from a reporter at The Urbanist and publisher of Notes from the Emerald City. [RSS](https://bsky.app/profile/did:plc:f5p5psli6mgis6ttny2ant7b/rss).
+- [Andrew Engelson (Bluesky)](https://bsky.app/profile/andyengelson.bsky.social) - Cascadia news, commentary, and organizing updates from the writer behind Cascadia Journal. [RSS](https://bsky.app/profile/did:plc:fwjwke65squvrpp5jgv3gxrj/rss).
+- [Daniel Beekman (Bluesky)](https://bsky.app/profile/dbeekman.bsky.social) - Seattle politics and community reporting from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:mrnizqztaonp6r32k3bbqp5g/rss).
+- [David Goldstein (Goldy) (Bluesky)](https://bsky.app/profile/goldy.horsesass.org) - Economic and political commentary from a Civic Ventures senior fellow and Pitchfork Economics co-host. [RSS](https://bsky.app/profile/did:plc:ap2panaty2yhp6dnwe7kyqxj/rss).
+- [David Kroman (Bluesky)](https://bsky.app/profile/kromandavid.bsky.social) - Seattle news and public-affairs commentary from a co-host of KUOW Soundside. [RSS](https://bsky.app/profile/did:plc:i2sx4ke5f3gs3zvfn7nm647v/rss).
+- [DivestSPD (Bluesky)](https://bsky.app/profile/divestspd.bsky.social) - Seattle police-accountability investigations and advocacy from a community watchdog. [RSS](https://bsky.app/profile/did:plc:2bbp5fjgbsci4fvu2lx4dedx/rss).
+- [Doug Trumm (Bluesky)](https://bsky.app/profile/metropolitanglide.bsky.social) - Housing, transportation, and urban-policy commentary from the publisher of The Urbanist. [RSS](https://bsky.app/profile/did:plc:mq5viv4jtwtjr2clfpjn6o6z/rss).
+- [Erica C. Barnett (Bluesky)](https://bsky.app/profile/ericacbarnett.bsky.social) - Seattle politics and public-policy reporting from the cofounder and editor of PubliCola. [RSS](https://bsky.app/profile/did:plc:mvuk5qvagm4ljx3lwj4vmb6v/rss).
+- [Guy Oron (Bluesky)](https://bsky.app/profile/guyoron.net) - Seattle reporting and commentary from the journalist behind Gossip Guy. [RSS](https://bsky.app/profile/did:plc:4zshn55gkmcp6whwkuwatkbe/rss).
+- [Hannah Krieg (Bluesky)](https://bsky.app/profile/hannahkrieg.bsky.social) - Independent Seattle reporting and commentary from the writer behind The Burner. [RSS](https://bsky.app/profile/did:plc:ua6zefzngv2ogn7drkp5cdy6/rss).
+- [Jake Goldstein-Street (Bluesky)](https://bsky.app/profile/goldsteinstreet.bsky.social) - Washington government and legal reporting from a Washington State Standard journalist. [RSS](https://bsky.app/profile/did:plc:d5oaljwsxuvvkmxkhliscya3/rss).
+- [Jim Brunner (Bluesky)](https://bsky.app/profile/jimbrunner.bsky.social) - Washington politics and government reporting from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:xhl3w4tvtedx35e5tlcvayzu/rss).
+- [KUOW Public Radio (Bluesky)](https://bsky.app/profile/kuow.org) - Puget Sound public-radio reporting and NPR news. [RSS](https://bsky.app/profile/did:plc:sgpikk2uv7446555gx2mawpz/rss).
+- [Megan Burbank (Bluesky)](https://bsky.app/profile/meganburbank.bsky.social) - Independent reporting and commentary on culture, politics, and abortion policy. [RSS](https://bsky.app/profile/did:plc:5wkuyf6gpcm5k4ipd223i75n/rss).
+- [Mike Baker (Bluesky)](https://bsky.app/profile/mikebaker.bsky.social) - Cascadia and national investigative reporting from a New York Times correspondent. [RSS](https://bsky.app/profile/did:plc:r4htmaum3mel37tvqtidnfo4/rss).
+- [Naomi Ishisaka (Bluesky)](https://bsky.app/profile/naomiishisaka.bsky.social) - Social-justice columns and analysis from a Seattle Times columnist. [RSS](https://bsky.app/profile/did:plc:wdxoaq3hdmmp7i3wwbxaxn5i/rss).
+- [Nick Deshais (Bluesky)](https://bsky.app/profile/nickdeshais.bsky.social) - Transportation reporting from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:wtvs2quhyrvxcbkutyi6zfby/rss).
+- [Ryan Packer (Bluesky)](https://bsky.app/profile/typewriteralley.bsky.social) - Transportation reporting and advocacy from a contributing editor at The Urbanist. [RSS](https://bsky.app/profile/did:plc:6vatl6lhsv3ninhf7n4ssria/rss).
+- [Seattle Bike Blog (Bluesky)](https://bsky.app/profile/seattlebikeblog.com) - Seattle cycling news, street-safety coverage, and bicycle advocacy. [RSS](https://bsky.app/profile/did:plc:6wamrktolx6e37qid6666cu5/rss).
+- [Shauna Sowersby (Bluesky)](https://bsky.app/profile/ssowersby.bsky.social) - Washington state-politics reporting from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:fkn3bqvtepdgxum2drbl6kla/rss).
+- [South Seattle Emerald (Bluesky)](https://bsky.app/profile/soseaemerald.bsky.social) - Community reporting and perspectives from South Seattle. [RSS](https://bsky.app/profile/did:plc:f4uz72wxjpztu3o27blzkqas/rss).
+- [Sydney Brownstone (Bluesky)](https://bsky.app/profile/sydbrownstone.bsky.social) - Investigative reporting and accountability coverage from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:l6gbvxbrvw62diazih4xyb2t/rss).
+- [The Needling (Bluesky)](https://bsky.app/profile/theneedling.com) - Seattle satire and parody from a local humor publication. [RSS](https://bsky.app/profile/did:plc:pxsx6uebhylyfaxejchrr7ls/rss).
+- [The Stranger (Bluesky)](https://bsky.app/profile/thestranger.com) - Seattle reporting, commentary, arts, food, and culture. [RSS](https://bsky.app/profile/did:plc:ekf3smdiurl26mmjjzguxq64/rss).
+- [The Urbanist (Bluesky)](https://bsky.app/profile/theurbanist.org) - Advocacy journalism on housing, transportation, and cities in the Seattle region. [RSS](https://bsky.app/profile/did:plc:4cehxdx5hfam37oos3yh5tta/rss).
+- [Through the Static (Bluesky)](https://bsky.app/profile/throughthestatic.bsky.social) - Independent Pacific Northwest reporting and commentary with an antifascist editorial perspective. [RSS](https://bsky.app/profile/did:plc:4e2htgs6lcmsahh6oxast42p/rss).
+- [Washington State Standard (Bluesky)](https://bsky.app/profile/washingtonstatestandard.com) - Washington state-government reporting, policy analysis, and political commentary. [RSS](https://bsky.app/profile/did:plc:26375peygwnrijoepmy2fdcs/rss).
 
 ## Reading and Archiving Articles
 
