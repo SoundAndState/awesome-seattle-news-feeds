@@ -2,9 +2,9 @@
 
 <!-- Generated from feeds.json. -->
 
-Reviewed 2026-09-15: 110 original subscriptions; 70 active feeds.
+Reviewed 2026-09-15: 110 original subscriptions; 96 active feeds.
 
-merged: 7; retained: 51; replaced: 19; excluded: 33.
+merged: 7; retained: 51; replaced: 24; excluded: 28.
 
 Each original URL is accounted for below. Excluded means unsuitable for this verified feed bundle at review time; a temporary request failure does not establish that a publisher has closed. Dead or repurposed addresses are shown as text, not recommendations.
 
@@ -50,7 +50,7 @@ Decision: **retained** → Seattle Weekly (`https://www.seattleweekly.com/feed/`
 
 Original: `http://southseattleemerald.com/feed/`
 
-Decision: **excluded**. The old .com address timed out. The current .org feed redirects to /stories.rss but returned zero entries. Needs a working populated feed before inclusion.
+Decision: **excluded**. The publication is active on southseattleemerald.org. Its current /stories.rss address was checked again and returned zero items; the legacy .com feed times out. Retain the publication as a feed-discovery candidate, not as a closed newsroom.
 
 ## Parkways
 
@@ -74,7 +74,7 @@ Decision: **replaced** → The Seattle Medium (`https://seattlemedium.com/catego
 
 Original: `http://seattlegreenways.org/feed/`
 
-Decision: **replaced** → Seattle Streets Alliance (`https://www.streetsalliance.org/feed/`). Replaced the old address with a verified current feed; reviewed current entries and sample topics.
+Decision: **replaced** → Seattle Streets Alliance (`https://www.streetsalliance.org/get-involved/blog/feed/`). Follow-up review selected the RSS address explicitly linked by the current Seattle Streets Alliance blog. Both the root and blog feed addresses returned the same recent article links; retained one subscription.
 
 ## The Seattle Times Eastside – The Seattle Times
 
@@ -110,7 +110,7 @@ Decision: **replaced** → The Seattle Times Local Politics (`https://www.seattl
 
 Original: `http://www.seattletimes.com/food-drink/feed/`
 
-Decision: **excluded**. Food and Drink is a broader topical feed and was left out to keep the Seattle Times selection focused on local civic reporting.
+Decision: **replaced** → The Seattle Times Food and Drink (`https://www.seattletimes.com/food-drink/feed/`). Restored as an explicitly optional, mixed-scope topic feed. This is distinct beat coverage, not an exact duplicate of Local Politics; current entries were inspected.
 
 ## West Seattle Bike Connections
 
@@ -188,7 +188,7 @@ Decision: **retained** → Washington State House Democrats (`https://housedemoc
 
 Original: `http://www.fremontuniverse.com/feed/`
 
-Decision: **excluded**. The old feed returns HTTP 404. Fremont Neighbor provides a separate current neighborhood publication; no identity equivalence is assumed.
+Decision: **excluded**. The supplied publisher-page review found the latest visible post dated March 23, 2021; the exported feed also returns 404. Treat as apparently dormant, without claiming formal closure.
 
 ## udistrictdaily.com
 
@@ -350,7 +350,7 @@ Decision: **merged** → The Seattle Times Local Politics (`https://www.seattlet
 
 Original: `http://www.mapleleaflife.com/feed/`
 
-Decision: **excluded**. The exported feed returns HTTP 404.
+Decision: **excluded**. The supplied publisher-page review found the latest visible post dated March 23, 2021; the exported feed also returns 404. Treat as apparently dormant, without claiming formal closure.
 
 ## SouthSoundTalk
 
@@ -368,7 +368,7 @@ Decision: **excluded**. The exported feed returns HTTP 404.
 
 Original: `http://www.magnoliavoice.com/feed/`
 
-Decision: **excluded**. The feed still parses, but inspected items were unrelated promotional content rather than Seattle neighborhood reporting. Excluded pending editorial review.
+Decision: **excluded**. The publication's neighborhood-guide presentation and inspected unrelated promotional stories leave its local-news relevance uncertain. Excluded pending editorial review; no claim that the site was hacked or sold.
 
 ## SDOT Blog
 
@@ -410,7 +410,7 @@ Decision: **excluded**. The response is not valid feed XML; the exported address
 
 Original: `http://www.queenanneview.com/feed/`
 
-Decision: **excluded**. The HTTPS request failed during TLS negotiation. A working feed was not verified.
+Decision: **excluded**. The supplied homepage review found an under-construction page; the follow-up feed request failed during TLS negotiation. Current publication and feed status remain unverified, not proven permanently closed.
 
 ## Redmond Reporter
 
@@ -434,7 +434,7 @@ Decision: **retained** → My Ballard (`https://www.myballard.com/feed/`). Upgra
 
 Original: `http://sccinsight.com/feed/`
 
-Decision: **excluded**. The feed returned HTTP 403. Kept out of the verified bundle pending manual review; this response alone does not establish publication status.
+Decision: **excluded**. Regular coverage ended with the publisher's December 31, 2021 sign-off, although later one-off posts exist. Retain as an archive rather than a current-news subscription. Publisher evidence: https://sccinsight.com/.
 
 ## Notes from the Emerald City
 
@@ -524,13 +524,13 @@ Decision: **retained** → The Burner (`https://www.theburnerseattle.com/blog-fe
 
 Original: `http://www.seattleglobalist.com/feed`
 
-Decision: **excluded**. The feed parses, but its newest entry is dated July 2020. Retain only as historical provenance.
+Decision: **excluded**. The publisher states that it ceased operations on September 30, 2020 and preserves the website as an archive: https://seattleglobalist.com/about-the-globalist. Keep out of the current-news bundle.
 
 ## Urban Living
 
 Original: `http://www.urbnlivn.com/feed/`
 
-Decision: **excluded**. The exported feed returns HTTP 404.
+Decision: **replaced** → Urban Living (`https://cms.urbnlivn.com/feed/`). Follow-up review found a populated current feed at the publisher's current address. Restored this distinct subscription after checking recent entries.
 
 ## The Seattle Star
 
@@ -590,7 +590,7 @@ Decision: **replaced** → NPI Cascadia Advocate (`https://www.nwprogressive.org
 
 Original: `http://blog.visitseattle.org/?feed=rss2`
 
-Decision: **excluded**. The old blog address returned an HTTP 525 TLS error. A working current feed was not verified.
+Decision: **replaced** → Visit Seattle (`https://visitseattle.org/feed/`). Follow-up review found a populated current feed at the publisher's current address. Restored this distinct subscription after checking recent entries.
 
 ## The SeaTac Blog
 
@@ -602,7 +602,7 @@ Decision: **retained** → The SeaTac Blog (`https://seatacblog.com/feed/`). Upg
 
 Original: `http://www.seattletimes.com/real-estate/feed/`
 
-Decision: **excluded**. The Real Estate feed has a broader topical remit. Left out in favor of the narrower Seattle Times civic feeds.
+Decision: **replaced** → The Seattle Times Real Estate (`https://www.seattletimes.com/real-estate/feed/`). Restored as an explicitly optional, mixed-scope topic feed. This is distinct beat coverage, not an exact duplicate of Local Politics; current entries were inspected.
 
 ## White Center Now: The blog about White Center
 
@@ -626,7 +626,7 @@ Decision: **retained** → Washington Smoke Blog (`https://wasmoke.blogspot.com/
 
 Original: `http://www.seattletimes.com/opinion/feed/`
 
-Decision: **excluded**. The Opinion feed mixes national and regional commentary. Left out of the Seattle Times local/state selection.
+Decision: **replaced** → The Seattle Times Opinion (`https://www.seattletimes.com/opinion/feed/`). Restored as an explicitly optional, mixed-scope topic feed. This is distinct beat coverage, not an exact duplicate of Local Politics; current entries were inspected.
 
 ## KREM RSS Feed: local
 
@@ -650,7 +650,7 @@ Decision: **retained** → Post Alley (`https://www.postalley.org/feed/`). Verif
 
 Original: `http://feeds.feedburner.com/SeattleBubble`
 
-Decision: **excluded**. The feed parses, but its newest entry is dated March 2023.
+Decision: **excluded**. The publisher website has resumed posting, with July and August 2026 entries; the old FeedBurner copy is stale, so inactivity is not the reason for exclusion. The publisher-linked direct feed at https://seattlebubble.com/blog/feed/ returned HTTP 403 and, with ordinary browser headers, a WordPress HTTP 500 error. Keep the active publication under feed repair review.
 
 ## King County Library System
 

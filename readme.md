@@ -6,9 +6,9 @@
 <!-- This independent list is new; the 30-day rule applies to submission to sindresorhus/awesome. -->
 <!--lint disable awesome-git-repo-age-->
 
-[Download the OPML file](https://raw.githubusercontent.com/sayhiben/awesome-seattle-news-feeds/main/feeds.opml) and import it into Feedly, NetNewsWire, Inoreader, or another RSS reader. [Browse the OPML](feeds.opml) or [edit the JSON source](feeds.json).
+[Download the OPML file](https://raw.githubusercontent.com/sayhiben/awesome-seattle-news-feeds/main/feeds.opml) and import it into Feedly, NetNewsWire, Inoreader, or another RSS reader. [Suggest a source or correction](CONTRIBUTING.md).
 
-70 curated feeds. Reviewed 2026-09-15. The starting point is a Seattle-focused Feedly export, so coverage elsewhere in Washington is still growing.
+96 curated feeds. Reviewed 2026-09-15. The starting point is a Seattle-focused Feedly export, so coverage elsewhere in Washington is still growing.
 
 ## Contents
 
@@ -19,6 +19,7 @@
 - [South King County and South Sound](#south-king-county-and-south-sound)
 - [Washington State](#washington-state)
 - [Transportation and Urbanism](#transportation-and-urbanism)
+- [Seattle Times Optional Topics](#seattle-times-optional-topics)
 - [Food Culture and History](#food-culture-and-history)
 - [Commentary and Advocacy](#commentary-and-advocacy)
 - [Government and Public Services](#government-and-public-services)
@@ -26,7 +27,6 @@
 - [Satire](#satire)
 - [Choosing Seattle Times Feeds](#choosing-seattle-times-feeds)
 - [Reading and Archiving Articles](#reading-and-archiving-articles)
-- [Curation and Maintenance](#curation-and-maintenance)
 
 ## Seattle and Regional Reporting
 
@@ -34,12 +34,16 @@ Citywide reporting and community journalism. Some publishers also carry national
 
 - [Cascade PBS News](https://www.cascadepbs.org/news) - Regional public-media journalism and analysis, using the news feed instead of television-program listings. [RSS](https://www.cascadepbs.org/articles/rss/).
 - [Converge Media](https://www.whereweconverge.com/post) - Local reporting, interviews, and cultural coverage centered on Seattle-area Black communities. [RSS](https://www.whereweconverge.com/post?format=rss).
+- [GeekWire](https://www.geekwire.com) - Seattle-area technology, startups, major employers, and business reporting, with national technology coverage. [RSS](https://www.geekwire.com/feed/).
 - [HardPressed](https://www.hardpressed-info.com) - Independent Seattle-area investigations and public-records reporting. [RSS](https://www.hardpressed-info.com/rss/).
 - [KING 5 Local](https://www.king5.com) - Television newsroom reporting on Seattle and Western Washington from the local section. [RSS](https://www.king5.com/feeds/syndication/rss/news/local).
+- [KNKX News](https://www.knkx.org/news) - Public-radio reporting from Seattle, Tacoma, and the Northwest, with some national news. [RSS](https://www.knkx.org/news.rss).
+- [KUOW Local Stories](https://www.kuow.org/tags/local-stories) - Public-radio reporting on Seattle and Washington using the publisher's Local Stories feed. [RSS](https://www.kuow.org/tags/local-stories.rss).
 - [MyNorthwest Local](https://mynorthwest.com/local) - Regional radio-news reporting and commentary using the local section feed. [RSS](https://mynorthwest.com/local/feed).
 - [Northwest Asian Weekly](https://nwasianweekly.com) - Reporting on Asian American communities in Seattle and the Pacific Northwest, plus broader community issues. [RSS](https://nwasianweekly.com/feed/).
 - [PubliCola](https://publicola.com) - Independent reporting and analysis on city government, housing, transportation, and public policy. [RSS](https://publicola.com/feed/).
 - [Real Change](https://www.realchangenews.org) - Local reporting and commentary on homelessness, poverty, housing, and social justice. [RSS](https://www.realchangenews.org/rss.xml).
+- [Seattle Daily Journal of Commerce](https://www.djc.com) - Regional construction, development, real estate, and business news; full articles may require a subscription. [RSS](https://www.djc.com/cust/rss/rss2.php).
 - [Seattle Weekly](https://www.seattleweekly.com) - Local and regional reporting, community stories, and entertainment. [RSS](https://www.seattleweekly.com/feed/).
 - [The Bulletin](https://thebulletinsea.org) - Independent reporting and analysis on Seattle Public Schools and education. [RSS](https://thebulletinsea.org/rss/).
 - [The Burner](https://www.theburnerseattle.com) - Independent Seattle-area reporting and commentary on government and public accountability. [RSS](https://www.theburnerseattle.com/blog-feed.xml).
@@ -57,6 +61,7 @@ Neighborhood reporting, local businesses, and community events.
 - [PhinneyWood](https://phinneywood.com) - Phinney Ridge and Greenwood news, businesses, and community events. [RSS](https://phinneywood.com/feed/).
 - [Wallyhood](https://www.wallyhood.org) - Wallingford neighborhood news, businesses, and community events. [RSS](https://www.wallyhood.org/feed/).
 - [West Seattle Blog](https://westseattleblog.com) - Neighborhood news, local government, transportation, and community events. [RSS](https://westseattleblog.com/feed/).
+- [Westside Seattle](https://www.westsideseattle.com) - West Seattle and nearby Westside community reporting, businesses, and local events. [RSS](https://www.westsideseattle.com/rss.xml).
 
 ## Eastside
 
@@ -70,11 +75,13 @@ Bellevue, Kirkland, Redmond, and surrounding communities. Separate local edition
 
 ## North Sound
 
-Everett, Edmonds, Lynnwood, and Snohomish County.
+Shoreline, Lake Forest Park, Snohomish County, and communities farther north in Whatcom, Skagit, and San Juan counties.
 
 - [Lynnwood Times](https://lynnwoodtimes.com) - Local and state reporting with a Snohomish County focus. [RSS](https://lynnwoodtimes.com/feed/).
 - [My Edmonds News](https://myedmondsnews.com) - Community reporting, local government, and events in Edmonds. [RSS](https://myedmondsnews.com/feed/).
 - [My Lynnwood News](https://mylynnwoodnews.com) - Community reporting, local government, and events from the publication formerly called Lynnwood Today. [RSS](https://mylynnwoodnews.com/feed/).
+- [Salish Current](https://salish-current.org) - Community reporting, arts, and civic coverage for Whatcom, Skagit, and San Juan counties. [RSS](https://salish-current.org/feed/).
+- [Shoreline Area News](https://www.shorelineareanews.com) - Shoreline and Lake Forest Park reporting, community announcements, and local events. [Atom](https://www.shorelineareanews.com/feeds/posts/default).
 - [The Everett Herald](https://www.heraldnet.com) - Snohomish County reporting, regional news, and local sports. [RSS](https://www.heraldnet.com/feed/).
 
 ## South King County and South Sound
@@ -85,13 +92,17 @@ Burien, SeaTac, Tukwila, White Center, and the Tacoma area.
 - [The B-Town Blog](https://b-townblog.com) - Burien-area community news, local government, businesses, and events. [RSS](https://b-townblog.com/feed/).
 - [The SeaTac Blog](https://seatacblog.com) - Local government, transportation, businesses, and community news. [RSS](https://seatacblog.com/feed/).
 - [The Tukwila Blog](https://tukwilablog.com) - Local news, public safety, city government, and community events. [RSS](https://tukwilablog.com/feed/).
+- [The Waterland Blog](https://waterlandblog.com) - Des Moines reporting, local government, businesses, and community events. [RSS](https://waterlandblog.com/feed/).
 - [White Center Now](https://whitecenternow.com) - Neighborhood reporting, restaurants, events, and community developments. [RSS](https://whitecenternow.com/feed/).
 
 ## Washington State
 
 State policy and reporting beyond the Seattle metro area.
 
+- [InvestigateWest](https://www.investigatewest.org) - Investigative reporting across the Northwest, including Washington, Oregon, and Idaho. [RSS](https://www.investigatewest.org/latest/rss/).
 - [KREM 2 Local](https://www.krem.com) - Television newsroom reporting on Spokane and the Inland Northwest, including nearby Idaho. [RSS](https://www.krem.com/feeds/syndication/rss/news/local).
+- [RANGE Media](https://www.rangemedia.co) - Worker-owned Spokane newsroom covering housing, labor, public accountability, and the Inland Northwest. [RSS](https://www.rangemedia.co/rss/).
+- [The Washington Observer](https://washingtonobserver.substack.com) - State government, lobbying, politics, and influence reporting; full articles may require a subscription. [RSS](https://washingtonobserver.substack.com/feed).
 - [Washington State Standard](https://washingtonstatestandard.com) - State government, elections, public policy, and accountability reporting. [RSS](https://washingtonstatestandard.com/feed/).
 
 ## Transportation and Urbanism
@@ -103,6 +114,14 @@ Transit, cycling, housing, and street design. Several publications combine repor
 - [The Seattle Times Traffic Lab](https://www.seattletimes.com/seattle-news/transportation) - Regional transportation reporting on roads, transit, and travel policy. [RSS](https://www.seattletimes.com/transportation/feed/).
 - [The Urbanist](https://www.theurbanist.org) - Housing and transportation reporting alongside pro-transit and pro-density commentary. [RSS](https://www.theurbanist.org/rss/).
 
+## Seattle Times Optional Topics
+
+Distinct section subscriptions with regional and nonlocal stories. Skip this folder when importing if you want only the narrower local civic feeds.
+
+- [The Seattle Times Food and Drink](https://www.seattletimes.com/life/food-drink) - Restaurant coverage and food features, including national stories and recipes. [RSS](https://www.seattletimes.com/food-drink/feed/).
+- [The Seattle Times Opinion](https://www.seattletimes.com/opinion) - Editorials, guest essays, and opinion columns on regional and national issues. [RSS](https://www.seattletimes.com/opinion/feed/).
+- [The Seattle Times Real Estate](https://www.seattletimes.com/business/real-estate) - Regional housing and development coverage mixed with broader property and home features. [RSS](https://www.seattletimes.com/real-estate/feed/).
+
 ## Food Culture and History
 
 Regional dining, arts, events, and local history.
@@ -112,18 +131,29 @@ Regional dining, arts, events, and local history.
 - [Seattle Now and Then](https://pauldorpat.com) - Local history, archival photographs, and present-day comparisons. [RSS](https://pauldorpat.com/feed/).
 - [Seattleite](https://seattleite.com) - Dining, travel, entertainment, and lifestyle coverage with a Seattle focus. [RSS](https://seattleite.com/feed/).
 - [The Seattle Star](https://www.seattlestar.net) - Local arts, literature, comics, and cultural commentary. [RSS](https://www.seattlestar.net/feed/).
+- [Visit Seattle](https://visitseattle.org) - Visitor guides, events, and destination features from the region's tourism organization. [RSS](https://visitseattle.org/feed/).
 
 ## Commentary and Advocacy
 
 Opinion, analysis, and advocacy sources. These feeds express editorial or organizational viewpoints and may discuss national issues.
 
+- [Cascadia Journal](https://www.cascadia-journal.com) - Andrew Engelson's regional news roundups, reporting, and opinionated essays, including Oregon and British Columbia. [RSS](https://www.cascadia-journal.com/rss/).
 - [DivestSPD](https://www.divestspd.com) - Police accountability investigations and commentary from an advocacy perspective. [RSS](https://www.divestspd.com/feed).
+- [Hacks & Wonks](https://www.officialhacksandwonks.com) - Washington politics interviews and episode transcripts hosted by political consultant Crystal Fincher; audio-first and published intermittently. [RSS](https://www.officialhacksandwonks.com/rss/).
 - [HorsesAss](https://horsesass.org) - Progressive political commentary on Seattle, Washington, and national issues. [RSS](https://horsesass.org/feed/).
 - [NPI Cascadia Advocate](https://www.nwprogressive.org/weblog) - Progressive political research, analysis, and advocacy for Washington and the wider Northwest. [RSS](https://www.nwprogressive.org/weblog/feed).
 - [Post Alley](https://www.postalley.org) - Regional essays and commentary on politics, civic life, and culture, including national topics. [RSS](https://www.postalley.org/feed/).
-- [Seattle Streets Alliance](https://www.streetsalliance.org/get-involved/blog) - Street safety and transportation advocacy from the organization formerly known as Seattle Neighborhood Greenways. [RSS](https://www.streetsalliance.org/feed/).
+- [Puget Sound Anarchists](https://pugetsoundanarchists.org) - Movement reports, anonymous submissions, reposts, and commentary from anarchist contributors across the Northwest. [RSS](https://pugetsoundanarchists.org/feed/).
+- [Rondezvous](https://www.rondezvouswa.com) - Ron Davis's Seattle housing, transportation, and city-government commentary, including advocacy and personal campaign updates. [RSS](https://www.rondezvouswa.com/feed).
+- [Seattle Schools Community Forum](https://saveseattleschools.blogspot.com) - Community news, commentary, and discussion about Seattle Public Schools, budgets, and education policy. [Atom](https://saveseattleschools.blogspot.com/feeds/posts/default).
+- [Seattle Solidarity Network](https://seasol.net) - First-person accounts of workplace and tenant campaigns from participating organizers. [RSS](https://seasol.net/feed/).
+- [Seattle Streets Alliance](https://www.streetsalliance.org/get-involved/blog) - Street safety and transportation advocacy from the organization formerly known as Seattle Neighborhood Greenways. [RSS](https://www.streetsalliance.org/get-involved/blog/feed/).
+- [Sightline Institute](https://www.sightline.org) - Research and advocacy on housing, land use, climate, and public policy across the Northwest. [RSS](https://www.sightline.org/feed/).
+- [The Harbor Rat Report](https://sabot.media) - Grays Harbor reporting mixed with movement essays, interviews, podcasts, and national and international organizing coverage. [RSS](https://sabot.media/feeds/projects/the-harbor-rat-report.xml).
+- [The STAND](https://www.thestand.org) - Washington labor reporting and news roundups published by the Washington State Labor Council, AFL-CIO. [RSS](https://www.thestand.org/feed/).
 - [Through the Static](https://throughthestatic.org) - Seattle community reporting and commentary with a focus on local activism. [RSS](https://throughthestatic.org/feed/).
 - [Transit Riders Union](https://transitriders.org) - Transit access, labor campaigns, and political endorsements from a membership advocacy organization. [RSS](https://transitriders.org/feed/).
+- [Urban Living](https://www.urbnlivn.com) - Seattle-area housing market analysis and property news from a real estate brokerage. [RSS](https://cms.urbnlivn.com/feed/).
 - [West Seattle Bike Connections](https://westseattlebikeconnections.org) - Cycling advocacy, neighborhood rides, and safer-street campaigns. [RSS](https://westseattlebikeconnections.org/feed/).
 
 ## Government and Public Services
@@ -134,6 +164,7 @@ Primary-source announcements from agencies, elected officials, public libraries,
 - [King County Library System](https://kcls.org) - Library services, events, reading programs, and community announcements. [RSS](https://kcls.org/feed/).
 - [King County Metro Matters](https://kingcountymetro.blog) - Bus service changes, transit projects, and rider information from the transit agency. [RSS](https://kingcountymetro.blog/feed/).
 - [King County Parks Blog](https://kingcountyparks.org) - County parks, regional trails, recreation, and facilities updates. [RSS](https://kingcountyparks.org/feed/).
+- [Public Health Insider](https://publichealthinsider.com) - Public Health Seattle and King County announcements, health guidance, and community updates. [RSS](https://publichealthinsider.com/feed/).
 - [SDOT Blog](https://sdotblog.seattle.gov) - City transportation projects, street changes, and travel advisories. [RSS](https://sdotblog.seattle.gov/feed/).
 - [Seattle City Council Blog](https://council.seattle.gov) - Council announcements and statements from elected officials. [RSS](https://council.seattle.gov/feed/).
 - [Seattle Economic Development Bottom Line](https://bottomline.seattle.gov) - City economic-development programs, small-business support, and announcements. [RSS](https://bottomline.seattle.gov/feed/).
@@ -160,11 +191,11 @@ Humor and fictional news; do not treat these stories as factual reporting.
 
 ## Choosing Seattle Times Feeds
 
-The closest verified match for a quieter Seattle/Washington civic-news subscription is the **Local Politics** RSS link above. On September 15, 2026, all 34 inspected headlines had Seattle or Washington connections. Eastside and Traffic Lab offer additional local topic coverage. These sections overlap, so your reader may still show the same article more than once.
+The **Local Politics** RSS link above is the closest verified match for a quieter Seattle/Washington civic-news subscription. All 34 headlines inspected on September 15, 2026 had Seattle or Washington connections. Eastside and Traffic Lab add local beat coverage; the feeds can overlap.
 
-The existing `https://www.seattletimes.com/seattle-news/feed/` is misleadingly broad: the review found national and international health and wire stories. `/local-news/feed/` redirects to that same feed. The Law and Justice feed also carried nonlocal stories; Northwest includes Oregon and other regional coverage. Category-query alternatives tested during review returned empty feeds.
+The broad `https://www.seattletimes.com/seattle-news/feed/` includes national and international wire stories. No comprehensive Seattle Times feed guaranteed to contain only Washington stories was verified. Local Politics omits other local beats, and publisher categorization can change.
 
-No comprehensive Seattle Times feed guaranteed to contain only Washington stories was verified. Local Politics is narrower and omits other local beats; publisher categorization can change. For wider coverage, follow the other local outlets in this directory or use your reader's filters on the broader feed. The OPML uses the narrower selection.
+The **Seattle Times Optional Topics** folder preserves the separate Food and Drink, Real Estate, and Opinion subscriptions. These include nonlocal stories. Skip that folder when importing for a more local reading mix.
 
 ## Reading and Archiving Articles
 
@@ -175,19 +206,3 @@ For a Seattle Times story, open the article link from your reader and copy its c
 [Archive.is](https://archive.is) and [Archive.ph](https://archive.ph) are addresses for the archive.today service. Its usual workflow is to search existing snapshots using the original article URL, then use the save form if a capture is needed. **Prefer another archive when possible:** [Wikipedia's current guidance](https://en.wikipedia.org/wiki/Wikipedia:Archive.today) documents its 2026 deprecation following browser-abuse and altered-snapshot concerns. Do not treat a snapshot there as the sole evidence of an article's wording; compare against the publisher or another archive.
 
 The [Wayback Machine](https://web.archive.org) is another option for older versions and broken links. An archive may show an incomplete page, an access screen, or an older version without later corrections. For Seattle Times articles in particular, RSS availability does not promise full article access, and no archive is guaranteed to capture subscriber-only text. A subscription or publisher-provided share link is the dependable way to access the current article.
-
-## Curation and Maintenance
-
-Here, “known-good” means a recognizable regional publisher or clearly labeled primary source, a populated feed that was checked on the recorded date, and a reviewed sample relevant to this directory. It is not a blanket endorsement of every story. Editorial judgments and corrections remain welcome. Opinion, advocacy, official communications, community announcements, and satire are labeled so readers can choose their mix. The [dated feed-check report](docs/feed-review-2026-09-15.json) records HTTP results, item counts, and latest entry dates for the initial catalog.
-
-The [import review](docs/import-review.md) accounts for every subscription in the original export, including exact duplicates, intentional publisher consolidation, redirects, renamed outlets, inactive feeds, and failures needing another check. A failed automated request is not proof that a publisher has shut down. Original addresses remain in the JSON as aliases or import history, but only curated active entries appear in the downloadable OPML.
-
-`feeds.json` is the source of truth for this README, the OPML file, and the import review. Run `npm ci`, edit the JSON, then run `npm run build` and `npm run ci`. The checks enforce the JSON schema, unique URLs and aliases, complete import accounting, reproducible output, Awesome List formatting, and OPML XML syntax and subscription structure.
-
-The [validation workflow](.github/workflows/validate.yml) runs on pushes and pull requests. The separate [feed-health workflow](.github/workflows/feed-health.yml) checks live feeds weekly and on demand, reports redirects and duplicate article sets, and flags broken, empty, undated, or year-old feeds for review. Its results are uploaded as a downloadable report. Network health can change independently of a valid release. On the initial GitHub-hosted run, the three Seattle Times feeds returned empty HTTP 202 responses and SouthSoundTalk timed out, despite successful local checks. See the [runner-specific review](docs/github-feed-review-2026-09-15.json). These remain visible health-check failures requiring review, not suppressed successes.
-
-This directory is dedicated to the public domain under [CC0 1.0](license); linked publisher content retains its own copyright. The Awesome badge indicates the list format, not acceptance into the central Awesome directory.
-
-## Contributing
-
-See the [contribution guide](contributing.md). Add or correct entries in `feeds.json`, regenerate the published files, and include evidence that the feed serves current, relevant stories.
