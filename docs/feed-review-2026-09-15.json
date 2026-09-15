@@ -1,0 +1,709 @@
+{
+  "checkedAt": "2026-09-15T21:06:31.976213+00:00",
+  "results": [
+    {
+      "id": "seattle-transit-blog",
+      "url": "https://seattletransitblog.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://seattletransitblog.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T19:20:33+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-stranger",
+      "url": "https://www.thestranger.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.thestranger.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T20:49:20+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "transit-riders-union",
+      "url": "https://transitriders.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://transitriders.org/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-07-01T21:24:18+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-weekly",
+      "url": "https://www.seattleweekly.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.seattleweekly.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T19:52:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-parks-parkways",
+      "url": "https://parkways.seattle.gov/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://parkways.seattle.gov/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-10T23:24:37+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "king-county-metro-matters",
+      "url": "https://kingcountymetro.blog/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://kingcountymetro.blog/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-11T23:58:16+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-seattle-medium",
+      "url": "https://seattlemedium.com/category/local-news/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://seattlemedium.com/category/local-news/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-10T15:50:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-streets-alliance",
+      "url": "https://www.streetsalliance.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.streetsalliance.org/feed/",
+      "format": "RSS",
+      "items": 20,
+      "latestEntry": "2026-09-10T22:49:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-seattle-times-eastside",
+      "url": "https://www.seattletimes.com/eastside/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.seattletimes.com/eastside/feed/",
+      "format": "RSS",
+      "items": 35,
+      "latestEntry": "2026-09-12T01:16:15+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattleite",
+      "url": "https://seattleite.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://seattleite.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-11T21:39:28+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-seattle-times-local-politics",
+      "url": "https://www.seattletimes.com/seattle-news/politics/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.seattletimes.com/seattle-news/politics/feed/",
+      "format": "RSS",
+      "items": 34,
+      "latestEntry": "2026-09-15T19:13:18+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "west-seattle-bike-connections",
+      "url": "https://westseattlebikeconnections.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://westseattlebikeconnections.org/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-08-15T19:41:13+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "northwest-asian-weekly",
+      "url": "https://nwasianweekly.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://nwasianweekly.com/feed/",
+      "format": "RSS",
+      "items": 20,
+      "latestEntry": "2026-09-15T18:56:25+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "downtown-bellevue-network",
+      "url": "https://downtownbellevue.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://downtownbellevue.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T17:01:08+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "kirkland-reporter",
+      "url": "https://www.kirklandreporter.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.kirklandreporter.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T19:52:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-bulletin",
+      "url": "https://thebulletinsea.org/rss/",
+      "httpStatus": 200,
+      "finalUrl": "https://thebulletinsea.org/rss/",
+      "format": "RSS",
+      "items": 15,
+      "latestEntry": "2026-09-13T17:00:45+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "bellevue-reporter",
+      "url": "https://www.bellevuereporter.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.bellevuereporter.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T19:52:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-needling",
+      "url": "https://theneedling.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://theneedling.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T05:13:40+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "washington-state-house-democrats",
+      "url": "https://housedemocrats.wa.gov/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://housedemocrats.wa.gov/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T17:40:04+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "town-hall-seattle",
+      "url": "https://townhallseattle.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://townhallseattle.org/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-14T17:11:47+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "wallyhood",
+      "url": "https://www.wallyhood.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.wallyhood.org/feed/",
+      "format": "RSS",
+      "items": 15,
+      "latestEntry": "2026-09-14T13:00:29+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "horsesass",
+      "url": "https://horsesass.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://horsesass.org/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-12T05:19:03+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-bike-blog",
+      "url": "https://www.seattlebikeblog.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.seattlebikeblog.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-14T21:07:15+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-b-town-blog",
+      "url": "https://b-townblog.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://b-townblog.com/feed/",
+      "format": "RSS",
+      "items": 25,
+      "latestEntry": "2026-09-15T19:52:46+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "lynnwood-times",
+      "url": "https://lynnwoodtimes.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://lynnwoodtimes.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T19:20:15+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "capitol-hill-seattle-blog",
+      "url": "https://www.capitolhillseattle.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.capitolhillseattle.com/feed/",
+      "format": "RSS",
+      "items": 5,
+      "latestEntry": "2026-09-15T20:43:35+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "phinneywood",
+      "url": "https://phinneywood.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://phinneywood.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-14T15:30:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "wsdot-blog",
+      "url": "https://feeds.feedburner.com/wsdotblog",
+      "httpStatus": 200,
+      "finalUrl": "https://feeds.feedburner.com/wsdotblog",
+      "format": "Atom",
+      "items": 5,
+      "latestEntry": "2026-09-11T14:55:24.980000+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "fremont-neighbor",
+      "url": "https://fremontneighbor.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://fremontneighbor.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T13:35:21+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "sound-transit-platform",
+      "url": "https://www.soundtransit.org/blog/platform/feed",
+      "httpStatus": 200,
+      "finalUrl": "https://www.soundtransit.org/blog/platform/feed",
+      "format": "RSS",
+      "items": 10,
+      "warnings": [
+        "Publisher channel title is empty; the OPML supplies a subscription name"
+      ],
+      "latestEntry": "2026-09-11T16:14:39+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "eater-seattle",
+      "url": "https://seattle.eater.com/rss/index.xml",
+      "httpStatus": 200,
+      "finalUrl": "https://seattle.eater.com/rss/index.xml",
+      "format": "Atom",
+      "items": 10,
+      "latestEntry": "2026-09-14T16:00:17+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "my-edmonds-news",
+      "url": "https://myedmondsnews.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://myedmondsnews.com/feed/",
+      "format": "RSS",
+      "items": 50,
+      "latestEntry": "2026-09-15T17:37:05+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "publicola",
+      "url": "https://publicola.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://publicola.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-14T16:54:41+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-tukwila-blog",
+      "url": "https://tukwilablog.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://tukwilablog.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T17:11:44+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "cascade-pbs-news",
+      "url": "https://www.cascadepbs.org/articles/rss/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.cascadepbs.org/articles/rss/",
+      "format": "RSS",
+      "items": 15,
+      "latestEntry": "2026-09-04T14:00:01+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "city-of-seattle-news",
+      "url": "https://news.seattle.gov/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://news.seattle.gov/feed/",
+      "format": "RSS",
+      "items": 20,
+      "latestEntry": "2026-09-15T19:36:13+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "divestspd",
+      "url": "https://www.divestspd.com/feed",
+      "httpStatus": 200,
+      "finalUrl": "https://www.divestspd.com/feed",
+      "format": "RSS",
+      "items": 20,
+      "latestEntry": "2026-09-14T15:19:01+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "southsoundtalk",
+      "url": "https://www.southsoundtalk.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.southsoundtalk.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T13:54:17+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "sdot-blog",
+      "url": "https://sdotblog.seattle.gov/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://sdotblog.seattle.gov/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-14T16:31:42+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-urbanist",
+      "url": "https://www.theurbanist.org/rss/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.theurbanist.org/rss/",
+      "format": "RSS",
+      "items": 15,
+      "latestEntry": "2026-09-15T13:00:31+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "through-the-static",
+      "url": "https://throughthestatic.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://throughthestatic.org/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T17:00:27+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-everett-herald",
+      "url": "https://www.heraldnet.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.heraldnet.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T20:50:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "redmond-reporter",
+      "url": "https://www.redmond-reporter.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.redmond-reporter.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T19:52:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "converge-media",
+      "url": "https://www.whereweconverge.com/post?format=rss",
+      "httpStatus": 200,
+      "finalUrl": "https://www.whereweconverge.com/post?format=rss",
+      "format": "RSS",
+      "items": 20,
+      "latestEntry": "2026-09-15T07:00:37+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "my-ballard",
+      "url": "https://www.myballard.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.myballard.com/feed/",
+      "format": "RSS",
+      "items": 30,
+      "latestEntry": "2026-09-15T17:29:14+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "my-lynnwood-news",
+      "url": "https://mylynnwoodnews.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://mylynnwoodnews.com/feed/",
+      "format": "RSS",
+      "items": 30,
+      "latestEntry": "2026-09-15T17:37:05+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "washington-state-standard",
+      "url": "https://washingtonstatestandard.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://washingtonstatestandard.com/feed/",
+      "format": "RSS",
+      "items": 100,
+      "latestEntry": "2026-09-15T18:59:08+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "king-5-local",
+      "url": "https://www.king5.com/feeds/syndication/rss/news/local",
+      "httpStatus": 200,
+      "finalUrl": "https://www.king5.com/feeds/syndication/rss/news/local",
+      "format": "RSS",
+      "items": 40,
+      "latestEntry": "2026-09-15T20:55:41+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-now-and-then",
+      "url": "https://pauldorpat.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://pauldorpat.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-10T15:15:14+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-city-council-blog",
+      "url": "https://council.seattle.gov/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://council.seattle.gov/feed/",
+      "format": "RSS",
+      "items": 200,
+      "latestEntry": "2026-09-15T17:48:07+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "king-county-parks-blog",
+      "url": "https://kingcountyparks.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://kingcountyparks.org/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-07-09T21:20:17+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-met-eat-and-drink",
+      "url": "https://www.seattlemet.com/eat-and-drink/feed?format=atom",
+      "httpStatus": 200,
+      "finalUrl": "https://www.seattlemet.com/eat-and-drink/feed?format=atom",
+      "format": "Atom",
+      "items": 20,
+      "latestEntry": "2026-09-15T16:06:52+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "west-seattle-junction-association",
+      "url": "https://wsjunction.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://wsjunction.org/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-08-18T04:05:58+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-economic-development-bottom-line",
+      "url": "https://bottomline.seattle.gov/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://bottomline.seattle.gov/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-09T18:15:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-burner",
+      "url": "https://www.theburnerseattle.com/blog-feed.xml",
+      "httpStatus": 200,
+      "finalUrl": "https://www.theburnerseattle.com/blog-feed.xml",
+      "format": "RSS",
+      "items": 20,
+      "latestEntry": "2026-09-15T16:52:14+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-seattle-star",
+      "url": "https://www.seattlestar.net/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.seattlestar.net/feed/",
+      "format": "RSS",
+      "items": 5,
+      "latestEntry": "2026-09-13T17:29:17+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "hardpressed",
+      "url": "https://www.hardpressed-info.com/rss/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.hardpressed-info.com/rss/",
+      "format": "RSS",
+      "items": 15,
+      "latestEntry": "2026-09-15T16:00:11+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "west-seattle-blog",
+      "url": "https://westseattleblog.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://westseattleblog.com/feed/",
+      "format": "RSS",
+      "items": 15,
+      "latestEntry": "2026-09-15T19:24:45+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "npi-cascadia-advocate",
+      "url": "https://www.nwprogressive.org/weblog/feed",
+      "httpStatus": 200,
+      "finalUrl": "https://www.nwprogressive.org/weblog/feed",
+      "format": "RSS",
+      "items": 14,
+      "latestEntry": "2026-09-14T02:05:39+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-seatac-blog",
+      "url": "https://seatacblog.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://seatacblog.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-14T22:31:49+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "white-center-now",
+      "url": "https://whitecenternow.com/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://whitecenternow.com/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-12T02:46:31+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "mynorthwest-local",
+      "url": "https://mynorthwest.com/local/feed",
+      "httpStatus": 200,
+      "finalUrl": "https://mynorthwest.com/local/feed",
+      "format": "RSS",
+      "items": 20,
+      "latestEntry": "2026-09-15T20:43:05+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "washington-smoke-blog",
+      "url": "https://wasmoke.blogspot.com/feeds/posts/default",
+      "httpStatus": 200,
+      "finalUrl": "https://wasmoke.blogspot.com/feeds/posts/default",
+      "format": "Atom",
+      "items": 25,
+      "latestEntry": "2026-09-11T18:15:29.284000+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "krem-2-local",
+      "url": "https://www.krem.com/feeds/syndication/rss/news/local",
+      "httpStatus": 200,
+      "finalUrl": "https://www.krem.com/feeds/syndication/rss/news/local",
+      "format": "RSS",
+      "items": 40,
+      "latestEntry": "2026-09-15T19:25:02+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-police-blotter",
+      "url": "https://spdblotter.seattle.gov/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://spdblotter.seattle.gov/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T00:36:30+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "post-alley",
+      "url": "https://www.postalley.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.postalley.org/feed/",
+      "format": "RSS",
+      "items": 26,
+      "latestEntry": "2026-09-15T18:06:33+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "king-county-library-system",
+      "url": "https://kcls.org/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://kcls.org/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-15T19:23:59+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "real-change",
+      "url": "https://www.realchangenews.org/rss.xml",
+      "httpStatus": 200,
+      "finalUrl": "https://www.realchangenews.org/rss.xml",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-09T14:00:00+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "seattle-human-interests",
+      "url": "https://humaninterests.seattle.gov/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://humaninterests.seattle.gov/feed/",
+      "format": "RSS",
+      "items": 10,
+      "latestEntry": "2026-09-01T16:12:43+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "the-seattle-times-traffic-lab",
+      "url": "https://www.seattletimes.com/transportation/feed/",
+      "httpStatus": 200,
+      "finalUrl": "https://www.seattletimes.com/transportation/feed/",
+      "format": "RSS",
+      "items": 33,
+      "latestEntry": "2026-09-15T13:00:00+00:00",
+      "status": "ok"
+    }
+  ],
+  "possibleDuplicates": []
+}

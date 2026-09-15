@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated from feeds.json. Run npm run build. -->
+<opml version="2.0">
+  <head>
+    <title>Awesome Seattle News Feeds</title>
+  </head>
+  <body>
+    <outline text="Seattle and Regional Reporting" title="Seattle and Regional Reporting">
+      <outline type="rss" text="Cascade PBS News" title="Cascade PBS News" description="Regional public-media journalism and analysis, using the news feed instead of television-program listings." xmlUrl="https://www.cascadepbs.org/articles/rss/" htmlUrl="https://www.cascadepbs.org/news"/>
+      <outline type="rss" text="Converge Media" title="Converge Media" description="Local reporting, interviews, and cultural coverage centered on Seattle-area Black communities." xmlUrl="https://www.whereweconverge.com/post?format=rss" htmlUrl="https://www.whereweconverge.com/post"/>
+      <outline type="rss" text="HardPressed" title="HardPressed" description="Independent Seattle-area investigations and public-records reporting." xmlUrl="https://www.hardpressed-info.com/rss/" htmlUrl="https://www.hardpressed-info.com"/>
+      <outline type="rss" text="KING 5 Local" title="KING 5 Local" description="Television newsroom reporting on Seattle and Western Washington from the local section." xmlUrl="https://www.king5.com/feeds/syndication/rss/news/local" htmlUrl="https://www.king5.com"/>
+      <outline type="rss" text="MyNorthwest Local" title="MyNorthwest Local" description="Regional radio-news reporting and commentary using the local section feed." xmlUrl="https://mynorthwest.com/local/feed" htmlUrl="https://mynorthwest.com/local"/>
+      <outline type="rss" text="Northwest Asian Weekly" title="Northwest Asian Weekly" description="Reporting on Asian American communities in Seattle and the Pacific Northwest, plus broader community issues." xmlUrl="https://nwasianweekly.com/feed/" htmlUrl="https://nwasianweekly.com"/>
+      <outline type="rss" text="PubliCola" title="PubliCola" description="Independent reporting and analysis on city government, housing, transportation, and public policy." xmlUrl="https://publicola.com/feed/" htmlUrl="https://publicola.com"/>
+      <outline type="rss" text="Real Change" title="Real Change" description="Local reporting and commentary on homelessness, poverty, housing, and social justice." xmlUrl="https://www.realchangenews.org/rss.xml" htmlUrl="https://www.realchangenews.org"/>
+      <outline type="rss" text="Seattle Weekly" title="Seattle Weekly" description="Local and regional reporting, community stories, and entertainment." xmlUrl="https://www.seattleweekly.com/feed/" htmlUrl="https://www.seattleweekly.com"/>
+      <outline type="rss" text="The Bulletin" title="The Bulletin" description="Independent reporting and analysis on Seattle Public Schools and education." xmlUrl="https://thebulletinsea.org/rss/" htmlUrl="https://thebulletinsea.org"/>
+      <outline type="rss" text="The Burner" title="The Burner" description="Independent Seattle-area reporting and commentary on government and public accountability." xmlUrl="https://www.theburnerseattle.com/blog-feed.xml" htmlUrl="https://www.theburnerseattle.com"/>
+      <outline type="rss" text="The Seattle Medium" title="The Seattle Medium" description="Local reporting on Seattle-area Black communities, using the local-news section feed." xmlUrl="https://seattlemedium.com/category/local-news/feed/" htmlUrl="https://seattlemedium.com/category/local-news"/>
+      <outline type="rss" text="The Seattle Times Local Politics" title="The Seattle Times Local Politics" description="Seattle and Washington government, elections, and civic affairs; the preferred narrower local feed." xmlUrl="https://www.seattletimes.com/seattle-news/politics/feed/" htmlUrl="https://www.seattletimes.com/seattle-news/politics"/>
+      <outline type="rss" text="The Stranger" title="The Stranger" description="Alternative local reporting, arts, and progressive commentary, with some national coverage." xmlUrl="https://www.thestranger.com/feed/" htmlUrl="https://www.thestranger.com"/>
+    </outline>
+    <outline text="Seattle Neighborhoods" title="Seattle Neighborhoods">
+      <outline type="rss" text="Capitol Hill Seattle Blog" title="Capitol Hill Seattle Blog" description="Neighborhood reporting on Capitol Hill and nearby central Seattle communities." xmlUrl="https://www.capitolhillseattle.com/feed/" htmlUrl="https://www.capitolhillseattle.com"/>
+      <outline type="rss" text="Fremont Neighbor" title="Fremont Neighbor" description="Local reporting and neighborhood developments in Fremont." xmlUrl="https://fremontneighbor.com/feed/" htmlUrl="https://fremontneighbor.com"/>
+      <outline type="rss" text="My Ballard" title="My Ballard" description="Ballard neighborhood reporting, development, businesses, and events." xmlUrl="https://www.myballard.com/feed/" htmlUrl="https://www.myballard.com"/>
+      <outline type="rss" text="PhinneyWood" title="PhinneyWood" description="Phinney Ridge and Greenwood news, businesses, and community events." xmlUrl="https://phinneywood.com/feed/" htmlUrl="https://phinneywood.com"/>
+      <outline type="rss" text="Wallyhood" title="Wallyhood" description="Wallingford neighborhood news, businesses, and community events." xmlUrl="https://www.wallyhood.org/feed/" htmlUrl="https://www.wallyhood.org"/>
+      <outline type="rss" text="West Seattle Blog" title="West Seattle Blog" description="Neighborhood news, local government, transportation, and community events." xmlUrl="https://westseattleblog.com/feed/" htmlUrl="https://westseattleblog.com"/>
+    </outline>
+    <outline text="Eastside" title="Eastside">
+      <outline type="rss" text="Bellevue Reporter" title="Bellevue Reporter" description="Local reporting and regional news for Bellevue readers." xmlUrl="https://www.bellevuereporter.com/feed/" htmlUrl="https://www.bellevuereporter.com"/>
+      <outline type="rss" text="Downtown Bellevue Network" title="Downtown Bellevue Network" description="Downtown development, businesses, restaurants, and neighborhood news." xmlUrl="https://downtownbellevue.com/feed/" htmlUrl="https://downtownbellevue.com"/>
+      <outline type="rss" text="Kirkland Reporter" title="Kirkland Reporter" description="Local reporting and regional news for Kirkland readers." xmlUrl="https://www.kirklandreporter.com/feed/" htmlUrl="https://www.kirklandreporter.com"/>
+      <outline type="rss" text="Redmond Reporter" title="Redmond Reporter" description="Local reporting and regional news for Redmond readers." xmlUrl="https://www.redmond-reporter.com/feed/" htmlUrl="https://www.redmond-reporter.com"/>
+      <outline type="rss" text="The Seattle Times Eastside" title="The Seattle Times Eastside" description="Reporting on communities east of Lake Washington; overlaps with other local sections." xmlUrl="https://www.seattletimes.com/eastside/feed/" htmlUrl="https://www.seattletimes.com/eastside"/>
+    </outline>
+    <outline text="North Sound" title="North Sound">
+      <outline type="rss" text="Lynnwood Times" title="Lynnwood Times" description="Local and state reporting with a Snohomish County focus." xmlUrl="https://lynnwoodtimes.com/feed/" htmlUrl="https://lynnwoodtimes.com"/>
+      <outline type="rss" text="My Edmonds News" title="My Edmonds News" description="Community reporting, local government, and events in Edmonds." xmlUrl="https://myedmondsnews.com/feed/" htmlUrl="https://myedmondsnews.com"/>
+      <outline type="rss" text="My Lynnwood News" title="My Lynnwood News" description="Community reporting, local government, and events from the publication formerly called Lynnwood Today." xmlUrl="https://mylynnwoodnews.com/feed/" htmlUrl="https://mylynnwoodnews.com"/>
+      <outline type="rss" text="The Everett Herald" title="The Everett Herald" description="Snohomish County reporting, regional news, and local sports." xmlUrl="https://www.heraldnet.com/feed/" htmlUrl="https://www.heraldnet.com"/>
+    </outline>
+    <outline text="South King County and South Sound" title="South King County and South Sound">
+      <outline type="rss" text="SouthSoundTalk" title="SouthSoundTalk" description="Tacoma-area community features, local businesses, and sponsored stories." xmlUrl="https://www.southsoundtalk.com/feed/" htmlUrl="https://www.southsoundtalk.com"/>
+      <outline type="rss" text="The B-Town Blog" title="The B-Town Blog" description="Burien-area community news, local government, businesses, and events." xmlUrl="https://b-townblog.com/feed/" htmlUrl="https://b-townblog.com"/>
+      <outline type="rss" text="The SeaTac Blog" title="The SeaTac Blog" description="Local government, transportation, businesses, and community news." xmlUrl="https://seatacblog.com/feed/" htmlUrl="https://seatacblog.com"/>
+      <outline type="rss" text="The Tukwila Blog" title="The Tukwila Blog" description="Local news, public safety, city government, and community events." xmlUrl="https://tukwilablog.com/feed/" htmlUrl="https://tukwilablog.com"/>
+      <outline type="rss" text="White Center Now" title="White Center Now" description="Neighborhood reporting, restaurants, events, and community developments." xmlUrl="https://whitecenternow.com/feed/" htmlUrl="https://whitecenternow.com"/>
+    </outline>
+    <outline text="Washington State" title="Washington State">
+      <outline type="rss" text="KREM 2 Local" title="KREM 2 Local" description="Television newsroom reporting on Spokane and the Inland Northwest, including nearby Idaho." xmlUrl="https://www.krem.com/feeds/syndication/rss/news/local" htmlUrl="https://www.krem.com"/>
+      <outline type="rss" text="Washington State Standard" title="Washington State Standard" description="State government, elections, public policy, and accountability reporting." xmlUrl="https://washingtonstatestandard.com/feed/" htmlUrl="https://washingtonstatestandard.com"/>
+    </outline>
+    <outline text="Transportation and Urbanism" title="Transportation and Urbanism">
+      <outline type="rss" text="Seattle Bike Blog" title="Seattle Bike Blog" description="Local cycling news, street safety reporting, and bicycle advocacy." xmlUrl="https://www.seattlebikeblog.com/feed/" htmlUrl="https://www.seattlebikeblog.com"/>
+      <outline type="rss" text="Seattle Transit Blog" title="Seattle Transit Blog" description="Regional transit reporting, service changes, and transit advocacy." xmlUrl="https://seattletransitblog.com/feed/" htmlUrl="https://seattletransitblog.com"/>
+      <outline type="rss" text="The Seattle Times Traffic Lab" title="The Seattle Times Traffic Lab" description="Regional transportation reporting on roads, transit, and travel policy." xmlUrl="https://www.seattletimes.com/transportation/feed/" htmlUrl="https://www.seattletimes.com/seattle-news/transportation"/>
+      <outline type="rss" text="The Urbanist" title="The Urbanist" description="Housing and transportation reporting alongside pro-transit and pro-density commentary." xmlUrl="https://www.theurbanist.org/rss/" htmlUrl="https://www.theurbanist.org"/>
+    </outline>
+    <outline text="Food Culture and History" title="Food Culture and History">
+      <outline type="rss" text="Eater Seattle" title="Eater Seattle" description="Restaurant news, dining guides, and food coverage for the Seattle area." xmlUrl="https://seattle.eater.com/rss/index.xml" htmlUrl="https://seattle.eater.com"/>
+      <outline type="rss" text="Seattle Met Eat and Drink" title="Seattle Met Eat and Drink" description="Regional restaurant coverage, dining guides, and food-related features." xmlUrl="https://www.seattlemet.com/eat-and-drink/feed?format=atom" htmlUrl="https://www.seattlemet.com/eat-and-drink"/>
+      <outline type="rss" text="Seattle Now and Then" title="Seattle Now and Then" description="Local history, archival photographs, and present-day comparisons." xmlUrl="https://pauldorpat.com/feed/" htmlUrl="https://pauldorpat.com"/>
+      <outline type="rss" text="Seattleite" title="Seattleite" description="Dining, travel, entertainment, and lifestyle coverage with a Seattle focus." xmlUrl="https://seattleite.com/feed/" htmlUrl="https://seattleite.com"/>
+      <outline type="rss" text="The Seattle Star" title="The Seattle Star" description="Local arts, literature, comics, and cultural commentary." xmlUrl="https://www.seattlestar.net/feed/" htmlUrl="https://www.seattlestar.net"/>
+    </outline>
+    <outline text="Commentary and Advocacy" title="Commentary and Advocacy">
+      <outline type="rss" text="DivestSPD" title="DivestSPD" description="Police accountability investigations and commentary from an advocacy perspective." xmlUrl="https://www.divestspd.com/feed" htmlUrl="https://www.divestspd.com"/>
+      <outline type="rss" text="HorsesAss" title="HorsesAss" description="Progressive political commentary on Seattle, Washington, and national issues." xmlUrl="https://horsesass.org/feed/" htmlUrl="https://horsesass.org"/>
+      <outline type="rss" text="NPI Cascadia Advocate" title="NPI Cascadia Advocate" description="Progressive political research, analysis, and advocacy for Washington and the wider Northwest." xmlUrl="https://www.nwprogressive.org/weblog/feed" htmlUrl="https://www.nwprogressive.org/weblog"/>
+      <outline type="rss" text="Post Alley" title="Post Alley" description="Regional essays and commentary on politics, civic life, and culture, including national topics." xmlUrl="https://www.postalley.org/feed/" htmlUrl="https://www.postalley.org"/>
+      <outline type="rss" text="Seattle Streets Alliance" title="Seattle Streets Alliance" description="Street safety and transportation advocacy from the organization formerly known as Seattle Neighborhood Greenways." xmlUrl="https://www.streetsalliance.org/feed/" htmlUrl="https://www.streetsalliance.org/get-involved/blog"/>
+      <outline type="rss" text="Through the Static" title="Through the Static" description="Seattle community reporting and commentary with a focus on local activism." xmlUrl="https://throughthestatic.org/feed/" htmlUrl="https://throughthestatic.org"/>
+      <outline type="rss" text="Transit Riders Union" title="Transit Riders Union" description="Transit access, labor campaigns, and political endorsements from a membership advocacy organization." xmlUrl="https://transitriders.org/feed/" htmlUrl="https://transitriders.org"/>
+      <outline type="rss" text="West Seattle Bike Connections" title="West Seattle Bike Connections" description="Cycling advocacy, neighborhood rides, and safer-street campaigns." xmlUrl="https://westseattlebikeconnections.org/feed/" htmlUrl="https://westseattlebikeconnections.org"/>
+    </outline>
+    <outline text="Government and Public Services" title="Government and Public Services">
+      <outline type="rss" text="City of Seattle News" title="City of Seattle News" description="Combined city department announcements; overlaps with the individual city feeds below." xmlUrl="https://news.seattle.gov/feed/" htmlUrl="https://news.seattle.gov"/>
+      <outline type="rss" text="King County Library System" title="King County Library System" description="Library services, events, reading programs, and community announcements." xmlUrl="https://kcls.org/feed/" htmlUrl="https://kcls.org"/>
+      <outline type="rss" text="King County Metro Matters" title="King County Metro Matters" description="Bus service changes, transit projects, and rider information from the transit agency." xmlUrl="https://kingcountymetro.blog/feed/" htmlUrl="https://kingcountymetro.blog"/>
+      <outline type="rss" text="King County Parks Blog" title="King County Parks Blog" description="County parks, regional trails, recreation, and facilities updates." xmlUrl="https://kingcountyparks.org/feed/" htmlUrl="https://kingcountyparks.org"/>
+      <outline type="rss" text="SDOT Blog" title="SDOT Blog" description="City transportation projects, street changes, and travel advisories." xmlUrl="https://sdotblog.seattle.gov/feed/" htmlUrl="https://sdotblog.seattle.gov"/>
+      <outline type="rss" text="Seattle City Council Blog" title="Seattle City Council Blog" description="Council announcements and statements from elected officials." xmlUrl="https://council.seattle.gov/feed/" htmlUrl="https://council.seattle.gov"/>
+      <outline type="rss" text="Seattle Economic Development Bottom Line" title="Seattle Economic Development Bottom Line" description="City economic-development programs, small-business support, and announcements." xmlUrl="https://bottomline.seattle.gov/feed/" htmlUrl="https://bottomline.seattle.gov"/>
+      <outline type="rss" text="Seattle Human Interests" title="Seattle Human Interests" description="Human Services Department programs, funding, and community-service announcements." xmlUrl="https://humaninterests.seattle.gov/feed/" htmlUrl="https://humaninterests.seattle.gov"/>
+      <outline type="rss" text="Seattle Parks Parkways" title="Seattle Parks Parkways" description="City parks, recreation programs, facilities, and service announcements." xmlUrl="https://parkways.seattle.gov/feed/" htmlUrl="https://parkways.seattle.gov"/>
+      <outline type="rss" text="Seattle Police Blotter" title="Seattle Police Blotter" description="Police department incident reports and announcements; an agency account of events." xmlUrl="https://spdblotter.seattle.gov/feed/" htmlUrl="https://spdblotter.seattle.gov"/>
+      <outline type="rss" text="Sound Transit Platform" title="Sound Transit Platform" description="Rail and bus projects, service information, and agency updates." xmlUrl="https://www.soundtransit.org/blog/platform/feed" htmlUrl="https://www.soundtransit.org"/>
+      <outline type="rss" text="Washington Smoke Blog" title="Washington Smoke Blog" description="Seasonal wildfire-smoke and air-quality updates from participating public agencies." xmlUrl="https://wasmoke.blogspot.com/feeds/posts/default" htmlUrl="https://wasmoke.blogspot.com"/>
+      <outline type="rss" text="Washington State House Democrats" title="Washington State House Democrats" description="Partisan legislative caucus announcements and news roundups from House Democrats." xmlUrl="https://housedemocrats.wa.gov/feed/" htmlUrl="https://housedemocrats.wa.gov"/>
+      <outline type="rss" text="WSDOT Blog" title="WSDOT Blog" description="State highway projects, ferries, travel information, and transportation updates." xmlUrl="https://feeds.feedburner.com/wsdotblog" htmlUrl="https://wsdotblog.blogspot.com"/>
+    </outline>
+    <outline text="Community Organizations" title="Community Organizations">
+      <outline type="rss" text="Town Hall Seattle" title="Town Hall Seattle" description="Civic and cultural programming, organization news, and event announcements." xmlUrl="https://townhallseattle.org/feed/" htmlUrl="https://townhallseattle.org"/>
+      <outline type="rss" text="West Seattle Junction Association" title="West Seattle Junction Association" description="Neighborhood business district events and organization announcements." xmlUrl="https://wsjunction.org/feed/" htmlUrl="https://wsjunction.org"/>
+    </outline>
+    <outline text="Satire" title="Satire">
+      <outline type="rss" text="The Needling" title="The Needling" description="Seattle-focused satirical stories and fictional headlines." xmlUrl="https://theneedling.com/feed/" htmlUrl="https://theneedling.com"/>
+    </outline>
+  </body>
+</opml>

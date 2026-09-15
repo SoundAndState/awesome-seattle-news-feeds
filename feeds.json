@@ -1,0 +1,1690 @@
+{
+  "$schema": "./feeds.schema.json",
+  "schemaVersion": 1,
+  "title": "Awesome Seattle News Feeds",
+  "description": "Curated RSS and Atom feeds for Seattle, the Puget Sound region, and Washington state.",
+  "repository": "sayhiben/awesome-seattle-news-feeds",
+  "reviewedOn": "2026-09-15",
+  "categories": [
+    {
+      "id": "regional",
+      "title": "Seattle and Regional Reporting",
+      "description": "Citywide reporting and community journalism. Some publishers also carry national stories, arts, or opinion."
+    },
+    {
+      "id": "neighborhoods",
+      "title": "Seattle Neighborhoods",
+      "description": "Neighborhood reporting, local businesses, and community events."
+    },
+    {
+      "id": "eastside",
+      "title": "Eastside",
+      "description": "Bellevue, Kirkland, Redmond, and surrounding communities. Separate local editions can carry shared regional stories."
+    },
+    {
+      "id": "north-sound",
+      "title": "North Sound",
+      "description": "Everett, Edmonds, Lynnwood, and Snohomish County."
+    },
+    {
+      "id": "south-sound",
+      "title": "South King County and South Sound",
+      "description": "Burien, SeaTac, Tukwila, White Center, and the Tacoma area."
+    },
+    {
+      "id": "statewide",
+      "title": "Washington State",
+      "description": "State policy and reporting beyond the Seattle metro area."
+    },
+    {
+      "id": "transport",
+      "title": "Transportation and Urbanism",
+      "description": "Transit, cycling, housing, and street design. Several publications combine reporting with an explicit advocacy perspective."
+    },
+    {
+      "id": "culture",
+      "title": "Food Culture and History",
+      "description": "Regional dining, arts, events, and local history."
+    },
+    {
+      "id": "commentary",
+      "title": "Commentary and Advocacy",
+      "description": "Opinion, analysis, and advocacy sources. These feeds express editorial or organizational viewpoints and may discuss national issues."
+    },
+    {
+      "id": "official",
+      "title": "Government and Public Services",
+      "description": "Primary-source announcements from agencies, elected officials, public libraries, and service providers. Official and partisan communications should be read alongside independent reporting."
+    },
+    {
+      "id": "community",
+      "title": "Community Organizations",
+      "description": "Neighborhood associations and nonprofit announcements."
+    },
+    {
+      "id": "satire",
+      "title": "Satire",
+      "description": "Humor and fictional news; do not treat these stories as factual reporting."
+    }
+  ],
+  "feeds": [
+    {
+      "id": "seattle-transit-blog",
+      "name": "Seattle Transit Blog",
+      "website": "https://seattletransitblog.com",
+      "feed": "https://seattletransitblog.com/feed/",
+      "category": "transport",
+      "description": "Regional transit reporting, service changes, and transit advocacy.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-stranger",
+      "name": "The Stranger",
+      "website": "https://www.thestranger.com",
+      "feed": "https://www.thestranger.com/feed/",
+      "category": "regional",
+      "description": "Alternative local reporting, arts, and progressive commentary, with some national coverage.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://www.thestranger.com/seattle/Rss.xml?section=226",
+        "http://feeds.thestranger.com/stranger/slog"
+      ]
+    },
+    {
+      "id": "transit-riders-union",
+      "name": "Transit Riders Union",
+      "website": "https://transitriders.org",
+      "feed": "https://transitriders.org/feed/",
+      "category": "commentary",
+      "description": "Transit access, labor campaigns, and political endorsements from a membership advocacy organization.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "seattle-weekly",
+      "name": "Seattle Weekly",
+      "website": "https://www.seattleweekly.com",
+      "feed": "https://www.seattleweekly.com/feed/",
+      "category": "regional",
+      "description": "Local and regional reporting, community stories, and entertainment.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "seattle-parks-parkways",
+      "name": "Seattle Parks Parkways",
+      "website": "https://parkways.seattle.gov",
+      "feed": "https://parkways.seattle.gov/feed/",
+      "category": "official",
+      "description": "City parks, recreation programs, facilities, and service announcements.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "king-county-metro-matters",
+      "name": "King County Metro Matters",
+      "website": "https://kingcountymetro.blog",
+      "feed": "https://kingcountymetro.blog/feed/",
+      "category": "official",
+      "description": "Bus service changes, transit projects, and rider information from the transit agency.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://metrofutureblog.wordpress.com/feed/"
+      ]
+    },
+    {
+      "id": "the-seattle-medium",
+      "name": "The Seattle Medium",
+      "website": "https://seattlemedium.com/category/local-news",
+      "feed": "https://seattlemedium.com/category/local-news/feed/",
+      "category": "regional",
+      "description": "Local reporting on Seattle-area Black communities, using the local-news section feed.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://seattlemedium.com/feed/"
+      ]
+    },
+    {
+      "id": "seattle-streets-alliance",
+      "name": "Seattle Streets Alliance",
+      "website": "https://www.streetsalliance.org/get-involved/blog",
+      "feed": "https://www.streetsalliance.org/feed/",
+      "category": "commentary",
+      "description": "Street safety and transportation advocacy from the organization formerly known as Seattle Neighborhood Greenways.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://seattlegreenways.org/feed/"
+      ]
+    },
+    {
+      "id": "the-seattle-times-eastside",
+      "name": "The Seattle Times Eastside",
+      "website": "https://www.seattletimes.com/eastside",
+      "feed": "https://www.seattletimes.com/eastside/feed/",
+      "category": "eastside",
+      "description": "Reporting on communities east of Lake Washington; overlaps with other local sections.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "seattleite",
+      "name": "Seattleite",
+      "website": "https://seattleite.com",
+      "feed": "https://seattleite.com/feed/",
+      "category": "culture",
+      "description": "Dining, travel, entertainment, and lifestyle coverage with a Seattle focus.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-seattle-times-local-politics",
+      "name": "The Seattle Times Local Politics",
+      "website": "https://www.seattletimes.com/seattle-news/politics",
+      "feed": "https://www.seattletimes.com/seattle-news/politics/feed/",
+      "category": "regional",
+      "description": "Seattle and Washington government, elections, and civic affairs; the preferred narrower local feed.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://blogs.seattletimes.com/politicsnorthwest/feed/",
+        "https://www.seattletimes.com/seattle-news/feed/"
+      ]
+    },
+    {
+      "id": "west-seattle-bike-connections",
+      "name": "West Seattle Bike Connections",
+      "website": "https://westseattlebikeconnections.org",
+      "feed": "https://westseattlebikeconnections.org/feed/",
+      "category": "commentary",
+      "description": "Cycling advocacy, neighborhood rides, and safer-street campaigns.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "northwest-asian-weekly",
+      "name": "Northwest Asian Weekly",
+      "website": "https://nwasianweekly.com",
+      "feed": "https://nwasianweekly.com/feed/",
+      "category": "regional",
+      "description": "Reporting on Asian American communities in Seattle and the Pacific Northwest, plus broader community issues.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "downtown-bellevue-network",
+      "name": "Downtown Bellevue Network",
+      "website": "https://downtownbellevue.com",
+      "feed": "https://downtownbellevue.com/feed/",
+      "category": "eastside",
+      "description": "Downtown development, businesses, restaurants, and neighborhood news.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "kirkland-reporter",
+      "name": "Kirkland Reporter",
+      "website": "https://www.kirklandreporter.com",
+      "feed": "https://www.kirklandreporter.com/feed/",
+      "category": "eastside",
+      "description": "Local reporting and regional news for Kirkland readers.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-bulletin",
+      "name": "The Bulletin",
+      "website": "https://thebulletinsea.org",
+      "feed": "https://thebulletinsea.org/rss/",
+      "category": "regional",
+      "description": "Independent reporting and analysis on Seattle Public Schools and education.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "bellevue-reporter",
+      "name": "Bellevue Reporter",
+      "website": "https://www.bellevuereporter.com",
+      "feed": "https://www.bellevuereporter.com/feed/",
+      "category": "eastside",
+      "description": "Local reporting and regional news for Bellevue readers.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-needling",
+      "name": "The Needling",
+      "website": "https://theneedling.com",
+      "feed": "https://theneedling.com/feed/",
+      "category": "satire",
+      "description": "Seattle-focused satirical stories and fictional headlines.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "washington-state-house-democrats",
+      "name": "Washington State House Democrats",
+      "website": "https://housedemocrats.wa.gov",
+      "feed": "https://housedemocrats.wa.gov/feed/",
+      "category": "official",
+      "description": "Partisan legislative caucus announcements and news roundups from House Democrats.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "town-hall-seattle",
+      "name": "Town Hall Seattle",
+      "website": "https://townhallseattle.org",
+      "feed": "https://townhallseattle.org/feed/",
+      "category": "community",
+      "description": "Civic and cultural programming, organization news, and event announcements.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "wallyhood",
+      "name": "Wallyhood",
+      "website": "https://www.wallyhood.org",
+      "feed": "https://www.wallyhood.org/feed/",
+      "category": "neighborhoods",
+      "description": "Wallingford neighborhood news, businesses, and community events.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://feeds2.feedburner.com/Wallyhood"
+      ]
+    },
+    {
+      "id": "horsesass",
+      "name": "HorsesAss",
+      "website": "https://horsesass.org",
+      "feed": "https://horsesass.org/feed/",
+      "category": "commentary",
+      "description": "Progressive political commentary on Seattle, Washington, and national issues.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://www.horsesass.org/?feed=rss2"
+      ]
+    },
+    {
+      "id": "seattle-bike-blog",
+      "name": "Seattle Bike Blog",
+      "website": "https://www.seattlebikeblog.com",
+      "feed": "https://www.seattlebikeblog.com/feed/",
+      "category": "transport",
+      "description": "Local cycling news, street safety reporting, and bicycle advocacy.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-b-town-blog",
+      "name": "The B-Town Blog",
+      "website": "https://b-townblog.com",
+      "feed": "https://b-townblog.com/feed/",
+      "category": "south-sound",
+      "description": "Burien-area community news, local government, businesses, and events.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "lynnwood-times",
+      "name": "Lynnwood Times",
+      "website": "https://lynnwoodtimes.com",
+      "feed": "https://lynnwoodtimes.com/feed/",
+      "category": "north-sound",
+      "description": "Local and state reporting with a Snohomish County focus.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "capitol-hill-seattle-blog",
+      "name": "Capitol Hill Seattle Blog",
+      "website": "https://www.capitolhillseattle.com",
+      "feed": "https://www.capitolhillseattle.com/feed/",
+      "category": "neighborhoods",
+      "description": "Neighborhood reporting on Capitol Hill and nearby central Seattle communities.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://feeds.feedburner.com/Capitolhillseattle"
+      ]
+    },
+    {
+      "id": "phinneywood",
+      "name": "PhinneyWood",
+      "website": "https://phinneywood.com",
+      "feed": "https://phinneywood.com/feed/",
+      "category": "neighborhoods",
+      "description": "Phinney Ridge and Greenwood news, businesses, and community events.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "wsdot-blog",
+      "name": "WSDOT Blog",
+      "website": "https://wsdotblog.blogspot.com",
+      "feed": "https://feeds.feedburner.com/wsdotblog",
+      "category": "official",
+      "description": "State highway projects, ferries, travel information, and transportation updates.",
+      "format": "Atom",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://wsdotblog.blogspot.com/feeds/posts/default"
+      ]
+    },
+    {
+      "id": "fremont-neighbor",
+      "name": "Fremont Neighbor",
+      "website": "https://fremontneighbor.com",
+      "feed": "https://fremontneighbor.com/feed/",
+      "category": "neighborhoods",
+      "description": "Local reporting and neighborhood developments in Fremont.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "sound-transit-platform",
+      "name": "Sound Transit Platform",
+      "website": "https://www.soundtransit.org",
+      "feed": "https://www.soundtransit.org/blog/platform/feed",
+      "category": "official",
+      "description": "Rail and bus projects, service information, and agency updates.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "eater-seattle",
+      "name": "Eater Seattle",
+      "website": "https://seattle.eater.com",
+      "feed": "https://seattle.eater.com/rss/index.xml",
+      "category": "culture",
+      "description": "Restaurant news, dining guides, and food coverage for the Seattle area.",
+      "format": "Atom",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://seattle.eater.com/atom.xml"
+      ]
+    },
+    {
+      "id": "my-edmonds-news",
+      "name": "My Edmonds News",
+      "website": "https://myedmondsnews.com",
+      "feed": "https://myedmondsnews.com/feed/",
+      "category": "north-sound",
+      "description": "Community reporting, local government, and events in Edmonds.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "publicola",
+      "name": "PubliCola",
+      "website": "https://publicola.com",
+      "feed": "https://publicola.com/feed/",
+      "category": "regional",
+      "description": "Independent reporting and analysis on city government, housing, transportation, and public policy.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://thecisforcrank.com/feed/"
+      ]
+    },
+    {
+      "id": "the-tukwila-blog",
+      "name": "The Tukwila Blog",
+      "website": "https://tukwilablog.com",
+      "feed": "https://tukwilablog.com/feed/",
+      "category": "south-sound",
+      "description": "Local news, public safety, city government, and community events.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "cascade-pbs-news",
+      "name": "Cascade PBS News",
+      "website": "https://www.cascadepbs.org/news",
+      "feed": "https://www.cascadepbs.org/articles/rss/",
+      "category": "regional",
+      "description": "Regional public-media journalism and analysis, using the news feed instead of television-program listings.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://crosscut.com/feed/"
+      ]
+    },
+    {
+      "id": "city-of-seattle-news",
+      "name": "City of Seattle News",
+      "website": "https://news.seattle.gov",
+      "feed": "https://news.seattle.gov/feed/",
+      "category": "official",
+      "description": "Combined city department announcements; overlaps with the individual city feeds below.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "divestspd",
+      "name": "DivestSPD",
+      "website": "https://www.divestspd.com",
+      "feed": "https://www.divestspd.com/feed",
+      "category": "commentary",
+      "description": "Police accountability investigations and commentary from an advocacy perspective.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "southsoundtalk",
+      "name": "SouthSoundTalk",
+      "website": "https://www.southsoundtalk.com",
+      "feed": "https://www.southsoundtalk.com/feed/",
+      "category": "south-sound",
+      "description": "Tacoma-area community features, local businesses, and sponsored stories.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "sdot-blog",
+      "name": "SDOT Blog",
+      "website": "https://sdotblog.seattle.gov",
+      "feed": "https://sdotblog.seattle.gov/feed/",
+      "category": "official",
+      "description": "City transportation projects, street changes, and travel advisories.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-urbanist",
+      "name": "The Urbanist",
+      "website": "https://www.theurbanist.org",
+      "feed": "https://www.theurbanist.org/rss/",
+      "category": "transport",
+      "description": "Housing and transportation reporting alongside pro-transit and pro-density commentary.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://theurbanist.org/feed/"
+      ]
+    },
+    {
+      "id": "through-the-static",
+      "name": "Through the Static",
+      "website": "https://throughthestatic.org",
+      "feed": "https://throughthestatic.org/feed/",
+      "category": "commentary",
+      "description": "Seattle community reporting and commentary with a focus on local activism.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-everett-herald",
+      "name": "The Everett Herald",
+      "website": "https://www.heraldnet.com",
+      "feed": "https://www.heraldnet.com/feed/",
+      "category": "north-sound",
+      "description": "Snohomish County reporting, regional news, and local sports.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://www.heraldnet.com/section/RSS01&mime=xml",
+        "http://www.heraldnet.com/section/RSS02&mime=xml"
+      ]
+    },
+    {
+      "id": "redmond-reporter",
+      "name": "Redmond Reporter",
+      "website": "https://www.redmond-reporter.com",
+      "feed": "https://www.redmond-reporter.com/feed/",
+      "category": "eastside",
+      "description": "Local reporting and regional news for Redmond readers.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "converge-media",
+      "name": "Converge Media",
+      "website": "https://www.whereweconverge.com/post",
+      "feed": "https://www.whereweconverge.com/post?format=rss",
+      "category": "regional",
+      "description": "Local reporting, interviews, and cultural coverage centered on Seattle-area Black communities.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "my-ballard",
+      "name": "My Ballard",
+      "website": "https://www.myballard.com",
+      "feed": "https://www.myballard.com/feed/",
+      "category": "neighborhoods",
+      "description": "Ballard neighborhood reporting, development, businesses, and events.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://feeds.feedburner.com/myballard"
+      ]
+    },
+    {
+      "id": "my-lynnwood-news",
+      "name": "My Lynnwood News",
+      "website": "https://mylynnwoodnews.com",
+      "feed": "https://mylynnwoodnews.com/feed/",
+      "category": "north-sound",
+      "description": "Community reporting, local government, and events from the publication formerly called Lynnwood Today.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://lynnwoodtoday.com/feed/"
+      ]
+    },
+    {
+      "id": "washington-state-standard",
+      "name": "Washington State Standard",
+      "website": "https://washingtonstatestandard.com",
+      "feed": "https://washingtonstatestandard.com/feed/",
+      "category": "statewide",
+      "description": "State government, elections, public policy, and accountability reporting.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "king-5-local",
+      "name": "KING 5 Local",
+      "website": "https://www.king5.com",
+      "feed": "https://www.king5.com/feeds/syndication/rss/news/local",
+      "category": "regional",
+      "description": "Television newsroom reporting on Seattle and Western Washington from the local section.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://rssfeeds.king5.com/king5/local",
+        "http://rssfeeds.king5.com/king5/home"
+      ]
+    },
+    {
+      "id": "seattle-now-and-then",
+      "name": "Seattle Now and Then",
+      "website": "https://pauldorpat.com",
+      "feed": "https://pauldorpat.com/feed/",
+      "category": "culture",
+      "description": "Local history, archival photographs, and present-day comparisons.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "seattle-city-council-blog",
+      "name": "Seattle City Council Blog",
+      "website": "https://council.seattle.gov",
+      "feed": "https://council.seattle.gov/feed/",
+      "category": "official",
+      "description": "Council announcements and statements from elected officials.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "king-county-parks-blog",
+      "name": "King County Parks Blog",
+      "website": "https://kingcountyparks.org",
+      "feed": "https://kingcountyparks.org/feed/",
+      "category": "official",
+      "description": "County parks, regional trails, recreation, and facilities updates.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://kingcountyparks.wordpress.com/feed/"
+      ]
+    },
+    {
+      "id": "seattle-met-eat-and-drink",
+      "name": "Seattle Met Eat and Drink",
+      "website": "https://www.seattlemet.com/eat-and-drink",
+      "feed": "https://www.seattlemet.com/eat-and-drink/feed?format=atom",
+      "category": "culture",
+      "description": "Regional restaurant coverage, dining guides, and food-related features.",
+      "format": "Atom",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://feeds2.feedburner.com/seattlemet-table-hopper"
+      ]
+    },
+    {
+      "id": "west-seattle-junction-association",
+      "name": "West Seattle Junction Association",
+      "website": "https://wsjunction.org",
+      "feed": "https://wsjunction.org/feed/",
+      "category": "community",
+      "description": "Neighborhood business district events and organization announcements.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "seattle-economic-development-bottom-line",
+      "name": "Seattle Economic Development Bottom Line",
+      "website": "https://bottomline.seattle.gov",
+      "feed": "https://bottomline.seattle.gov/feed/",
+      "category": "official",
+      "description": "City economic-development programs, small-business support, and announcements.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-burner",
+      "name": "The Burner",
+      "website": "https://www.theburnerseattle.com",
+      "feed": "https://www.theburnerseattle.com/blog-feed.xml",
+      "category": "regional",
+      "description": "Independent Seattle-area reporting and commentary on government and public accountability.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-seattle-star",
+      "name": "The Seattle Star",
+      "website": "https://www.seattlestar.net",
+      "feed": "https://www.seattlestar.net/feed/",
+      "category": "culture",
+      "description": "Local arts, literature, comics, and cultural commentary.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "hardpressed",
+      "name": "HardPressed",
+      "website": "https://www.hardpressed-info.com",
+      "feed": "https://www.hardpressed-info.com/rss/",
+      "category": "regional",
+      "description": "Independent Seattle-area investigations and public-records reporting.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "west-seattle-blog",
+      "name": "West Seattle Blog",
+      "website": "https://westseattleblog.com",
+      "feed": "https://westseattleblog.com/feed/",
+      "category": "neighborhoods",
+      "description": "Neighborhood news, local government, transportation, and community events.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "npi-cascadia-advocate",
+      "name": "NPI Cascadia Advocate",
+      "website": "https://www.nwprogressive.org/weblog",
+      "feed": "https://www.nwprogressive.org/weblog/feed",
+      "category": "commentary",
+      "description": "Progressive political research, analysis, and advocacy for Washington and the wider Northwest.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://www.nwprogressive.org/weblog/atom.xml",
+        "https://www.nwprogressive.org/feed/"
+      ]
+    },
+    {
+      "id": "the-seatac-blog",
+      "name": "The SeaTac Blog",
+      "website": "https://seatacblog.com",
+      "feed": "https://seatacblog.com/feed/",
+      "category": "south-sound",
+      "description": "Local government, transportation, businesses, and community news.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "white-center-now",
+      "name": "White Center Now",
+      "website": "https://whitecenternow.com",
+      "feed": "https://whitecenternow.com/feed/",
+      "category": "south-sound",
+      "description": "Neighborhood reporting, restaurants, events, and community developments.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "mynorthwest-local",
+      "name": "MyNorthwest Local",
+      "website": "https://mynorthwest.com/local",
+      "feed": "https://mynorthwest.com/local/feed",
+      "category": "regional",
+      "description": "Regional radio-news reporting and commentary using the local section feed.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "http://www.mynorthwest.com/xml/11.xml"
+      ]
+    },
+    {
+      "id": "washington-smoke-blog",
+      "name": "Washington Smoke Blog",
+      "website": "https://wasmoke.blogspot.com",
+      "feed": "https://wasmoke.blogspot.com/feeds/posts/default",
+      "category": "official",
+      "description": "Seasonal wildfire-smoke and air-quality updates from participating public agencies.",
+      "format": "Atom",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "krem-2-local",
+      "name": "KREM 2 Local",
+      "website": "https://www.krem.com",
+      "feed": "https://www.krem.com/feeds/syndication/rss/news/local",
+      "category": "statewide",
+      "description": "Television newsroom reporting on Spokane and the Inland Northwest, including nearby Idaho.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "seattle-police-blotter",
+      "name": "Seattle Police Blotter",
+      "website": "https://spdblotter.seattle.gov",
+      "feed": "https://spdblotter.seattle.gov/feed/",
+      "category": "official",
+      "description": "Police department incident reports and announcements; an agency account of events.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "post-alley",
+      "name": "Post Alley",
+      "website": "https://www.postalley.org",
+      "feed": "https://www.postalley.org/feed/",
+      "category": "commentary",
+      "description": "Regional essays and commentary on politics, civic life, and culture, including national topics.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "king-county-library-system",
+      "name": "King County Library System",
+      "website": "https://kcls.org",
+      "feed": "https://kcls.org/feed/",
+      "category": "official",
+      "description": "Library services, events, reading programs, and community announcements.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "real-change",
+      "name": "Real Change",
+      "website": "https://www.realchangenews.org",
+      "feed": "https://www.realchangenews.org/rss.xml",
+      "category": "regional",
+      "description": "Local reporting and commentary on homelessness, poverty, housing, and social justice.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "seattle-human-interests",
+      "name": "Seattle Human Interests",
+      "website": "https://humaninterests.seattle.gov",
+      "feed": "https://humaninterests.seattle.gov/feed/",
+      "category": "official",
+      "description": "Human Services Department programs, funding, and community-service announcements.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    },
+    {
+      "id": "the-seattle-times-traffic-lab",
+      "name": "The Seattle Times Traffic Lab",
+      "website": "https://www.seattletimes.com/seattle-news/transportation",
+      "feed": "https://www.seattletimes.com/transportation/feed/",
+      "category": "transport",
+      "description": "Regional transportation reporting on roads, transit, and travel policy.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": []
+    }
+  ],
+  "imports": [
+    {
+      "name": "Northwest Progressive Institute",
+      "url": "https://www.nwprogressive.org/feed/",
+      "decision": "merged",
+      "feedId": "npi-cascadia-advocate",
+      "reason": "The organizational feed contains only a 2016 membership notice. Consolidated under the active Cascadia Advocate publication; these were distinct feeds, not identical article sets."
+    },
+    {
+      "name": "The Stranger, Seattle's Only Newspaper: Slog",
+      "url": "http://feeds.thestranger.com/stranger/slog",
+      "decision": "merged",
+      "feedId": "the-stranger",
+      "reason": "The obsolete Slog host no longer resolves. Consolidated the two legacy Stranger subscriptions into the current publisher feed; a separate working Slog-only feed was not found."
+    },
+    {
+      "name": "Seattle Transit Blog",
+      "url": "http://seattletransitblog.com/feed/",
+      "decision": "retained",
+      "feedId": "seattle-transit-blog",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Stranger",
+      "url": "http://www.thestranger.com/seattle/Rss.xml?section=226",
+      "decision": "replaced",
+      "feedId": "the-stranger",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Transit Riders Union",
+      "url": "http://transitriders.org/feed/",
+      "decision": "retained",
+      "feedId": "transit-riders-union",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Seattle Weekly",
+      "url": "http://www.seattleweekly.com/feed/",
+      "decision": "retained",
+      "feedId": "seattle-weekly",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "southseattleemerald",
+      "url": "http://southseattleemerald.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The old .com address timed out. The current .org feed redirects to /stories.rss but returned zero entries. Needs a working populated feed before inclusion."
+    },
+    {
+      "name": "Parkways",
+      "url": "http://parkways.seattle.gov/feed/",
+      "decision": "retained",
+      "feedId": "seattle-parks-parkways",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Metro Matters",
+      "url": "http://metrofutureblog.wordpress.com/feed/",
+      "decision": "replaced",
+      "feedId": "king-county-metro-matters",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Seattle Medium",
+      "url": "http://seattlemedium.com/feed/",
+      "decision": "replaced",
+      "feedId": "the-seattle-medium",
+      "reason": "Selected the verified Local News section instead of the broad feed, which included national wire stories."
+    },
+    {
+      "name": "Blog",
+      "url": "http://seattlegreenways.org/feed/",
+      "decision": "replaced",
+      "feedId": "seattle-streets-alliance",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Seattle Times Eastside – The Seattle Times",
+      "url": "http://www.seattletimes.com/eastside/feed/",
+      "decision": "retained",
+      "feedId": "the-seattle-times-eastside",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Pinehurst Seattle",
+      "url": "http://www.pinehurstseattle.org/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "HTTPS connection refused during review. An active, working feed was not verified."
+    },
+    {
+      "name": "Lake Union Beat",
+      "url": "http://lakeunionbeat.com/?feed=rss2",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The domain did not resolve during review."
+    },
+    {
+      "name": "S E A T T L E I T E",
+      "url": "http://www.seattleite.com/feed/",
+      "decision": "retained",
+      "feedId": "seattleite",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Seattle Times Local Politics – The Seattle Times",
+      "url": "http://blogs.seattletimes.com/politicsnorthwest/feed/",
+      "decision": "replaced",
+      "feedId": "the-seattle-times-local-politics",
+      "reason": "Replaced the defunct politicsnorthwest blog redirect with /seattle-news/politics/feed/. All 34 inspected headlines had Seattle or Washington connections."
+    },
+    {
+      "name": "The Seattle Times Food & Drink – The Seattle Times",
+      "url": "http://www.seattletimes.com/food-drink/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "Food and Drink is a broader topical feed and was left out to keep the Seattle Times selection focused on local civic reporting."
+    },
+    {
+      "name": "West Seattle Bike Connections",
+      "url": "http://westseattlebikeconnections.org/feed/",
+      "decision": "retained",
+      "feedId": "west-seattle-bike-connections",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Northwest Asian Weekly",
+      "url": "http://www.nwasianweekly.com/feed/",
+      "decision": "retained",
+      "feedId": "northwest-asian-weekly",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Downtown Bellevue Network",
+      "url": "http://www.downtownbellevue.com/feed/",
+      "decision": "retained",
+      "feedId": "downtown-bellevue-network",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Seattle Times Traffic Lab – The Seattle Times",
+      "url": "http://www.seattletimes.com/transportation/feed/",
+      "decision": "retained",
+      "feedId": "the-seattle-times-traffic-lab",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Kirkland Reporter",
+      "url": "http://www.kirklandreporter.com/feed/",
+      "decision": "retained",
+      "feedId": "kirkland-reporter",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Bulletin",
+      "url": "https://thebulletinsea.org/rss/",
+      "decision": "retained",
+      "feedId": "the-bulletin",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "Seattle Gay News Homepage Feed",
+      "url": "https://www.sgn.org/rss/rss_seattle_gay_news_0_0.xml",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The feed returned HTTP 500 on two checks. Recheck the publisher before restoring."
+    },
+    {
+      "name": "Ravenna Blog",
+      "url": "http://www.ravennablog.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The feed parses, but its newest entry is dated June 2020. Excluded from the current-news bundle."
+    },
+    {
+      "name": "HeraldNet.com Top Stories",
+      "url": "http://www.heraldnet.com/section/RSS02&mime=xml",
+      "decision": "merged",
+      "feedId": "the-everett-herald",
+      "reason": "Both legacy HeraldNet RSS01/RSS02 endpoints return 404. Replaced the two old subscription variants with one current publisher feed."
+    },
+    {
+      "name": "Bellevue Reporter",
+      "url": "http://www.bellevuereporter.com/feed/",
+      "decision": "retained",
+      "feedId": "bellevue-reporter",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Needling",
+      "url": "http://theneedling.com/feed/",
+      "decision": "retained",
+      "feedId": "the-needling",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Washington State House DemocratsWashington State House Democrats",
+      "url": "http://housedemocrats.wa.gov/feed/",
+      "decision": "retained",
+      "feedId": "washington-state-house-democrats",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Fremont Universe",
+      "url": "http://www.fremontuniverse.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The old feed returns HTTP 404. Fremont Neighbor provides a separate current neighborhood publication; no identity equivalence is assumed."
+    },
+    {
+      "name": "udistrictdaily.com",
+      "url": "http://www.udistrictdaily.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The former neighborhood domain redirects to an unrelated beauty-commerce website. Excluded as repurposed."
+    },
+    {
+      "name": "Town Hall Seattle",
+      "url": "http://townhallseattle.org/feed/",
+      "decision": "retained",
+      "feedId": "town-hall-seattle",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Wallyhood",
+      "url": "http://feeds2.feedburner.com/Wallyhood",
+      "decision": "replaced",
+      "feedId": "wallyhood",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "HorsesAss.Org",
+      "url": "http://www.horsesass.org/?feed=rss2",
+      "decision": "replaced",
+      "feedId": "horsesass",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Seattle Bike Blog",
+      "url": "http://seattlebikeblog.com/feed/",
+      "decision": "retained",
+      "feedId": "seattle-bike-blog",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The B-Town (Burien) Blog",
+      "url": "http://www.b-townblog.com/feed/",
+      "decision": "retained",
+      "feedId": "the-b-town-blog",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Lynnwood Times",
+      "url": "https://lynnwoodtimes.com/feed/",
+      "decision": "retained",
+      "feedId": "lynnwood-times",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "KING - Local",
+      "url": "http://rssfeeds.king5.com/king5/local",
+      "decision": "merged",
+      "feedId": "king-5-local",
+      "reason": "The legacy KING local host no longer resolves. The current official local feed already appears separately in the export."
+    },
+    {
+      "name": "CHS Capitol Hill Seattle capitolhillseattle.com",
+      "url": "http://feeds.feedburner.com/Capitolhillseattle",
+      "decision": "replaced",
+      "feedId": "capitol-hill-seattle-blog",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The PhinneyWood Blog",
+      "url": "http://www.phinneywood.com/feed/",
+      "decision": "retained",
+      "feedId": "phinneywood",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Today in Washington State History",
+      "url": "http://www.historylink.org/rss/today.xml/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "This is a history anniversary feed, not current reporting; its items also lack publication dates for freshness checks."
+    },
+    {
+      "name": "The WSDOT Blog - Washington State Department of Transportation",
+      "url": "http://wsdotblog.blogspot.com/feeds/posts/default",
+      "decision": "replaced",
+      "feedId": "wsdot-blog",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Fremont Neighbor",
+      "url": "https://fremontneighbor.com/feed/",
+      "decision": "retained",
+      "feedId": "fremont-neighbor",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "seattlepi.com: Local News",
+      "url": "http://seattlepi.nwsource.com/rss/local_2.rss",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The obsolete SeattlePI feed returns HTTP 404. The other exported SeattlePI feed was reviewed separately and excluded for its broad wire-content mix."
+    },
+    {
+      "name": "Sound Transit",
+      "url": "https://www.soundtransit.org/blog/platform/feed",
+      "decision": "retained",
+      "feedId": "sound-transit-platform",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics. The publisher leaves its channel title blank; the generated OPML supplies a readable subscription name."
+    },
+    {
+      "name": "Eater Seattle - All",
+      "url": "http://seattle.eater.com/atom.xml",
+      "decision": "replaced",
+      "feedId": "eater-seattle",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "International Examiner",
+      "url": "http://www.iexaminer.org/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The publisher returned HTTP 403 on both feed checks. This is an access limitation, not a claim that the publication is inactive."
+    },
+    {
+      "name": "My Edmonds News",
+      "url": "http://myedmondsnews.com/feed/",
+      "decision": "retained",
+      "feedId": "my-edmonds-news",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "PubliCola",
+      "url": "http://thecisforcrank.com/feed/",
+      "decision": "replaced",
+      "feedId": "publicola",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Tukwila Blog",
+      "url": "http://www.tukwilablog.com/feed/",
+      "decision": "retained",
+      "feedId": "the-tukwila-blog",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Cascade PBS",
+      "url": "http://crosscut.com/feed/",
+      "decision": "replaced",
+      "feedId": "cascade-pbs-news",
+      "reason": "Replaced the Crosscut redirect, which now includes television previews, with the verified Cascade PBS news feed."
+    },
+    {
+      "name": "News.seattle.gov",
+      "url": "https://news.seattle.gov/feed/",
+      "decision": "retained",
+      "feedId": "city-of-seattle-news",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "Top Washington state and Seattle news",
+      "url": "https://www.seattlepi.com/local/feed/Top-Washington-state-and-Seattle-news-1375.php%20",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "Removed the trailing encoded space and verified the feed, but the sample was dominated by syndicated sports and earnings updates rather than local reporting."
+    },
+    {
+      "name": "KING - News",
+      "url": "http://rssfeeds.king5.com/king5/home",
+      "decision": "merged",
+      "feedId": "king-5-local",
+      "reason": "Consolidated the defunct broad KING news subscription under the existing local-only section subscription to reduce nonlocal coverage."
+    },
+    {
+      "name": "DivestSPD",
+      "url": "https://www.divestspd.com/feed",
+      "decision": "retained",
+      "feedId": "divestspd",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "The Seattle Times Local News – The Seattle Times",
+      "url": "https://www.seattletimes.com/seattle-news/feed/",
+      "decision": "merged",
+      "feedId": "the-seattle-times-local-politics",
+      "reason": "The nominal Local News feed contains national and international wire stories. Consolidated under the narrower Local Politics feed; the 34 inspected items had Seattle or Washington connections, but this is not a comprehensive all-local-news feed."
+    },
+    {
+      "name": "Maple Leaf Life",
+      "url": "http://www.mapleleaflife.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The exported feed returns HTTP 404."
+    },
+    {
+      "name": "SouthSoundTalk",
+      "url": "http://www.southsoundtalk.com/feed/",
+      "decision": "retained",
+      "feedId": "southsoundtalk",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Montlake Community Club",
+      "url": "http://montlake.net/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The exported feed returns HTTP 404."
+    },
+    {
+      "name": "Magnolia, Seattle: Neighborhood Guide",
+      "url": "http://www.magnoliavoice.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The feed still parses, but inspected items were unrelated promotional content rather than Seattle neighborhood reporting. Excluded pending editorial review."
+    },
+    {
+      "name": "SDOT Blog",
+      "url": "http://sdotblog.seattle.gov/feed/",
+      "decision": "retained",
+      "feedId": "sdot-blog",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Urbanist",
+      "url": "http://theurbanist.org/feed/",
+      "decision": "replaced",
+      "feedId": "the-urbanist",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Through the Static",
+      "url": "https://throughthestatic.org/feed/",
+      "decision": "retained",
+      "feedId": "through-the-static",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "HeraldNet.com",
+      "url": "http://www.heraldnet.com/section/RSS01&mime=xml",
+      "decision": "replaced",
+      "feedId": "the-everett-herald",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Local",
+      "url": "https://feeds.mcclatchy.com/thenewstribune/sections/news/local/stories",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The exported feed and an alternative publisher endpoint repeatedly timed out. Needs a successful live check before inclusion."
+    },
+    {
+      "name": "The Evergrey",
+      "url": "https://theevergrey.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The response is not valid feed XML; the exported address currently returns a mismatched-tag document."
+    },
+    {
+      "name": "Queen Anne View",
+      "url": "http://www.queenanneview.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The HTTPS request failed during TLS negotiation. A working feed was not verified."
+    },
+    {
+      "name": "Redmond Reporter",
+      "url": "http://www.redmond-reporter.com/feed/",
+      "decision": "retained",
+      "feedId": "redmond-reporter",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Blog - Converge Media | Local Seattle News",
+      "url": "https://www.whereweconverge.com/post?format=rss",
+      "decision": "retained",
+      "feedId": "converge-media",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "My Ballard",
+      "url": "http://www.myballard.com/feed/",
+      "decision": "retained",
+      "feedId": "my-ballard",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Seattle City Council Insight",
+      "url": "http://sccinsight.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The feed returned HTTP 403. Kept out of the verified bundle pending manual review; this response alone does not establish publication status."
+    },
+    {
+      "name": "Notes from the Emerald City",
+      "url": "https://notesfromtheemeraldcity.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The feed returned HTTP 403. Kept out of the verified bundle pending manual review."
+    },
+    {
+      "name": "My Lynnwood News",
+      "url": "http://lynnwoodtoday.com/feed/",
+      "decision": "replaced",
+      "feedId": "my-lynnwood-news",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Washington State Standard",
+      "url": "https://washingtonstatestandard.com/feed/",
+      "decision": "retained",
+      "feedId": "washington-state-standard",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "KING RSS Feed: local",
+      "url": "https://www.king5.com/feeds/syndication/rss/news/local",
+      "decision": "retained",
+      "feedId": "king-5-local",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "Ballard – My Ballard",
+      "url": "http://feeds.feedburner.com/myballard",
+      "decision": "merged",
+      "feedId": "my-ballard",
+      "reason": "The FeedBurner and direct My Ballard feeds returned the same article URLs. Kept the publisher-hosted subscription."
+    },
+    {
+      "name": "Seattle Now & Then",
+      "url": "http://pauldorpat.com/feed/",
+      "decision": "retained",
+      "feedId": "seattle-now-and-then",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Seattle City Council Blog",
+      "url": "http://council.seattle.gov/feed/",
+      "decision": "retained",
+      "feedId": "seattle-city-council-blog",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "King County Parks Blog",
+      "url": "http://kingcountyparks.wordpress.com/feed/",
+      "decision": "replaced",
+      "feedId": "king-county-parks-blog",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Eat & Drink - Seattle Met",
+      "url": "http://feeds2.feedburner.com/seattlemet-table-hopper",
+      "decision": "replaced",
+      "feedId": "seattle-met-eat-and-drink",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "West Seattle Junction Association",
+      "url": "http://wsjunction.org/feed/",
+      "decision": "retained",
+      "feedId": "west-seattle-junction-association",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Bizjournals.com Seattle RSS Feed",
+      "url": "http://www.bizjournals.com/rss/feed/daily/seattle",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The publisher blocks the automated feed request with HTTP 403. A working accessible feed was not verified."
+    },
+    {
+      "name": "Wedgwood Community Council",
+      "url": "http://wedgwoodcc.org/feed",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The exported feed returned HTTP 403. A working accessible feed was not verified."
+    },
+    {
+      "name": "Bottom Line",
+      "url": "http://bottomline.seattle.gov/feed/",
+      "decision": "retained",
+      "feedId": "seattle-economic-development-bottom-line",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Burner",
+      "url": "https://www.theburnerseattle.com/blog-feed.xml",
+      "decision": "retained",
+      "feedId": "the-burner",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "The Seattle Globalist",
+      "url": "http://www.seattleglobalist.com/feed",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The feed parses, but its newest entry is dated July 2020. Retain only as historical provenance."
+    },
+    {
+      "name": "Urban Living",
+      "url": "http://www.urbnlivn.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The exported feed returns HTTP 404."
+    },
+    {
+      "name": "The Seattle Star",
+      "url": "http://www.seattlestar.net/feed/",
+      "decision": "retained",
+      "feedId": "the-seattle-star",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Laurelhurst Blog",
+      "url": "http://thelaurelhurstblog.blogspot.com/feeds/posts/default",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The Atom feed parses, but its newest entry is dated February 2023."
+    },
+    {
+      "name": "Washington State Governor&#39;s Office - Medium",
+      "url": "https://medium.com/feed/wagovernor",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The Medium feed ends in January 2025 and belongs to a previous gubernatorial administration. It is not a current governor news feed."
+    },
+    {
+      "name": "HardPressed",
+      "url": "https://www.hardpressed-info.com/rss/",
+      "decision": "retained",
+      "feedId": "hardpressed",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "West Seattle Blog...",
+      "url": "http://westseattleblog.com/feed",
+      "decision": "retained",
+      "feedId": "west-seattle-blog",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Wallingford | Seattle | Washington",
+      "url": "http://www.mywallingford.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The exported feed returns HTTP 404."
+    },
+    {
+      "name": "Cascade Bike Blog - Cascade Bicycle Club - Seattle, Washington",
+      "url": "http://blog.cascade.org/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The legacy host timed out and the current-site /blog/feed alternative returned HTTP 404."
+    },
+    {
+      "name": "สล็อตเว็บตรง",
+      "url": "http://www.seattlegreenlaker.com/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The Feedly export title advertises gambling in Thai. Quarantined without visiting or recommending the former neighborhood domain."
+    },
+    {
+      "name": "NPI's Cascadia Advocate",
+      "url": "http://www.nwprogressive.org/weblog/atom.xml",
+      "decision": "replaced",
+      "feedId": "npi-cascadia-advocate",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Visit Seattle",
+      "url": "http://blog.visitseattle.org/?feed=rss2",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The old blog address returned an HTTP 525 TLS error. A working current feed was not verified."
+    },
+    {
+      "name": "The SeaTac Blog",
+      "url": "http://www.seatacblog.com/feed/",
+      "decision": "retained",
+      "feedId": "the-seatac-blog",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Seattle Times Real Estate – The Seattle Times",
+      "url": "http://www.seattletimes.com/real-estate/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The Real Estate feed has a broader topical remit. Left out in favor of the narrower Seattle Times civic feeds."
+    },
+    {
+      "name": "White Center Now: The blog about White Center",
+      "url": "http://whitecenternow.com/feed/",
+      "decision": "retained",
+      "feedId": "white-center-now",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "MyNorthwest News – MyNorthwest.com",
+      "url": "http://www.mynorthwest.com/xml/11.xml",
+      "decision": "replaced",
+      "feedId": "mynorthwest-local",
+      "reason": "Replaced the old address with a verified current feed; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Washington Smoke Blog",
+      "url": "http://wasmoke.blogspot.com/feeds/posts/default",
+      "decision": "retained",
+      "feedId": "washington-smoke-blog",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "The Seattle Times Opinion – The Seattle Times",
+      "url": "http://www.seattletimes.com/opinion/feed/",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The Opinion feed mixes national and regional commentary. Left out of the Seattle Times local/state selection."
+    },
+    {
+      "name": "KREM RSS Feed: local",
+      "url": "https://www.krem.com/feeds/syndication/rss/news/local",
+      "decision": "retained",
+      "feedId": "krem-2-local",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "SPD Blotter",
+      "url": "http://spdblotter.seattle.gov/feed/",
+      "decision": "retained",
+      "feedId": "seattle-police-blotter",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Post Alley",
+      "url": "https://www.postalley.org/feed/",
+      "decision": "retained",
+      "feedId": "post-alley",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "Seattle Bubble",
+      "url": "http://feeds.feedburner.com/SeattleBubble",
+      "decision": "excluded",
+      "feedId": null,
+      "reason": "The feed parses, but its newest entry is dated March 2023."
+    },
+    {
+      "name": "King County Library System",
+      "url": "https://kcls.org/feed/",
+      "decision": "retained",
+      "feedId": "king-county-library-system",
+      "reason": "Verified a populated RSS/Atom feed with current entries and reviewed sample topics."
+    },
+    {
+      "name": "sitewide rss feed",
+      "url": "http://realchangenews.org/rss.xml",
+      "decision": "retained",
+      "feedId": "real-change",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    },
+    {
+      "name": "Human Interests",
+      "url": "http://humaninterests.seattle.gov/feed/",
+      "decision": "retained",
+      "feedId": "seattle-human-interests",
+      "reason": "Upgraded to verified HTTPS and followed publisher redirects; reviewed current entries and sample topics."
+    }
+  ],
+  "sections": [
+    {
+      "title": "Choosing Seattle Times Feeds",
+      "paragraphs": [
+        "The closest verified match for a quieter Seattle/Washington civic-news subscription is the **Local Politics** RSS link above. On September 15, 2026, all 34 inspected headlines had Seattle or Washington connections. Eastside and Traffic Lab offer additional local topic coverage. These sections overlap, so your reader may still show the same article more than once.",
+        "The existing `https://www.seattletimes.com/seattle-news/feed/` is misleadingly broad: the review found national and international health and wire stories. `/local-news/feed/` redirects to that same feed. The Law and Justice feed also carried nonlocal stories; Northwest includes Oregon and other regional coverage. Category-query alternatives tested during review returned empty feeds.",
+        "No comprehensive Seattle Times feed guaranteed to contain only Washington stories was verified. Local Politics is narrower and omits other local beats; publisher categorization can change. For wider coverage, follow the other local outlets in this directory or use your reader's filters on the broader feed. The OPML uses the narrower selection."
+      ]
+    },
+    {
+      "title": "Reading and Archiving Articles",
+      "paragraphs": [
+        "For a Seattle Times story, open the article link from your reader and copy its canonical article URL. Remove RSS tracking parameters such as `utm_source`, `utm_medium`, and `utm_campaign`; retain the article path. Search for that URL in an archive, rather than searching the RSS feed address. Keep the original publisher URL alongside any snapshot link.",
+        "[Ghostarchive](https://ghostarchive.org) accepts a page URL for lookup or capture. Search for an existing snapshot first; if none exists, use its archive form for a publicly accessible page. Check the resulting headline, article body, images, and capture date. Its [service documentation](https://ghostarchive.org/about.html) explains capture limits and that password-protected pages are not collected.",
+        "[Archive.is](https://archive.is) and [Archive.ph](https://archive.ph) are addresses for the archive.today service. Its usual workflow is to search existing snapshots using the original article URL, then use the save form if a capture is needed. **Prefer another archive when possible:** [Wikipedia's current guidance](https://en.wikipedia.org/wiki/Wikipedia:Archive.today) documents its 2026 deprecation following browser-abuse and altered-snapshot concerns. Do not treat a snapshot there as the sole evidence of an article's wording; compare against the publisher or another archive.",
+        "The [Wayback Machine](https://web.archive.org) is another option for older versions and broken links. An archive may show an incomplete page, an access screen, or an older version without later corrections. For Seattle Times articles in particular, RSS availability does not promise full article access, and no archive is guaranteed to capture subscriber-only text. A subscription or publisher-provided share link is the dependable way to access the current article."
+      ]
+    },
+    {
+      "title": "Curation and Maintenance",
+      "paragraphs": [
+        "Here, “known-good” means a recognizable regional publisher or clearly labeled primary source, a populated feed that was checked on the recorded date, and a reviewed sample relevant to this directory. It is not a blanket endorsement of every story. Editorial judgments and corrections remain welcome. Opinion, advocacy, official communications, community announcements, and satire are labeled so readers can choose their mix. The [dated feed-check report](docs/feed-review-2026-09-15.json) records HTTP results, item counts, and latest entry dates for the initial catalog.",
+        "The [import review](docs/import-review.md) accounts for every subscription in the original export, including exact duplicates, intentional publisher consolidation, redirects, renamed outlets, inactive feeds, and failures needing another check. A failed automated request is not proof that a publisher has shut down. Original addresses remain in the JSON as aliases or import history, but only curated active entries appear in the downloadable OPML.",
+        "`feeds.json` is the source of truth for this README, the OPML file, and the import review. Run `npm ci`, edit the JSON, then run `npm run build` and `npm run ci`. The checks enforce the JSON schema, unique URLs and aliases, complete import accounting, reproducible output, Awesome List formatting, and OPML XML syntax and subscription structure.",
+        "The [validation workflow](.github/workflows/validate.yml) runs on pushes and pull requests. The separate [feed-health workflow](.github/workflows/feed-health.yml) checks live feeds weekly and on demand, reports redirects and duplicate article sets, and flags broken, empty, undated, or year-old feeds for review. Its results are uploaded as a downloadable report. Network health can change independently of a valid release.",
+        "This directory is dedicated to the public domain under [CC0 1.0](license); linked publisher content retains its own copyright. The Awesome badge indicates the list format, not acceptance into the central Awesome directory."
+      ]
+    }
+  ]
+}

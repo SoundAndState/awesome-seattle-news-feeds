@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Awesome Seattle News Feeds catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "title", "description", "repository", "reviewedOn", "categories", "feeds", "imports", "sections"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "title": {"$ref": "#/definitions/text"},
+    "description": {"$ref": "#/definitions/text"},
+    "repository": {"type": "string", "pattern": "^[a-zA-Z0-9-]+/awesome-[a-z0-9-]+$"},
+    "reviewedOn": {"type": "string", "format": "date"},
+    "categories": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "title", "description"],
+        "properties": {"id": {"$ref": "#/definitions/id"}, "title": {"$ref": "#/definitions/text"}, "description": {"$ref": "#/definitions/text"}}
+      }
+    },
+    "feeds": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "name", "website", "feed", "category", "description", "format", "checkedOn", "aliases"],
+        "properties": {
+          "id": {"$ref": "#/definitions/id"},
+          "name": {"$ref": "#/definitions/text"},
+          "website": {"$ref": "#/definitions/https"},
+          "feed": {"$ref": "#/definitions/https"},
+          "category": {"$ref": "#/definitions/id"},
+          "description": {"type": "string", "minLength": 10, "pattern": "^[A-Z][^\\r\\n]+\\.$"},
+          "format": {"enum": ["RSS", "Atom"]},
+          "checkedOn": {"type": "string", "format": "date"},
+          "aliases": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/definitions/http"}}
+        }
+      }
+    },
+    "imports": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["name", "url", "decision", "feedId", "reason"],
+        "properties": {
+          "name": {"$ref": "#/definitions/text"},
+          "url": {"$ref": "#/definitions/http"},
+          "decision": {"enum": ["retained", "replaced", "merged", "excluded"]},
+          "feedId": {"anyOf": [{"$ref": "#/definitions/id"}, {"type": "null"}]},
+          "reason": {"$ref": "#/definitions/text"}
+        }
+      }
+    },
+    "sections": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["title", "paragraphs"],
+        "properties": {
+          "title": {"$ref": "#/definitions/text"},
+          "paragraphs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    }
+  },
+  "definitions": {
+    "text": {"type": "string", "minLength": 1, "pattern": "^\\S[^\\r\\n]*\\S$"},
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "https": {"type": "string", "format": "uri", "pattern": "^https://[^\\s<>\"()]+$"},
+    "http": {"type": "string", "format": "uri", "pattern": "^https?://[^\\s<>\"]+$"}
+  }
+}

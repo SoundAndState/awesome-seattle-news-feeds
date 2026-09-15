@@ -1,0 +1,27 @@
+{
+  "name": "awesome-seattle-news-feeds",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A curated directory of Seattle and Washington news feeds, built from JSON.",
+  "type": "module",
+  "license": "CC0-1.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check",
+    "validate": "node scripts/validate.mjs",
+    "lint:readme": "awesome-lint readme.md",
+    "lint:opml": "node scripts/validate-opml.mjs",
+    "test": "node --test",
+    "ci": "npm run check && npm run validate && npm run lint:readme && npm run lint:opml && npm test",
+    "check:feeds": "python scripts/check_feeds.py"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "awesome-lint": "2.3.0",
+    "fast-xml-parser": "5.11.1"
+  }
+}

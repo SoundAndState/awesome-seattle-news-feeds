@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+    <head>
+        <title>Awesome Seattle News Feeds</title>
+    </head>
+    <body>
+        <outline text="Seattle" title="Seattle">
+            <outline type="rss" text="Northwest Progressive Institute" title="Northwest Progressive Institute" xmlUrl="https://www.nwprogressive.org/feed/" htmlUrl="https://www.nwprogressive.org/"/>
+            <outline type="rss" text="The Stranger, Seattle's Only Newspaper: Slog" title="The Stranger, Seattle's Only Newspaper: Slog" xmlUrl="http://feeds.thestranger.com/stranger/slog" htmlUrl="https://www.thestranger.com"/>
+            <outline type="rss" text="Seattle Transit Blog" title="Seattle Transit Blog" xmlUrl="http://seattletransitblog.com/feed/" htmlUrl="https://seattletransitblog.com"/>
+            <outline type="rss" text="The Stranger" title="The Stranger" xmlUrl="http://www.thestranger.com/seattle/Rss.xml?section=226" htmlUrl="https://www.thestranger.com"/>
+            <outline type="rss" text="Transit Riders Union" title="Transit Riders Union" xmlUrl="http://transitriders.org/feed/" htmlUrl="https://transitriders.org"/>
+            <outline type="rss" text="Seattle Weekly" title="Seattle Weekly" xmlUrl="http://www.seattleweekly.com/feed/" htmlUrl="https://www.seattleweekly.com/"/>
+            <outline type="rss" text="southseattleemerald" title="southseattleemerald" xmlUrl="http://southseattleemerald.com/feed/" htmlUrl="https://southseattleemerald.org"/>
+            <outline type="rss" text="Parkways" title="Parkways" xmlUrl="http://parkways.seattle.gov/feed/" htmlUrl="https://parkways.seattle.gov/"/>
+            <outline type="rss" text="Metro Matters" title="Metro Matters" xmlUrl="http://metrofutureblog.wordpress.com/feed/" htmlUrl="https://kingcountymetro.blog"/>
+            <outline type="rss" text="The Seattle Medium" title="The Seattle Medium" xmlUrl="http://seattlemedium.com/feed/" htmlUrl="https://seattlemedium.com/"/>
+            <outline type="rss" text="Blog" title="Blog" xmlUrl="http://seattlegreenways.org/feed/" htmlUrl="https://www.streetsalliance.org/get-involved/blog/"/>
+            <outline type="rss" text="The Seattle Times Eastside – The Seattle Times" title="The Seattle Times Eastside – The Seattle Times" xmlUrl="http://www.seattletimes.com/eastside/feed/" htmlUrl="https://www.seattletimes.com"/>
+            <outline type="rss" text="Pinehurst Seattle" title="Pinehurst Seattle" xmlUrl="http://www.pinehurstseattle.org/feed/" htmlUrl="http://www.pinehurstseattle.org"/>
+            <outline type="rss" text="Lake Union Beat" title="Lake Union Beat" xmlUrl="http://lakeunionbeat.com/?feed=rss2" htmlUrl="https://lakeunionbeat.com"/>
+            <outline type="rss" text="S E A T T L E I T E" title="S E A T T L E I T E" xmlUrl="http://www.seattleite.com/feed/" htmlUrl="https://seattleite.com"/>
+            <outline type="rss" text="The Seattle Times Local Politics – The Seattle Times" title="The Seattle Times Local Politics – The Seattle Times" xmlUrl="http://blogs.seattletimes.com/politicsnorthwest/feed/" htmlUrl="https://www.seattletimes.com"/>
+            <outline type="rss" text="The Seattle Times Food &amp; Drink – The Seattle Times" title="The Seattle Times Food &amp; Drink – The Seattle Times" xmlUrl="http://www.seattletimes.com/food-drink/feed/" htmlUrl="https://www.seattletimes.com"/>
+            <outline type="rss" text="West Seattle Bike Connections" title="West Seattle Bike Connections" xmlUrl="http://westseattlebikeconnections.org/feed/" htmlUrl="https://westseattlebikeconnections.org"/>
+            <outline type="rss" text="Northwest Asian Weekly" title="Northwest Asian Weekly" xmlUrl="http://www.nwasianweekly.com/feed/" htmlUrl="https://nwasianweekly.com"/>
+            <outline type="rss" text="Downtown Bellevue Network" title="Downtown Bellevue Network" xmlUrl="http://www.downtownbellevue.com/feed/" htmlUrl="https://downtownbellevue.com"/>
+            <outline type="rss" text="The Seattle Times Traffic Lab – The Seattle Times" title="The Seattle Times Traffic Lab – The Seattle Times" xmlUrl="http://www.seattletimes.com/transportation/feed/" htmlUrl="https://www.seattletimes.com"/>
+            <outline type="rss" text="Kirkland Reporter" title="Kirkland Reporter" xmlUrl="http://www.kirklandreporter.com/feed/" htmlUrl="https://www.kirklandreporter.com/"/>
+            <outline type="rss" text="The Bulletin" title="The Bulletin" xmlUrl="https://thebulletinsea.org/rss/" htmlUrl="https://thebulletinsea.org/"/>
+            <outline type="rss" text="Seattle Gay News Homepage Feed" title="Seattle Gay News Homepage Feed" xmlUrl="https://www.sgn.org/rss/rss_seattle_gay_news_0_0.xml" htmlUrl="https://www.sgn.org"/>
+            <outline type="rss" text="Ravenna Blog" title="Ravenna Blog" xmlUrl="http://www.ravennablog.com/feed/" htmlUrl="https://ravennablog.com"/>
+            <outline type="rss" text="HeraldNet.com Top Stories" title="HeraldNet.com Top Stories" xmlUrl="http://www.heraldnet.com/section/RSS02&amp;mime=xml" htmlUrl="https://www.heraldnet.com/mobilerss/twitter/"/>
+            <outline type="rss" text="Bellevue Reporter" title="Bellevue Reporter" xmlUrl="http://www.bellevuereporter.com/feed/" htmlUrl="https://www.bellevuereporter.com/"/>
+            <outline type="rss" text="The Needling" title="The Needling" xmlUrl="http://theneedling.com/feed/" htmlUrl="https://theneedling.com"/>
+            <outline type="rss" text="Washington State House DemocratsWashington State House Democrats" title="Washington State House DemocratsWashington State House Democrats" xmlUrl="http://housedemocrats.wa.gov/feed/" htmlUrl="https://housedemocrats.wa.gov"/>
+            <outline type="rss" text="Fremont Universe" title="Fremont Universe" xmlUrl="http://www.fremontuniverse.com/feed/" htmlUrl="https://fremontuniverse.com"/>
+            <outline type="rss" text="udistrictdaily.com" title="udistrictdaily.com" xmlUrl="http://www.udistrictdaily.com/feed/" htmlUrl="http://udistrictdaily.com"/>
+            <outline type="rss" text="Town Hall Seattle" title="Town Hall Seattle" xmlUrl="http://townhallseattle.org/feed/" htmlUrl="https://townhallseattle.org/"/>
+            <outline type="rss" text="Wallyhood" title="Wallyhood" xmlUrl="http://feeds2.feedburner.com/Wallyhood" htmlUrl="https://www.wallyhood.org/"/>
+            <outline type="rss" text="HorsesAss.Org" title="HorsesAss.Org" xmlUrl="http://www.horsesass.org/?feed=rss2" htmlUrl="https://horsesass.org"/>
+            <outline type="rss" text="Seattle Bike Blog" title="Seattle Bike Blog" xmlUrl="http://seattlebikeblog.com/feed/" htmlUrl="https://www.seattlebikeblog.com"/>
+            <outline type="rss" text="The B-Town (Burien) Blog" title="The B-Town (Burien) Blog" xmlUrl="http://www.b-townblog.com/feed/" htmlUrl="https://b-townblog.com/"/>
+            <outline type="rss" text="Lynnwood Times" title="Lynnwood Times" xmlUrl="https://lynnwoodtimes.com/feed/" htmlUrl="https://lynnwoodtimes.com/"/>
+            <outline type="rss" text="KING - Local" title="KING - Local" xmlUrl="http://rssfeeds.king5.com/king5/local" htmlUrl="https://www.king5.com/"/>
+            <outline type="rss" text="CHS Capitol Hill Seattle capitolhillseattle.com" title="CHS Capitol Hill Seattle capitolhillseattle.com" xmlUrl="http://feeds.feedburner.com/Capitolhillseattle" htmlUrl="https://www.capitolhillseattle.com"/>
+            <outline type="rss" text="The PhinneyWood Blog" title="The PhinneyWood Blog" xmlUrl="http://www.phinneywood.com/feed/" htmlUrl="https://phinneywood.com/"/>
+            <outline type="rss" text="Today in Washington State History" title="Today in Washington State History" xmlUrl="http://www.historylink.org/rss/today.xml/" htmlUrl="http://www.historylink.org"/>
+            <outline type="rss" text="The WSDOT Blog - Washington State Department of Transportation" title="The WSDOT Blog - Washington State Department of Transportation" xmlUrl="http://wsdotblog.blogspot.com/feeds/posts/default" htmlUrl="https://wsdotblog.blogspot.com/"/>
+            <outline type="rss" text="Fremont Neighbor" title="Fremont Neighbor" xmlUrl="https://fremontneighbor.com/feed/" htmlUrl="https://fremontneighbor.com/"/>
+            <outline type="rss" text="seattlepi.com: Local News" title="seattlepi.com: Local News" xmlUrl="http://seattlepi.nwsource.com/rss/local_2.rss" htmlUrl="https://www.seattlepi.com/seattlenews/feed/seattlepi-com-local-news-218.php"/>
+            <outline type="rss" xmlUrl="https://www.soundtransit.org/blog/platform/feed" htmlUrl="https://www.soundtransit.org/"/>
+            <outline type="rss" text="Eater Seattle - All" title="Eater Seattle - All" xmlUrl="http://seattle.eater.com/atom.xml" htmlUrl="https://seattle.eater.com"/>
+            <outline type="rss" text="International Examiner" title="International Examiner" xmlUrl="http://www.iexaminer.org/feed/" htmlUrl="https://iexaminer.org/"/>
+            <outline type="rss" text="My Edmonds News" title="My Edmonds News" xmlUrl="http://myedmondsnews.com/feed/" htmlUrl="https://myedmondsnews.com/"/>
+            <outline type="rss" text="PubliCola" title="PubliCola" xmlUrl="http://thecisforcrank.com/feed/" htmlUrl="https://publicola.com/"/>
+            <outline type="rss" text="The Tukwila Blog" title="The Tukwila Blog" xmlUrl="http://www.tukwilablog.com/feed/" htmlUrl="https://tukwilablog.com"/>
+            <outline type="rss" text="Cascade PBS" title="Cascade PBS" xmlUrl="http://crosscut.com/feed/" htmlUrl="https://www.cascadepbs.org/"/>
+            <outline type="rss" text="News.seattle.gov" title="News.seattle.gov" xmlUrl="https://news.seattle.gov/feed/" htmlUrl="https://news.seattle.gov"/>
+            <outline type="rss" text="Top Washington state and Seattle news" title="Top Washington state and Seattle news" xmlUrl="https://www.seattlepi.com/local/feed/Top-Washington-state-and-Seattle-news-1375.php%20" htmlUrl="https://www.seattlepi.com/seattlenews/feed/top-washington-state-and-seattle-news-1375.php"/>
+            <outline type="rss" text="KING - News" title="KING - News" xmlUrl="http://rssfeeds.king5.com/king5/home" htmlUrl="https://www.king5.com/"/>
+            <outline type="rss" text="DivestSPD" title="DivestSPD" xmlUrl="https://www.divestspd.com/feed" htmlUrl="https://www.divestspd.com"/>
+            <outline type="rss" text="The Seattle Times Local News – The Seattle Times" title="The Seattle Times Local News – The Seattle Times" xmlUrl="https://www.seattletimes.com/seattle-news/feed/" htmlUrl="https://www.seattletimes.com"/>
+            <outline type="rss" text="Maple Leaf Life" title="Maple Leaf Life" xmlUrl="http://www.mapleleaflife.com/feed/" htmlUrl="http://mapleleaflife.com"/>
+            <outline type="rss" text="SouthSoundTalk" title="SouthSoundTalk" xmlUrl="http://www.southsoundtalk.com/feed/" htmlUrl="https://www.southsoundtalk.com/"/>
+            <outline type="rss" text="Montlake Community Club" title="Montlake Community Club" xmlUrl="http://montlake.net/feed/" htmlUrl="https://montlake.net"/>
+            <outline type="rss" text="Magnolia, Seattle: Neighborhood Guide" title="Magnolia, Seattle: Neighborhood Guide" xmlUrl="http://www.magnoliavoice.com/feed/" htmlUrl="https://magnoliavoice.com"/>
+            <outline type="rss" text="SDOT Blog" title="SDOT Blog" xmlUrl="http://sdotblog.seattle.gov/feed/" htmlUrl="https://sdotblog.seattle.gov/"/>
+            <outline type="rss" text="The Urbanist" title="The Urbanist" xmlUrl="http://theurbanist.org/feed/" htmlUrl="https://www.theurbanist.org/"/>
+            <outline type="rss" text="Through the Static" title="Through the Static" xmlUrl="https://throughthestatic.org/feed/" htmlUrl="https://throughthestatic.org"/>
+            <outline type="rss" text="HeraldNet.com" title="HeraldNet.com" xmlUrl="http://www.heraldnet.com/section/RSS01&amp;mime=xml" htmlUrl="https://www.heraldnet.com/"/>
+            <outline type="rss" text="Local" title="Local" xmlUrl="https://feeds.mcclatchy.com/thenewstribune/sections/news/local/stories" htmlUrl="https://www.thenewstribune.com/news/local/"/>
+            <outline type="rss" text="The Evergrey" title="The Evergrey" xmlUrl="https://theevergrey.com/feed/" htmlUrl="https://theevergrey.com"/>
+            <outline type="rss" text="Queen Anne View" title="Queen Anne View" xmlUrl="http://www.queenanneview.com/feed/" htmlUrl="https://queenanneview.com"/>
+            <outline type="rss" text="Redmond Reporter" title="Redmond Reporter" xmlUrl="http://www.redmond-reporter.com/feed/" htmlUrl="https://www.redmond-reporter.com/"/>
+            <outline type="rss" text="Blog - Converge Media | Local Seattle News" title="Blog - Converge Media | Local Seattle News" xmlUrl="https://www.whereweconverge.com/post?format=rss" htmlUrl="https://www.whereweconverge.com/post/"/>
+            <outline type="rss" text="My Ballard" title="My Ballard" xmlUrl="http://www.myballard.com/feed/" htmlUrl="https://www.myballard.com"/>
+            <outline type="rss" text="Seattle City Council Insight" title="Seattle City Council Insight" xmlUrl="http://sccinsight.com/feed/" htmlUrl="https://sccinsight.com/"/>
+            <outline type="rss" text="Notes from the Emerald City" title="Notes from the Emerald City" xmlUrl="https://notesfromtheemeraldcity.com/feed/" htmlUrl="https://notesfromtheemeraldcity.com"/>
+            <outline type="rss" text="My Lynnwood News" title="My Lynnwood News" xmlUrl="http://lynnwoodtoday.com/feed/" htmlUrl="https://mylynnwoodnews.com/"/>
+            <outline type="rss" text="Washington State Standard" title="Washington State Standard" xmlUrl="https://washingtonstatestandard.com/feed/" htmlUrl="https://washingtonstatestandard.com/"/>
+            <outline type="rss" text="KING RSS Feed: local" title="KING RSS Feed: local" xmlUrl="https://www.king5.com/feeds/syndication/rss/news/local" htmlUrl="https://www.king5.com/"/>
+            <outline type="rss" text="Ballard – My Ballard" title="Ballard – My Ballard" xmlUrl="http://feeds.feedburner.com/myballard" htmlUrl="https://www.myballard.com"/>
+            <outline type="rss" text="Seattle Now &amp; Then" title="Seattle Now &amp; Then" xmlUrl="http://pauldorpat.com/feed/" htmlUrl="https://pauldorpat.com"/>
+            <outline type="rss" text="Seattle City Council Blog" title="Seattle City Council Blog" xmlUrl="http://council.seattle.gov/feed/" htmlUrl="https://council.seattle.gov/"/>
+            <outline type="rss" text="King County Parks Blog" title="King County Parks Blog" xmlUrl="http://kingcountyparks.wordpress.com/feed/" htmlUrl="https://kingcountyparks.org"/>
+            <outline type="rss" text="Eat &amp; Drink - Seattle Met" title="Eat &amp; Drink - Seattle Met" xmlUrl="http://feeds2.feedburner.com/seattlemet-table-hopper" htmlUrl="https://www.seattlemet.com"/>
+            <outline type="rss" text="West Seattle Junction Association" title="West Seattle Junction Association" xmlUrl="http://wsjunction.org/feed/" htmlUrl="https://wsjunction.org"/>
+            <outline type="rss" text="Bizjournals.com Seattle RSS Feed" title="Bizjournals.com Seattle RSS Feed" xmlUrl="http://www.bizjournals.com/rss/feed/daily/seattle" htmlUrl="https://www.bizjournals.com"/>
+            <outline type="rss" text="Wedgwood Community Council" title="Wedgwood Community Council" xmlUrl="http://wedgwoodcc.org/feed" htmlUrl="http://www.wedgwoodcc.org"/>
+            <outline type="rss" text="Bottom Line" title="Bottom Line" xmlUrl="http://bottomline.seattle.gov/feed/" htmlUrl="https://bottomline.seattle.gov/"/>
+            <outline type="rss" text="The Burner" title="The Burner" xmlUrl="https://www.theburnerseattle.com/blog-feed.xml" htmlUrl="https://www.theburnerseattle.com/blog-1"/>
+            <outline type="rss" text="The Seattle Globalist" title="The Seattle Globalist" xmlUrl="http://www.seattleglobalist.com/feed" htmlUrl="https://seattleglobalist.com"/>
+            <outline type="rss" text="Urban Living" title="Urban Living" xmlUrl="http://www.urbnlivn.com/feed/" htmlUrl="https://cms.urbnlivn.com/"/>
+            <outline type="rss" text="The Seattle Star" title="The Seattle Star" xmlUrl="http://www.seattlestar.net/feed/" htmlUrl="https://www.seattlestar.net"/>
+            <outline type="rss" text="Laurelhurst Blog" title="Laurelhurst Blog" xmlUrl="http://thelaurelhurstblog.blogspot.com/feeds/posts/default" htmlUrl="http://thelaurelhurstblog.blogspot.com/"/>
+            <outline type="rss" text="Washington State Governor&amp;#39;s Office - Medium" title="Washington State Governor&amp;#39;s Office - Medium" xmlUrl="https://medium.com/feed/wagovernor" htmlUrl="https://medium.com/wagovernor?source=rss----b37b197d8735---4"/>
+            <outline type="rss" text="HardPressed" title="HardPressed" xmlUrl="https://www.hardpressed-info.com/rss/" htmlUrl="https://www.hardpressed-info.com/"/>
+            <outline type="rss" text="West Seattle Blog..." title="West Seattle Blog..." xmlUrl="http://westseattleblog.com/feed" htmlUrl="https://westseattleblog.com"/>
+            <outline type="rss" text="Wallingford | Seattle | Washington" title="Wallingford | Seattle | Washington" xmlUrl="http://www.mywallingford.com/feed/" htmlUrl="https://mywallingford.com"/>
+            <outline type="rss" text="Cascade Bike Blog - Cascade Bicycle Club - Seattle, Washington" title="Cascade Bike Blog - Cascade Bicycle Club - Seattle, Washington" xmlUrl="http://blog.cascade.org/feed/" htmlUrl="https://cascade.org/blog/feed?field_blog_category_target_id_op=in&amp;&amp;field_global_interests_target_id_op=in&amp;&amp;&amp;title_op=contains&amp;title="/>
+            <outline type="rss" text="สล็อตเว็บตรง" title="สล็อตเว็บตรง" xmlUrl="http://www.seattlegreenlaker.com/feed/" htmlUrl="https://seattlegreenlaker.com/"/>
+            <outline type="rss" text="NPI's Cascadia Advocate" title="NPI's Cascadia Advocate" xmlUrl="http://www.nwprogressive.org/weblog/atom.xml" htmlUrl="https://www.nwprogressive.org/weblog"/>
+            <outline type="rss" text="Visit Seattle" title="Visit Seattle" xmlUrl="http://blog.visitseattle.org/?feed=rss2" htmlUrl="https://visitseattle.org/"/>
+            <outline type="rss" text="The SeaTac Blog" title="The SeaTac Blog" xmlUrl="http://www.seatacblog.com/feed/" htmlUrl="https://seatacblog.com"/>
+            <outline type="rss" text="The Seattle Times Real Estate – The Seattle Times" title="The Seattle Times Real Estate – The Seattle Times" xmlUrl="http://www.seattletimes.com/real-estate/feed/" htmlUrl="https://www.seattletimes.com"/>
+            <outline type="rss" text="White Center Now: The blog about White Center" title="White Center Now: The blog about White Center" xmlUrl="http://whitecenternow.com/feed/" htmlUrl="https://whitecenternow.com"/>
+            <outline type="rss" text="MyNorthwest News – MyNorthwest.com" title="MyNorthwest News – MyNorthwest.com" xmlUrl="http://www.mynorthwest.com/xml/11.xml" htmlUrl="https://mynorthwest.com"/>
+            <outline type="rss" text="Washington Smoke Blog" title="Washington Smoke Blog" xmlUrl="http://wasmoke.blogspot.com/feeds/posts/default" htmlUrl="https://wasmoke.blogspot.com/"/>
+            <outline type="rss" text="The Seattle Times Opinion – The Seattle Times" title="The Seattle Times Opinion – The Seattle Times" xmlUrl="http://www.seattletimes.com/opinion/feed/" htmlUrl="https://www.seattletimes.com"/>
+            <outline type="rss" text="KREM RSS Feed: local" title="KREM RSS Feed: local" xmlUrl="https://www.krem.com/feeds/syndication/rss/news/local" htmlUrl="https://www.krem.com/"/>
+            <outline type="rss" text="SPD Blotter" title="SPD Blotter" xmlUrl="http://spdblotter.seattle.gov/feed/" htmlUrl="https://spdblotter.seattle.gov/"/>
+            <outline type="rss" text="Post Alley" title="Post Alley" xmlUrl="https://www.postalley.org/feed/" htmlUrl="https://www.postalley.org"/>
+            <outline type="rss" text="Seattle Bubble" title="Seattle Bubble" xmlUrl="http://feeds.feedburner.com/SeattleBubble" htmlUrl="https://seattlebubble.com/blog/"/>
+            <outline type="rss" text="King County Library System" title="King County Library System" xmlUrl="https://kcls.org/feed/" htmlUrl="https://kcls.org"/>
+            <outline type="rss" text="sitewide rss feed" title="sitewide rss feed" xmlUrl="http://realchangenews.org/rss.xml" htmlUrl="https://www.realchangenews.org/rss.xml"/>
+            <outline type="rss" text="Human Interests" title="Human Interests" xmlUrl="http://humaninterests.seattle.gov/feed/" htmlUrl="https://humaninterests.seattle.gov/"/>
+        </outline>
+    </body>
+</opml>
