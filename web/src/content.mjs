@@ -2,7 +2,8 @@ import DOMPurify from 'dompurify';
 import {safeUrl} from './feeds.mjs';
 
 export function cleanText(value) {
-  const clean = DOMPurify.sanitize(String(value || ''), {ALLOWED_TAGS: [], ALLOWED_ATTR: [], RETURN_DOM_FRAGMENT: true});
+  const spaced = String(value || '').replace(/<br\s*\/?>|<\/(?:p|div|li|h[1-6])>/gi, ' ');
+  const clean = DOMPurify.sanitize(spaced, {ALLOWED_TAGS: [], ALLOWED_ATTR: [], RETURN_DOM_FRAGMENT: true});
   return clean.textContent.replace(/\s+/g, ' ').trim();
 }
 

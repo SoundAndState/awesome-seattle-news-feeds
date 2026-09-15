@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeFeed, safeUrl, verifyOpml, nextRefresh, inBatches} from '../web/src/feeds.mjs';
+import {normalizeFeed, safeUrl, verifyOpml, nextRefresh, inBatches, selectedSources} from '../web/src/feeds.mjs';
 import {loadCatalog} from '../scripts/catalog.mjs';
 import {renderOpml} from '../scripts/render.mjs';
 
@@ -28,4 +28,26 @@ test('refresh failures back off and network concurrency stays bounded', async ()
   let active = 0, maximum = 0; const done = [];
   await inBatches(Array.from({length: 12}, (_, i) => i), async item => {active++; maximum = Math.max(maximum, active); await new Promise(resolve => setTimeout(resolve, 5)); done.push(item); active--;}, 3);
   assert.equal(maximum, 3); assert.equal(new Set(done).size, 12);
+});
+
+test('social sources are separate from default news but selectable individually or by section', () => {
+  const sources = [{id: 'news', category: 'regional'}, {id: 'social', category: 'bluesky'}];
+  assert.deepEqual(selectedSources(sources).map(feed => feed.id), ['news']);
+  assert.deepEqual(selectedSources(sources, {category: 'bluesky'}).map(feed => feed.id), ['social']);
+  assert.deepEqual(selectedSources(sources, {source: 'social'}).map(feed => feed.id), ['social']);
+  assert.equal(selectedSources(sources, {includeSocial: true}).length, 2);
+});
+
+test('native Bluesky posts get readable titles, literal text, and identity stable across handle changes', () => {
+  const post = '<rss version="2.0"><channel><title>Example</title><description>Posts</description><item><link>https://bsky.app/profile/old.example/post/123</link><description>Local news &lt;3&#xA;Next line &amp; details.</description><pubDate>15 Sep 2026 20:00 +0000</pubDate><guid isPermaLink="false">at://did:plc:example/app.bsky.feed.post/123</guid></item></channel></rss>';
+  const socialSource = {...source, category: 'bluesky'};
+  const [article] = normalizeFeed(post, socialSource);
+  assert.equal(article.title, 'Local news &lt;3 Next line &amp; details.');
+  assert.equal(article.html, '<p>Local news &lt;3<br>Next line &amp; details.</p>');
+  assert.ok(article.published > 0);
+  assert.equal(article.id, normalizeFeed(post.replace('old.example', 'new.example'), socialSource)[0].id);
+  const longPost = post.replace('Local news &lt;3&#xA;Next line &amp; details.', 'Neighborhood news and transportation updates. '.repeat(8));
+  const [preview] = normalizeFeed(longPost, socialSource);
+  assert.ok(preview.title.length <= 160);
+  assert.ok(['Neighborhood', 'news', 'and', 'transportation', 'updates.'].includes(preview.title.split(' ').at(-1)));
 });

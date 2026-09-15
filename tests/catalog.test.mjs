@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import {XMLParser} from 'fast-xml-parser';
 import {loadCatalog, validateCatalog} from '../scripts/catalog.mjs';
 import {renderOpml, renderReadme} from '../scripts/render.mjs';
 import {validateOpml} from '../scripts/validate-opml.mjs';
@@ -69,4 +70,16 @@ test('generation is deterministic and includes all feeds in both artifacts', asy
   assert.equal(renderReadme(catalog), renderReadme(structuredClone(catalog)));
   assert.equal((renderOpml(catalog).match(/type="rss"/g) || []).length, catalog.feeds.length);
   for (const feed of catalog.feeds) assert.ok(renderReadme(catalog).includes(`](${feed.feed})`));
+});
+
+test('Bluesky subscriptions occupy their own top-level OPML folder', async () => {
+  const catalog = await loadCatalog();
+  const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix: '', isArray: name => name === 'outline'});
+  const folders = parser.parse(renderOpml(catalog)).opml.body.outline;
+  const socialFeeds = catalog.feeds.filter(feed => feed.category === 'bluesky');
+  const folder = folders.find(folder => folder.title === 'Bluesky');
+  assert.ok(socialFeeds.length > 0);
+  assert.deepEqual(new Set(folder.outline.map(feed => feed.xmlUrl)), new Set(socialFeeds.map(feed => feed.feed)));
+  assert.ok(folder.outline.every(feed => /^https:\/\/bsky\.app\/profile\/did:[^/]+\/rss$/.test(feed.xmlUrl)));
+  assert.ok(folders.filter(folder => folder.title !== 'Bluesky').every(folder => folder.outline.every(feed => !feed.xmlUrl.startsWith('https://bsky.app/'))));
 });

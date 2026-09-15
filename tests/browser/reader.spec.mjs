@@ -1,13 +1,20 @@
 import {test, expect} from '@playwright/test';
+import catalog from '../../feeds.json' with {type: 'json'};
 
-const fixture = id => `<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Publisher</title><description>Local reporting</description><item><title>Seattle parks get a new trail — ${id}</title><link>https://publisher.example/${id}</link><pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate><content:encoded><![CDATA[<p>A new trail connects two neighborhoods.</p><script>window.compromised=true</script><img src="https://tracker.example/pixel" onerror="window.compromised=true"><a href="javascript:alert(1)">Unsafe link</a><a href="/more">More reporting</a>]]></content:encoded></item></channel></rss>`;
+const newsCount = catalog.feeds.filter(feed => feed.category !== 'bluesky').length;
+const socialCount = catalog.feeds.filter(feed => feed.category === 'bluesky').length;
+const totalCount = catalog.feeds.length;
+
+const fixture = id => id.startsWith('bluesky-')
+  ? `<rss version="2.0"><channel><title>Local voice</title><link>https://bsky.app/profile/example.bsky.social</link><description>Bluesky posts</description><item><description>A new trail connects two neighborhoods.\nParks &amp; trails &lt;3 — ${id} https://example.com/${'a-long-article-link-'.repeat(12)}</description><link>https://bsky.app/profile/example.bsky.social/post/${id}</link><guid isPermaLink="false">at://did:plc:example/app.bsky.feed.post/${id}</guid><pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate></item></channel></rss>`
+  : `<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Publisher</title><description>Local reporting</description><item><title>Seattle parks get a new trail — ${id}</title><link>https://publisher.example/${id}</link><pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate><content:encoded><![CDATA[<p>A new trail connects two neighborhoods.</p><script>window.compromised=true</script><img src="https://tracker.example/pixel" onerror="window.compromised=true"><a href="javascript:alert(1)">Unsafe link</a><a href="/more">More reporting</a>]]></content:encoded></item></channel></rss>`;
 async function load(page, fail = false) {
   await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*', route => {
     const id = route.request().url().split('/').pop();
     return route.fulfill({status: fail ? 502 : 200, contentType: fail ? 'application/json' : 'application/xml', body: fail ? JSON.stringify({error:'Publisher returned HTTP 403.'}) : fixture(id)});
   });
   await page.goto('./'); await expect(page.getByRole('button', {name:'Refresh',exact:true})).toBeEnabled({timeout:30000});
-  await expect(page.locator('#all-count')).toHaveText(fail ? '0' : '96');
+  await expect(page.locator('#all-count')).toHaveText(fail ? '0' : String(newsCount));
 }
 
 test('catalog loads automatically; search, source and section filters work', async ({page}) => {
@@ -38,10 +45,10 @@ test('failed refresh preserves cached stories and shows source errors', async ({
   await page.evaluate(async () => {const db=await new Promise((resolve,reject)=>{const req=indexedDB.open('sound-and-state');req.onsuccess=()=>resolve(req.result);req.onerror=reject;}); await new Promise((resolve,reject)=>{const tx=db.transaction('feeds','readwrite');const store=tx.objectStore('feeds');const req=store.openCursor();req.onsuccess=()=>{const cursor=req.result;if(cursor){cursor.update({...cursor.value,nextCheck:0});cursor.continue();}};tx.oncomplete=resolve;tx.onerror=reject;});db.close();});
   await page.unroute('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*');
   await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',route=>route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({error:'Publisher returned HTTP 403.'})}));
-  await page.reload(); await expect(page.locator('#all-count')).toHaveText('96');
+  await page.reload(); await expect(page.locator('#all-count')).toHaveText(String(newsCount));
   await expect(page.getByRole('button',{name:'Refresh',exact:true})).toBeEnabled({timeout:30000});
-  await page.getByRole('button',{name:'96 feeds unavailable · View sources'}).click();
-  await expect(page.locator('.source-card')).toHaveCount(96); await expect(page.locator('.source-detail').first()).toContainText('Last loaded');
+  await page.getByRole('button',{name:`${newsCount} feeds unavailable · View sources`}).click();
+  await expect(page.locator('.source-card')).toHaveCount(totalCount); await expect(page.locator('.source-detail').filter({hasText:'Last loaded'})).toHaveCount(newsCount);
 });
 test('reading backup restores saved stories after local data is cleared', async ({page}) => {
   await load(page); await page.locator('.save-button').first().click(); await page.getByRole('button',{name:'About this reader'}).click();
@@ -57,6 +64,32 @@ test('mobile reader has no horizontal overflow and section navigation is accessi
   await page.setViewportSize({width:390,height:844}); await load(page);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole('button',{name:'Browse sections'}).click(); await expect(page.locator('#categories')).toBeVisible();
-  await page.locator('[data-view="sources"]').click(); await expect(page.locator('.source-card')).toHaveCount(96);
+  await page.locator('[data-view="sources"]').click(); await expect(page.locator('.source-card')).toHaveCount(totalCount);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test('Bluesky loads on selection and stays out of the default news timeline after reload', async ({page}) => {
+  const socialRequests = [];
+  page.on('request', request => {if (request.url().includes('/feed/bluesky-')) socialRequests.push(request.url());});
+  await load(page);
+  expect(socialRequests).toHaveLength(0);
+  await page.locator('[data-category="bluesky"]').click();
+  await expect(page.locator('#all-count')).toHaveText(String(socialCount));
+  await expect(page.locator('.story')).toHaveCount(socialCount);
+  await expect(page.locator('.story-title').first()).toContainText('A new trail connects two neighborhoods.');
+  await expect(page.locator('.story-title').first()).toContainText('Parks & trails <3');
+  expect(socialRequests).toHaveLength(socialCount);
+  await page.locator('.save-button').first().click();
+  await page.locator('#clear-section').click();
+  await expect(page.locator('#all-count')).toHaveText(String(newsCount));
+  await expect(page.locator('.category-bluesky')).toHaveCount(0);
+  await page.locator('[data-view="saved"]').click();
+  await expect(page.locator('.story')).toHaveCount(1);
+  await expect(page.locator('.category-bluesky')).toHaveCount(1);
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.reload();
+  await expect(page.locator('#all-count')).toHaveText(String(newsCount));
+  await expect(page.locator('.category-bluesky')).toHaveCount(0);
+  expect(socialRequests).toHaveLength(socialCount);
 });

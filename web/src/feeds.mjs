@@ -2,6 +2,18 @@ import {parseFeed, parseOpml} from 'feedsmith';
 
 export const REFRESH_MS = 15 * 60 * 1000;
 
+export function selectedSources(feeds, {category = '', source = '', includeSocial = false} = {}) {
+  return feeds.filter(feed => (!category || feed.category === category) && (!source || feed.id === source) && (includeSocial || category || source || feed.category !== 'bluesky'));
+}
+
+const escapeHtml = text => text.replace(/[&<>"']/g, char => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]));
+
+function postHeadline(text) {
+  const normalized = text.trim().replace(/\s+/g, ' ');
+  const preview = [...normalized].slice(0, 160).join('');
+  return (preview.length < normalized.length ? preview.replace(/\s+\S*$/, '') : preview) || 'Bluesky post';
+}
+
 export function safeUrl(value, base) {
   if (typeof value !== 'string' || !value.trim()) return '';
   try {
@@ -33,10 +45,12 @@ export function normalizeFeed(text, source, now = Date.now()) {
     const rawDate = item.pubDate || item.published || item.date_published || item.dc?.date || item.updated || item.date_modified;
     const parsed = Date.parse(rawDate);
     const published = Number.isFinite(parsed) && parsed <= now + 24 * 60 * 60 * 1000 ? parsed : 0;
-    const title = typeof item.title === 'string' ? item.title : 'Untitled story';
-    const html = item.content?.encoded || (typeof item.content === 'string' ? item.content : '') || item.content_html || item.description || item.summary || item.content_text || '';
+    const social = source.category === 'bluesky';
+    const postText = typeof item.description === 'string' ? item.description : '';
+    const title = social ? escapeHtml(postHeadline(postText)) : typeof item.title === 'string' ? item.title : 'Untitled story';
+    const html = social ? `<p>${escapeHtml(postText).replace(/\r?\n/g, '<br>')}</p>` : item.content?.encoded || (typeof item.content === 'string' ? item.content : '') || item.content_html || item.description || item.summary || item.content_text || '';
     const guid = item.guid?.value || item.id || `${title}:${rawDate || ''}`;
-    const id = storyKey(url, source.id, guid);
+    const id = social && /^at:\/\/did:[^/]+\/app\.bsky\.feed\.post\//.test(guid) ? guid : storyKey(url, source.id, guid);
     result.set(id, {id, url, title: title.slice(0, 2000), html: String(html).slice(0, 100000), published, firstSeen: now, feedIds: [source.id]});
   }
   return [...result.values()];

@@ -64,6 +64,11 @@
       "id": "satire",
       "title": "Satire",
       "description": "Local humor and satirical news."
+    },
+    {
+      "id": "bluesky",
+      "title": "Bluesky",
+      "description": "Social feeds from Seattle-region journalists, publications, and commentators."
     }
   ],
   "feeds": [
@@ -1174,6 +1179,357 @@
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
+    },
+    {
+      "id": "bluesky-hannah-krieg",
+      "name": "Hannah Krieg (Bluesky)",
+      "website": "https://bsky.app/profile/hannahkrieg.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:ua6zefzngv2ogn7drkp5cdy6/rss",
+      "category": "bluesky",
+      "description": "Independent Seattle reporting and commentary from the writer behind The Burner.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/hannahkrieg.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-erica-c-barnett",
+      "name": "Erica C. Barnett (Bluesky)",
+      "website": "https://bsky.app/profile/ericacbarnett.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:mvuk5qvagm4ljx3lwj4vmb6v/rss",
+      "category": "bluesky",
+      "description": "Seattle politics and public-policy reporting from the cofounder and editor of PubliCola.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/ericacbarnett.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-ryan-packer",
+      "name": "Ryan Packer (Bluesky)",
+      "website": "https://bsky.app/profile/typewriteralley.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:6vatl6lhsv3ninhf7n4ssria/rss",
+      "category": "bluesky",
+      "description": "Transportation reporting and advocacy from a contributing editor at The Urbanist.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/typewriteralley.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-guy-oron",
+      "name": "Guy Oron (Bluesky)",
+      "website": "https://bsky.app/profile/guyoron.net",
+      "feed": "https://bsky.app/profile/did:plc:4zshn55gkmcp6whwkuwatkbe/rss",
+      "category": "bluesky",
+      "description": "Seattle reporting and commentary from the journalist behind Gossip Guy.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/guyoron.net/rss"
+      ]
+    },
+    {
+      "id": "bluesky-doug-trumm",
+      "name": "Doug Trumm (Bluesky)",
+      "website": "https://bsky.app/profile/metropolitanglide.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:mq5viv4jtwtjr2clfpjn6o6z/rss",
+      "category": "bluesky",
+      "description": "Housing, transportation, and urban-policy commentary from the publisher of The Urbanist.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/metropolitanglide.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-amy-sundberg",
+      "name": "Amy Sundberg (Bluesky)",
+      "website": "https://bsky.app/profile/amysundberg.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:f5p5psli6mgis6ttny2ant7b/rss",
+      "category": "bluesky",
+      "description": "Seattle government, policing, and surveillance coverage from a reporter at The Urbanist and publisher of Notes from the Emerald City.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/amysundberg.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-megan-burbank",
+      "name": "Megan Burbank (Bluesky)",
+      "website": "https://bsky.app/profile/meganburbank.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:5wkuyf6gpcm5k4ipd223i75n/rss",
+      "category": "bluesky",
+      "description": "Independent reporting and commentary on culture, politics, and abortion policy.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/meganburbank.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-nick-deshais",
+      "name": "Nick Deshais (Bluesky)",
+      "website": "https://bsky.app/profile/nickdeshais.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:wtvs2quhyrvxcbkutyi6zfby/rss",
+      "category": "bluesky",
+      "description": "Transportation reporting from a Seattle Times journalist.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/nickdeshais.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-andrew-engelson",
+      "name": "Andrew Engelson (Bluesky)",
+      "website": "https://bsky.app/profile/andyengelson.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:fwjwke65squvrpp5jgv3gxrj/rss",
+      "category": "bluesky",
+      "description": "Cascadia news, commentary, and organizing updates from the writer behind Cascadia Journal.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/andyengelson.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-david-goldstein",
+      "name": "David Goldstein (Goldy) (Bluesky)",
+      "website": "https://bsky.app/profile/goldy.horsesass.org",
+      "feed": "https://bsky.app/profile/did:plc:ap2panaty2yhp6dnwe7kyqxj/rss",
+      "category": "bluesky",
+      "description": "Economic and political commentary from a Civic Ventures senior fellow and Pitchfork Economics co-host.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/goldy.horsesass.org/rss"
+      ]
+    },
+    {
+      "id": "bluesky-david-kroman",
+      "name": "David Kroman (Bluesky)",
+      "website": "https://bsky.app/profile/kromandavid.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:i2sx4ke5f3gs3zvfn7nm647v/rss",
+      "category": "bluesky",
+      "description": "Seattle news and public-affairs commentary from a co-host of KUOW Soundside.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/kromandavid.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-daniel-beekman",
+      "name": "Daniel Beekman (Bluesky)",
+      "website": "https://bsky.app/profile/dbeekman.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:mrnizqztaonp6r32k3bbqp5g/rss",
+      "category": "bluesky",
+      "description": "Seattle politics and community reporting from a Seattle Times journalist.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/dbeekman.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-sydney-brownstone",
+      "name": "Sydney Brownstone (Bluesky)",
+      "website": "https://bsky.app/profile/sydbrownstone.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:l6gbvxbrvw62diazih4xyb2t/rss",
+      "category": "bluesky",
+      "description": "Investigative reporting and accountability coverage from a Seattle Times journalist.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/sydbrownstone.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-jim-brunner",
+      "name": "Jim Brunner (Bluesky)",
+      "website": "https://bsky.app/profile/jimbrunner.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:xhl3w4tvtedx35e5tlcvayzu/rss",
+      "category": "bluesky",
+      "description": "Washington politics and government reporting from a Seattle Times journalist.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/jimbrunner.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-shauna-sowersby",
+      "name": "Shauna Sowersby (Bluesky)",
+      "website": "https://bsky.app/profile/ssowersby.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:fkn3bqvtepdgxum2drbl6kla/rss",
+      "category": "bluesky",
+      "description": "Washington state-politics reporting from a Seattle Times journalist.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/ssowersby.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-naomi-ishisaka",
+      "name": "Naomi Ishisaka (Bluesky)",
+      "website": "https://bsky.app/profile/naomiishisaka.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:wdxoaq3hdmmp7i3wwbxaxn5i/rss",
+      "category": "bluesky",
+      "description": "Social-justice columns and analysis from a Seattle Times columnist.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/naomiishisaka.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-jake-goldstein-street",
+      "name": "Jake Goldstein-Street (Bluesky)",
+      "website": "https://bsky.app/profile/goldsteinstreet.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:d5oaljwsxuvvkmxkhliscya3/rss",
+      "category": "bluesky",
+      "description": "Washington government and legal reporting from a Washington State Standard journalist.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/goldsteinstreet.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-mike-baker",
+      "name": "Mike Baker (Bluesky)",
+      "website": "https://bsky.app/profile/mikebaker.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:r4htmaum3mel37tvqtidnfo4/rss",
+      "category": "bluesky",
+      "description": "Cascadia and national investigative reporting from a New York Times correspondent.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/mikebaker.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-divestspd",
+      "name": "DivestSPD (Bluesky)",
+      "website": "https://bsky.app/profile/divestspd.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:2bbp5fjgbsci4fvu2lx4dedx/rss",
+      "category": "bluesky",
+      "description": "Seattle police-accountability investigations and advocacy from a community watchdog.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/divestspd.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-through-the-static",
+      "name": "Through the Static (Bluesky)",
+      "website": "https://bsky.app/profile/throughthestatic.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:4e2htgs6lcmsahh6oxast42p/rss",
+      "category": "bluesky",
+      "description": "Independent Pacific Northwest reporting and commentary with an antifascist editorial perspective.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/throughthestatic.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-seattle-bike-blog",
+      "name": "Seattle Bike Blog (Bluesky)",
+      "website": "https://bsky.app/profile/seattlebikeblog.com",
+      "feed": "https://bsky.app/profile/did:plc:6wamrktolx6e37qid6666cu5/rss",
+      "category": "bluesky",
+      "description": "Seattle cycling news, street-safety coverage, and bicycle advocacy.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/seattlebikeblog.com/rss"
+      ]
+    },
+    {
+      "id": "bluesky-the-urbanist",
+      "name": "The Urbanist (Bluesky)",
+      "website": "https://bsky.app/profile/theurbanist.org",
+      "feed": "https://bsky.app/profile/did:plc:4cehxdx5hfam37oos3yh5tta/rss",
+      "category": "bluesky",
+      "description": "Advocacy journalism on housing, transportation, and cities in the Seattle region.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/theurbanist.org/rss"
+      ]
+    },
+    {
+      "id": "bluesky-south-seattle-emerald",
+      "name": "South Seattle Emerald (Bluesky)",
+      "website": "https://bsky.app/profile/soseaemerald.bsky.social",
+      "feed": "https://bsky.app/profile/did:plc:f4uz72wxjpztu3o27blzkqas/rss",
+      "category": "bluesky",
+      "description": "Community reporting and perspectives from South Seattle.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/soseaemerald.bsky.social/rss"
+      ]
+    },
+    {
+      "id": "bluesky-washington-state-standard",
+      "name": "Washington State Standard (Bluesky)",
+      "website": "https://bsky.app/profile/washingtonstatestandard.com",
+      "feed": "https://bsky.app/profile/did:plc:26375peygwnrijoepmy2fdcs/rss",
+      "category": "bluesky",
+      "description": "Washington state-government reporting, policy analysis, and political commentary.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/washingtonstatestandard.com/rss"
+      ]
+    },
+    {
+      "id": "bluesky-kuow",
+      "name": "KUOW Public Radio (Bluesky)",
+      "website": "https://bsky.app/profile/kuow.org",
+      "feed": "https://bsky.app/profile/did:plc:sgpikk2uv7446555gx2mawpz/rss",
+      "category": "bluesky",
+      "description": "Puget Sound public-radio reporting and NPR news.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/kuow.org/rss"
+      ]
+    },
+    {
+      "id": "bluesky-the-needling",
+      "name": "The Needling (Bluesky)",
+      "website": "https://bsky.app/profile/theneedling.com",
+      "feed": "https://bsky.app/profile/did:plc:pxsx6uebhylyfaxejchrr7ls/rss",
+      "category": "bluesky",
+      "description": "Seattle satire and parody from a local humor publication.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/theneedling.com/rss"
+      ]
+    },
+    {
+      "id": "bluesky-the-stranger",
+      "name": "The Stranger (Bluesky)",
+      "website": "https://bsky.app/profile/thestranger.com",
+      "feed": "https://bsky.app/profile/did:plc:ekf3smdiurl26mmjjzguxq64/rss",
+      "category": "bluesky",
+      "description": "Seattle reporting, commentary, arts, food, and culture.",
+      "format": "RSS",
+      "checkedOn": "2026-09-15",
+      "aliases": [
+        "https://bsky.app/profile/thestranger.com/rss"
+      ]
     }
   ],
   "sections": [
