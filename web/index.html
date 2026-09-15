@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A quiet place to catch up on Seattle, Puget Sound, and Washington. Read stories from a curated collection of local news feeds.">
+  <meta name="theme-color" content="#173f36">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://awesome-seattle-feed-proxy.bmenesini.workers.dev; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <title>Sound &amp; State — Seattle News Reader</title>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to stories</a>
+  <header class="masthead">
+    <a class="wordmark" href="./" aria-label="Sound and State home"><span class="brand-icon" aria-hidden="true">S<span>&amp;</span>S</span><span>Sound <i>&amp;</i> State<small>A SEATTLE &amp; WASHINGTON NEWS READER</small></span></a>
+    <nav aria-label="Resources"><a href="./feeds.opml" download>Get the feeds <span aria-hidden="true">↗</span></a><button id="about-button" class="text-button">About this reader</button><a id="github-link" href="https://github.com/sayhiben/awesome-seattle-news-feeds">GitHub <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <div class="edition-line"><span>SEATTLE · PUGET SOUND · WASHINGTON</span><time id="edition-date"></time><span class="local-label"><span class="dot"></span> Local stories. A wider view.</span></div>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Reading filters">
+      <div class="sidebar-heading"><span class="eyebrow">YOUR EDITION</span><button id="mobile-filter" class="text-button" aria-expanded="false" aria-controls="filter-content">Browse sections <span aria-hidden="true">⌄</span></button></div>
+      <div id="filter-content">
+        <nav class="view-nav" aria-label="Library">
+          <button data-view="all" class="active" aria-pressed="true"><span><span class="nav-icon" aria-hidden="true">▤</span> Latest stories</span><span id="all-count" class="count">0</span></button>
+          <button data-view="unread" aria-pressed="false"><span><span class="nav-icon" aria-hidden="true">○</span> Unread</span><span id="unread-count" class="count">0</span></button>
+          <button data-view="saved" aria-pressed="false"><span><span class="nav-icon" aria-hidden="true">◇</span> Saved stories</span><span id="saved-count" class="count">0</span></button>
+          <button data-view="sources" aria-pressed="false"><span><span class="nav-icon" aria-hidden="true">▦</span> All sources</span><span id="sources-count" class="count">—</span></button>
+        </nav>
+        <div class="section-label"><span class="eyebrow">EXPLORE SECTIONS</span><button id="clear-section" class="text-button" hidden>Clear</button></div>
+        <nav id="categories" class="category-nav" aria-label="Sections"></nav>
+        <div class="sidebar-note"><span class="mini-rule"></span><p>Good local journalism<br>keeps us connected.</p><span>Read widely. Visit the publishers.<br>Support the news you value.</span></div>
+      </div>
+    </aside>
+    <main id="main" tabindex="-1">
+      <section class="page-heading"><div><p id="heading-kicker" class="eyebrow">THE LOCAL PICTURE</p><h1 id="heading">Around the Sound.</h1><p id="description">The latest from your corner of the Northwest.</p></div><div class="collection-stamp"><strong id="feed-count">—</strong><span>CURATED<br>NEWS FEEDS</span></div></section>
+      <div class="toolbar"><label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Search stories or sources…" aria-label="Search stories or sources"></label><label class="source-select"><span class="sr-only">Filter by source</span><select id="source-filter"><option value="">All sources</option></select></label><button id="refresh" class="primary-button"><span aria-hidden="true">↻</span> Refresh</button></div>
+      <div class="reading-bar"><div><span class="live-dot" aria-hidden="true"></span><span id="result-label">Opening the collection…</span></div><button id="mark-read" class="text-button">Mark these read</button></div>
+      <div id="notice" class="notice" role="status" hidden></div>
+      <div id="feed-progress" class="feed-progress" role="status" aria-live="polite"></div>
+      <section id="stories" aria-label="Stories"></section>
+      <button id="load-more" class="load-more" hidden>Show more stories <span aria-hidden="true">↓</span></button>
+      <footer class="reader-footer"><span>From the Awesome Seattle News Feeds collection.</span><span>Reading state stays in this browser.</span></footer>
+    </main>
+  </div>
+  <dialog id="article-dialog" aria-labelledby="article-title"><div class="dialog-top"><span class="eyebrow">FROM THE PUBLISHER’S FEED</span><button class="close-button" data-close="article-dialog" aria-label="Close story">×</button></div><div id="article-body"></div></dialog>
+  <dialog id="about-dialog" aria-labelledby="about-title"><div class="dialog-top"><span class="eyebrow">A LITTLE CONTEXT</span><button class="close-button" data-close="about-dialog" aria-label="Close about">×</button></div><div class="about-content"><h2 id="about-title">Stay close to the story.</h2><p>Sound &amp; State brings the <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds</a> collection into one quiet reading space. Reporting, opinion, advocacy, official updates, and satire are grouped into labeled sections.</p><h3>Your browser, your reading list</h3><p>Read status, saved stories, and downloaded articles stay on this device. There are no accounts or analytics. Clearing browser data removes this history; use a backup to keep it.</p><div class="backup-actions"><button id="export-state" class="secondary-button">Export reading backup</button><button id="import-state" class="secondary-button">Restore backup</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div><p id="backup-status" role="status"></p><h3>Fresh stories, at your pace</h3><p>Feeds refresh when you open the reader and when you choose Refresh, at most once every 15 minutes per feed. Only the selected section or source is refreshed when a filter is active. Unavailable feeds are retried less often; previously loaded stories stay visible. Unsaved articles are kept for 30 days, up to 150 per feed. Saved stories stay until you remove them.</p><h3>Visit and support the source</h3><p>This reader shows what publishers include in their RSS feeds. Some provide excerpts or require a subscription for the full story. “Read at publisher” opens the original article.</p><p>Feeds travel through this project’s Cloudflare relay so your browser can read them. GitHub and Cloudflare receive ordinary connection information; publishers receive requests from the relay. Article previews don’t load remote images or trackers.</p><p>For Seattle Times subscriptions and article archives, see the collection’s <a href="https://github.com/sayhiben/awesome-seattle-news-feeds#reading-and-archiving-articles">reading and archiving guidance</a>. <a href="./third-party-notices.txt">Software credits</a>.</p></div></dialog>
+  <noscript><p class="notice">This reader needs JavaScript. You can still <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">browse the full list</a> or <a href="./feeds.opml">download the feeds</a>.</p></noscript>
+  <script type="module" src="./src/main.mjs"></script>
+</body>
+</html>

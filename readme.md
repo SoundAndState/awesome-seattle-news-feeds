@@ -6,7 +6,7 @@
 <!-- This independent list is new; the 30-day rule applies to submission to sindresorhus/awesome. -->
 <!--lint disable awesome-git-repo-age-->
 
-[Download the OPML file](https://raw.githubusercontent.com/sayhiben/awesome-seattle-news-feeds/main/feeds.opml) and import it into Feedly, NetNewsWire, Inoreader, or another RSS reader. [Suggest a source or correction](CONTRIBUTING.md).
+[Read the news in Sound & State](https://sayhiben.github.io/awesome-seattle-news-feeds/) or [download the OPML file](https://raw.githubusercontent.com/sayhiben/awesome-seattle-news-feeds/main/feeds.opml) for Feedly, NetNewsWire, Inoreader, or another RSS reader. [Suggest a source or correction](CONTRIBUTING.md).
 
 96 curated feeds. Reviewed 2026-09-15. The starting point is a Seattle-focused Feedly export, so coverage elsewhere in Washington is still growing.
 

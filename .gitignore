@@ -3,3 +3,12 @@ node_modules/
 reports/
 __pycache__/
 *.pyc
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+dist/
+.wrangler/
+playwright-report/
+test-results/

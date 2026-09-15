@@ -1,0 +1,4 @@
+{
+  "base": "/awesome-seattle-news-feeds/",
+  "proxy": "https://awesome-seattle-feed-proxy.bmenesini.workers.dev"
+}

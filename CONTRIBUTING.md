@@ -23,3 +23,5 @@ npm run ci
 Commit the JSON and generated files together. Check changed feeds in a reader; `npm run check:feeds` also checks live feeds with Python 3.12 or later. Publisher access restrictions can affect automated checks.
 
 Contributions use [CC0 1.0](license). Linked articles retain their publishers' copyrights.
+
+Reader development and deployment are documented in [Maintaining the reader](docs/reader-maintenance.md).

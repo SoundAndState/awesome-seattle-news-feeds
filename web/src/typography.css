@@ -1,0 +1,2 @@
+/* System typefaces keep the reader fast and avoid third-party font requests. */
+html{-webkit-text-size-adjust:100%;text-rendering:optimizeLegibility}

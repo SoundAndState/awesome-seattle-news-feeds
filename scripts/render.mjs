@@ -11,7 +11,7 @@ export function renderReadme(catalog) {
     '<!-- This independent list is new; the 30-day rule applies to submission to sindresorhus/awesome. -->',
     '<!--lint disable awesome-git-repo-age-->',
     '',
-    `[Download the OPML file](https://raw.githubusercontent.com/${catalog.repository}/main/feeds.opml) and import it into Feedly, NetNewsWire, Inoreader, or another RSS reader. [Suggest a source or correction](CONTRIBUTING.md).`,
+    `[Read the news in Sound & State](https://${catalog.repository.split('/')[0]}.github.io/${catalog.repository.split('/')[1]}/) or [download the OPML file](https://raw.githubusercontent.com/${catalog.repository}/main/feeds.opml) for Feedly, NetNewsWire, Inoreader, or another RSS reader. [Suggest a source or correction](CONTRIBUTING.md).`,
     '',
     `${catalog.feeds.length} curated feeds. Reviewed ${catalog.reviewedOn}. The starting point is a Seattle-focused Feedly export, so coverage elsewhere in Washington is still growing.`,
     '',

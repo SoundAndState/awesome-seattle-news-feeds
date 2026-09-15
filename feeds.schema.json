@@ -33,6 +33,7 @@
           "description": {"type": "string", "minLength": 10, "pattern": "^[A-Z][^\\r\\n]+\\.$"},
           "format": {"enum": ["RSS", "Atom"]},
           "checkedOn": {"type": "string", "format": "date"},
+          "redirects": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/definitions/https"}},
           "aliases": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/definitions/http"}}
         }
       }
