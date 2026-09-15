@@ -22,11 +22,11 @@ test('rejects collision with an obsolete alias, preserving category-specific fee
   await assert.rejects(validateCatalog(catalog), /Duplicate feed URL/);
 });
 
-test('rejects unknown categories, malformed URLs, and unknown import targets', async () => {
+test('rejects unknown categories, malformed URLs, and invalid check dates', async () => {
   for (const mutate of [
     catalog => {catalog.feeds[0].category = 'missing';},
     catalog => {catalog.feeds[0].feed = 'https://bad url';},
-    catalog => {catalog.imports[0].feedId = 'missing';},
+    catalog => {catalog.feeds[0].checkedOn = 'not-a-date';},
   ]) {
     const catalog = await loadCatalog();
     mutate(catalog);

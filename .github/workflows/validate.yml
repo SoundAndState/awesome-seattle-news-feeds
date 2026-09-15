@@ -25,6 +25,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: npm ci
+      - name: Compile published files from JSON
+        run: npm run build
       - name: Check generated files match JSON
         run: npm run check
       - name: Validate catalog and deduplication
@@ -49,3 +51,12 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Test reader in a browser
         run: npm run test:browser
+      - name: Upload generated files for review
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: generated-catalog
+          path: |
+            readme.md
+            feeds.opml
+          retention-days: 7
+          if-no-files-found: error

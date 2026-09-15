@@ -34,22 +34,14 @@ export async function validateCatalog(catalog) {
     unique('heading', category.title.toLowerCase());
   }
   for (const section of catalog.sections) unique('heading', section.title.toLowerCase());
-  const ids = new Set(catalog.feeds.map(feed => feed.id));
   for (const feed of catalog.feeds) {
     unique('id', feed.id);
     unique('name', feed.name.toLowerCase());
     if (!categories.has(feed.category)) throw new Error(`Unknown category: ${feed.category}`);
     for (const url of [feed.feed, ...feed.aliases]) unique('feed URL', canonicalUrl(url), feed.id);
-    if (feed.checkedOn > catalog.reviewedOn) throw new Error(`Check date after review date: ${feed.id}`);
   }
   for (const category of categories) {
     if (!catalog.feeds.some(feed => feed.category === category)) throw new Error(`Empty category: ${category}`);
-  }
-  for (const entry of catalog.imports) {
-    unique('import URL', entry.url);
-    if (entry.decision === 'excluded') {
-      if (entry.feedId !== null) throw new Error('Excluded import cannot target an active feed');
-    } else if (!ids.has(entry.feedId)) throw new Error(`Unknown import target: ${entry.feedId}`);
   }
   return catalog;
 }

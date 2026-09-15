@@ -1,27 +1,20 @@
 # Contributing
 
-Suggest a source or correction by [opening an issue](https://github.com/sayhiben/awesome-seattle-news-feeds/issues/new) or submitting a pull request. Include the publisher, website, feed URL, date checked, and a brief explanation of its Seattle or Washington coverage.
+Submit feed additions and corrections as pull requests editing only [`feeds.json`](feeds.json). GitHub Actions compiles and validates the README and OPML, with generated files available as a workflow artifact for review. After merge, Actions commits the generated files and publishes the reader and proxy.
 
-## What belongs here
+## Catalog changes
 
-- Recognizable regional publishers with populated, current RSS or Atom feeds. Read recent items to confirm their relevance.
-- Clearly labeled reporting, commentary, advocacy, official updates, community announcements, and satire. Note national coverage or an author's organizational role where relevant.
-- Direct publisher feeds where available. Keep distinct topic feeds; consolidate aliases and duplicate subscriptions.
+- Follow [`feeds.schema.json`](feeds.schema.json). Use a unique, stable `id`, an existing category, the publisher's HTTPS website and RSS or Atom URL, a concise description, and a `checkedOn` date in `YYYY-MM-DD` format.
+- Check that the feed has current, relevant stories. Prefer original reporting and direct publisher feeds. Label opinion, advocacy, official announcements, and satire accurately.
+- Check existing entries and `aliases` for duplicates. Keep distinct topic feeds. Add `redirects` only for verified, exact HTTPS destinations needed by the proxy.
+- Low-quality sources may not be accepted. Inclusion is subject to the maintainer's discretion.
 
-An access block does not mean a publication has closed. Recheck uncertain feeds and consult the [import review](docs/import-review.md) and [follow-up review](docs/follow-up-review-2026-09-15.md) before restoring an excluded source. Preserve a record of unresolved or historical sources without adding them to the active download.
+## Development
 
-## Submitting an edit
+Use Node.js 24 or newer. `npm ci && npm run ci` builds and validates the catalog, lints the README and OPML, runs unit tests, and builds the reader. `npm run preview` serves the reader locally.
 
-Edit `feeds.json`, then regenerate and check the published files with Node.js 24 or later:
+For reader changes, run `npx playwright install chromium` and `npm run test:browser`. For live feed checks, use Python 3.12 or newer and `npm run check:feeds`.
 
-```sh
-npm ci
-npm run build
-npm run ci
-```
+Deployment uses the repository's `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` Actions secrets. Local deployment reads the same variables from the environment or ignored `.env`; run `npm run deploy:proxy`. Never commit credentials.
 
-Commit the JSON and generated files together. Check changed feeds in a reader; `npm run check:feeds` also checks live feeds with Python 3.12 or later. Publisher access restrictions can affect automated checks.
-
-Contributions use [CC0 1.0](license). Linked articles retain their publishers' copyrights.
-
-Reader development and deployment are documented in [Maintaining the reader](docs/reader-maintenance.md).
+Contributions use [CC0 1.0](license). Publisher content retains its original copyright.

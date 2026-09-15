@@ -2,4 +2,3 @@
 *.opml text eol=lf
 readme.md linguist-generated=true
 feeds.opml linguist-generated=true
-docs/import-review.md linguist-generated=true

@@ -17,7 +17,7 @@ export default defineConfig({
       const catalog = await loadCatalog();
       await validateCatalog(catalog);
       this.emitFile({type: 'asset', fileName: 'catalog.json', source: JSON.stringify({
-        title: catalog.title, repository: catalog.repository, reviewedOn: catalog.reviewedOn,
+        title: catalog.title, repository: catalog.repository,
         categories: catalog.categories,
         feeds: catalog.feeds.map(({id, name, website, feed, category, description}) => ({id, name, website, feed, category, description})),
       })});

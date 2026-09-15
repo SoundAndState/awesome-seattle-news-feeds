@@ -19,7 +19,7 @@
     "preview": "vite preview --host 127.0.0.1 --port 4173",
     "test:browser": "playwright test",
     "deploy:proxy": "node scripts/deploy-proxy.mjs",
-    "ci": "npm run check && npm run validate && npm run lint:readme && npm run lint:opml && npm test && npm run build:web",
+    "ci": "npm run build && npm run check && npm run validate && npm run lint:readme && npm run lint:opml && npm test && npm run build:web",
     "check:feeds": "python scripts/check_feeds.py"
   },
   "devDependencies": {

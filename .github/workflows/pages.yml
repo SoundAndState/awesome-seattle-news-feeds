@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
     environment:
@@ -39,7 +39,19 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npm run check && npm run build:web
+      - name: Compile and validate published files
+        run: npm run ci
+        env:
+          github_token: ${{ github.token }}
+      - name: Commit compiled README and OPML
+        run: |
+          git add -- readme.md feeds.opml
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Regenerate README and OPML'
+            git push origin HEAD:main
+          fi
       - name: Deploy the approved feed proxy
         run: npm run deploy:proxy
         env:
