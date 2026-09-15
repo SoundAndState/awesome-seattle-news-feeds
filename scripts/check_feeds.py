@@ -4,6 +4,7 @@ import concurrent.futures
 import datetime as dt
 import email.utils
 import json
+import os
 from pathlib import Path
 import time
 import urllib.parse
@@ -94,8 +95,14 @@ def check(feed, max_age_days):
         try:
             request = urllib.request.Request(feed['feed'], headers={'User-Agent': AGENT, 'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9'})
             with urllib.request.urlopen(request, timeout=20) as response:
-                result.update(httpStatus=response.status, finalUrl=response.url)
+                result.update(httpStatus=response.status, finalUrl=response.url,
+                              contentType=response.headers.get('Content-Type', ''))
                 data = response.read(MAX_BYTES + 1)
+            result['responseBytes'] = len(data)
+            if result['httpStatus'] != 200:
+                raise ValueError(f"HTTP {result['httpStatus']} returned instead of a feed response; access needs review from this network")
+            if not data.strip():
+                raise ValueError('Publisher returned an empty HTTP 200 response')
             if len(data) > MAX_BYTES:
                 raise ValueError('Response exceeds 5 MB')
             result.update(inspect_xml(data, dt.datetime.now(UTC), max_age_days))
@@ -139,6 +146,17 @@ def main():
     for pair in duplicates:
         print('REVIEW DUPLICATE: ' + ', '.join(pair))
     failures = sum(result['status'] == 'failed' for result in results)
+    summary_path = os.environ.get('GITHUB_STEP_SUMMARY')
+    if summary_path:
+        lines = ['# Live feed health', '', f'{len(results)} feeds checked; {failures} failures; {len(duplicates)} possible duplicate pairs.', '',
+                 'These are network checks, separate from README and OPML validation. A runner-specific response does not prove a feed is unavailable to readers. Download the feed-health artifact for details.', '']
+        for result in results:
+            if result['status'] == 'failed':
+                detail = result['error'].replace('<', '&lt;').replace('>', '&gt;').replace('\n', ' ')
+                lines.append(f"- **{result['id']}**: {detail}")
+        for pair in duplicates:
+            lines.append('- Possible duplicate subscriptions: ' + ', '.join(pair))
+        Path(summary_path).write_text('\n'.join(lines) + '\n', encoding='utf-8')
     print(f'{len(results)} checked; {failures} failures; {len(duplicates)} possible duplicate pairs. Report: {output}')
     raise SystemExit(1 if failures or duplicates else 0)
 
