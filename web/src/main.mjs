@@ -1,5 +1,5 @@
 import './style.css';
-import {normalizeFeed, verifyOpml, inBatches, nextRefresh, safeUrl, selectedSources} from './feeds.mjs';
+import {normalizeFeed, verifyOpml, inBatches, nextRefresh, safeUrl, selectedSources, archiveUrl} from './feeds.mjs';
 import {cleanText, articleContent} from './content.mjs';
 import {openLibrary, save, removeArticles} from './storage.mjs';
 
@@ -12,18 +12,49 @@ const el = (tag, className, text) => {
 };
 const button = (label, className, action) => {const node = el('button', className, label); node.addEventListener('click', action); return node;};
 const external = (label, url, className = '') => {
-  const node = el('a', className, label);
+  const node = el('a', className, label.replace(/↗(?!\uFE0E)/g, '↗\uFE0E'));
   node.href = safeUrl(url) || '#'; node.target = '_blank'; node.rel = 'noopener noreferrer'; return node;
 };
 const articles = new Map();
 const states = new Map();
 const health = new Map();
 let catalog, feedMap, categoryMap;
-let view = 'all', category = '', source = '', query = '', limit = 60, refreshing = false, refreshAgain = false, done = 0, total = 0, renderTimer;
+let view = 'all', category = '', source = '', query = '', unavailableOnly = false, limit = 60, refreshing = false, refreshAgain = false, done = 0, total = 0, renderTimer;
 const shortNames = {'regional': 'Seattle & regional', 'neighborhoods': 'Seattle neighborhoods', 'eastside': 'Eastside', 'north-sound': 'North Sound', 'south-sound': 'South Sound', 'statewide': 'Washington state', 'transport': 'Transit & urbanism', 'culture': 'Food, culture & history', 'commentary': 'Commentary & advocacy', 'official': 'Government & services', 'community': 'Community organizations', 'satire': 'Satire', 'bluesky': 'Bluesky'};
 
 function notice(message) {$('#notice').textContent = message; $('#notice').hidden = !message;}
 function sourceName(article) {return feedMap.get(article.feedIds[0])?.name || article.sourceName || 'Previously saved source';}
+function sourceLink(article) {
+  const feed = feedMap.get(article.feedIds[0]);
+  return feed ? external(sourceName(article), feed.website, 'publisher') : el('span', 'publisher', sourceName(article));
+}
+function bookmarkIcon() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true'); svg.classList.add('bookmark-icon');
+  const path = document.createElementNS(svg.namespaceURI, 'path');
+  path.setAttribute('d', 'M6 3h12v18l-6-4-6 4z'); svg.append(path); return svg;
+}
+function saveButton(article, className = 'save-button') {
+  const node = button('', className, async () => {
+    await setState(article.id, {saved: !states.get(article.id)?.saved});
+    update();
+  });
+  function update() {
+    const saved = Boolean(states.get(article.id)?.saved);
+    node.replaceChildren(bookmarkIcon(), el('span', '', saved ? 'Saved' : 'Save'));
+    node.classList.toggle('is-saved', saved); node.setAttribute('aria-pressed', String(saved));
+    node.setAttribute('aria-label', `${saved ? 'Unsave' : 'Save'} ${article.title}`);
+  }
+  node.dataset.save = article.id; update(); return node;
+}
+function articleLinks(article, className = 'publisher-link') {
+  if (!article.url) return [];
+  const social = feedMap.get(article.feedIds[0])?.category === 'bluesky';
+  const publisher = external(`${social ? 'View on Bluesky' : 'Read at publisher'} ↗\uFE0E`, article.url, className);
+  const archive = external('Read archived page ↗\uFE0E', archiveUrl(article.url), `${className} archive-link`);
+  for (const link of [publisher, archive]) link.addEventListener('click', () => setState(article.id, {read: true}));
+  return [publisher, archive];
+}
 function dateLabel(timestamp, full = false) {
   if (!timestamp) return 'Date not provided';
   return new Intl.DateTimeFormat('en-US', full ? {dateStyle: 'long', timeStyle: 'short'} : {month: 'short', day: 'numeric', ...(new Date(timestamp).getFullYear() !== new Date().getFullYear() ? {year: 'numeric'} : {})}).format(timestamp);
@@ -53,15 +84,16 @@ function updateNavigation() {
   $('#clear-section').hidden = !category && !source;
   $('#source-filter').value = source;
   $('#mark-read').hidden = view === 'sources' || view === 'saved';
+  $('#show-all-sources').hidden = view !== 'sources' || !unavailableOnly;
 }
 
 function renderProgress() {
-  const failures = selectedFeeds().filter(feed => health.get(feed.id)?.error).length;
+  const failures = selectedFeeds(true).filter(feed => health.get(feed.id)?.error).length;
   const node = $('#feed-progress');
   node.replaceChildren();
   if (refreshing) node.append(el('span', 'refresh-status', `Checking feeds · ${done} of ${total}`));
   else node.append(el('span', '', 'Updates are checked at most every 15 minutes per feed.'));
-  if (failures) node.append(button(`${failures} feed${failures === 1 ? '' : 's'} unavailable · View sources`, 'text-button status-link', () => {view = 'sources'; render();}));
+  if (failures) node.append(button(`${failures} feed${failures === 1 ? '' : 's'} unavailable · View sources`, 'text-button status-link', () => {view = 'sources'; unavailableOnly = true; query = ''; $('#search').value = ''; render();}));
 }
 
 function storyCard(article, index) {
@@ -71,7 +103,7 @@ function storyCard(article, index) {
   number.setAttribute('aria-hidden', 'true');
   const body = el('div', 'story-copy');
   const metadata = el('div', 'story-meta');
-  metadata.append(el('span', 'publisher', sourceName(article)), el('span', 'meta-dot', '·'));
+  metadata.append(sourceLink(article), el('span', 'meta-dot', '·'));
   const time = el('time', '', dateLabel(article.published));
   if (article.published) time.dateTime = new Date(article.published).toISOString();
   metadata.append(time);
@@ -82,20 +114,17 @@ function storyCard(article, index) {
   const categoryId = feedMap.get(article.feedIds[0])?.category;
   const footer = el('div', 'story-foot');
   footer.append(el('span', `category-tag category-${categoryId}`, shortNames[categoryId] || 'From your library'));
-  if (article.url) {
-    const publisher = external(categoryId === 'bluesky' ? 'View on Bluesky ↗' : 'Read at publisher ↗', article.url, 'publisher-link');
-    publisher.addEventListener('click', () => setState(article.id, {read: true}));
-    footer.append(publisher);
-  }
-  body.append(metadata, title);
+  footer.append(...articleLinks(article));
+  body.append(title, metadata);
   if (article.excerpt || categoryId !== 'bluesky') body.append(el('p', 'excerpt', article.excerpt || 'Open the story for the publisher’s feed preview.'));
   body.append(footer);
   const actions = el('div', 'story-actions');
-  const saved = button(state.saved ? '◆' : '◇', `save-button ${state.saved ? 'is-saved' : ''}`, async () => {await setState(article.id, {saved: !states.get(article.id)?.saved});});
-  saved.setAttribute('aria-label', `${state.saved ? 'Unsave' : 'Save'} ${article.title}`); saved.setAttribute('aria-pressed', String(Boolean(state.saved))); saved.title = state.saved ? 'Remove saved story' : 'Save story'; saved.dataset.save = article.id;
-  const read = button(state.read ? 'Read' : 'Mark read', 'read-button', () => setState(article.id, {read: !states.get(article.id)?.read}));
-  read.setAttribute('aria-label', `${state.read ? 'Mark unread' : 'Mark read'}: ${article.title}`);
-  actions.append(saved, read); card.append(number, body, actions); return card;
+  const readLabel = el('label', 'read-control');
+  const read = el('input'); read.type = 'checkbox'; read.checked = Boolean(state.read); read.dataset.read = article.id;
+  read.setAttribute('aria-label', `Read: ${article.title}`);
+  read.addEventListener('change', () => setState(article.id, {read: read.checked}));
+  readLabel.append(read, el('span', '', 'Read'));
+  actions.append(saveButton(article), readLabel); body.append(actions); card.append(number, body); return card;
 }
 
 function sourceCard(feed) {
@@ -115,20 +144,21 @@ function sourceCard(feed) {
 function render() {
   if (!catalog) return;
   const focus = document.activeElement;
-  const focusKey = focus?.dataset.save || focus?.dataset.story;
-  const focusKind = focus?.dataset.save ? 'save' : 'story';
+  const focusKey = focus?.dataset.save || focus?.dataset.story || focus?.dataset.read;
+  const focusKind = focus?.dataset.save ? 'save' : focus?.dataset.read ? 'read' : 'story';
   const categoryInfo = categoryMap.get(category);
   const feedInfo = feedMap.get(source);
-  const titles = {all: 'Around the Sound.', unread: 'A fresh perspective.', saved: 'Worth coming back to.', sources: 'The local voices.'};
-  $('#heading').textContent = feedInfo?.name || categoryInfo?.title || titles[view];
-  $('#heading-kicker').textContent = {all: 'THE LOCAL PICTURE', unread: 'YOUR UNREAD STORIES', saved: 'YOUR SAVED STORIES', sources: 'MEET THE COLLECTION'}[view];
-  $('#description').textContent = feedInfo?.description || categoryInfo?.description || {all: 'The latest from your corner of the Northwest.', unread: 'Stories you haven’t opened yet, newest first.', saved: 'Your reading list, kept right here in this browser.', sources: 'Independent reporting, neighborhood notes, and perspectives from across Washington.'}[view];
+  const titles = {all: 'Latest stories', unread: 'Unread stories', saved: 'Saved stories', sources: unavailableOnly ? 'Unavailable feeds' : 'All sources'};
+  $('#heading').textContent = view === 'sources' && unavailableOnly ? titles.sources : feedInfo?.name || categoryInfo?.title || titles[view];
+  $('#page-heading').classList.toggle('sr-only', view === 'all' && !category && !source);
+  $('#description').textContent = feedInfo?.description || categoryInfo?.description || '';
+  $('#description').hidden = !$('#description').textContent || (view === 'sources' && unavailableOnly);
   updateNavigation(); renderProgress();
   const container = $('#stories'); container.className = view === 'sources' ? 'source-grid' : '';
   container.replaceChildren();
   if (view === 'sources') {
-    const sources = selectedFeeds(true).filter(feed => !query || `${feed.name} ${feed.description}`.toLocaleLowerCase().includes(query)).sort((a, b) => a.name.localeCompare(b.name));
-    $('#result-label').textContent = `${sources.length} curated feed${sources.length === 1 ? '' : 's'}`;
+    const sources = selectedFeeds(true).filter(feed => (!unavailableOnly || health.get(feed.id)?.error) && (!query || `${feed.name} ${feed.description}`.toLocaleLowerCase().includes(query))).sort((a, b) => a.name.localeCompare(b.name));
+    $('#result-label').textContent = `${sources.length} ${unavailableOnly ? 'unavailable ' : ''}feed${sources.length === 1 ? '' : 's'}`;
     container.append(...sources.map(sourceCard));
     if (!sources.length) showEmpty('No sources match.', 'Try another search or clear the section filter.');
     $('#load-more').hidden = true;
@@ -138,8 +168,8 @@ function render() {
     $('#result-label').textContent = `${list.length.toLocaleString()} ${view === 'saved' ? 'saved ' : ''}${social ? `post${list.length === 1 ? '' : 's'}` : `stor${list.length === 1 ? 'y' : 'ies'}`} · Newest first`;
     container.append(...list.slice(0, limit).map(storyCard));
     if (!list.length) {
-      const title = refreshing ? 'Gathering the local picture…' : view === 'saved' ? 'Keep a story for later.' : view === 'unread' && articles.size ? 'You’re caught up.' : 'A little quiet here.';
-      const description = refreshing ? 'Stories appear as each publisher’s feed arrives.' : view === 'saved' ? 'Choose the diamond beside any story to save it here.' : query ? 'Try another search or clear your filters.' : 'Try Refresh or browse the source directory. Some publishers may be temporarily unavailable.';
+      const title = refreshing ? 'Loading feeds…' : view === 'saved' ? 'No saved stories.' : view === 'unread' ? 'No unread stories.' : 'No stories to show.';
+      const description = refreshing ? 'Stories appear as feeds arrive.' : view === 'saved' ? 'Use Save beside a story to add it here.' : query ? 'Try another search or clear your filters.' : 'Try Refresh or check the source directory for feed errors.';
       showEmpty(title, description);
     }
     $('#load-more').hidden = list.length <= limit;
@@ -161,15 +191,16 @@ async function setState(id, changes) {
 function openArticle(article) {
   setState(article.id, {read: true});
   const body = $('#article-body'); body.replaceChildren();
-  const metadata = el('p', 'article-meta', `${sourceName(article)} · ${dateLabel(article.published, true)}`);
+  const metadata = el('p', 'article-meta');
+  const time = el('time', '', dateLabel(article.published, true));
+  if (article.published) time.dateTime = new Date(article.published).toISOString();
+  metadata.append(sourceLink(article), ' · ', time);
   const title = el('h2', 'article-title', article.title); title.id = 'article-title';
   const actions = el('div', 'article-links');
-  if (article.url) actions.append(external(feedMap.get(article.feedIds[0])?.category === 'bluesky' ? 'View on Bluesky ↗' : 'Read at publisher ↗', article.url, 'primary-button'));
-  const saved = button(states.get(article.id)?.saved ? 'Saved ◆' : 'Save story ◇', 'secondary-button', async () => {await setState(article.id, {saved: !states.get(article.id)?.saved}); saved.textContent = states.get(article.id)?.saved ? 'Saved ◆' : 'Save story ◇';});
-  actions.append(saved);
+  actions.append(...articleLinks(article), saveButton(article));
   const content = el('div', 'article-content'); content.append(articleContent(article.html, article.url || feedMap.get(article.feedIds[0])?.website));
   if (!content.textContent.trim()) content.append(el('p', '', 'This feed includes a headline only. Visit the publisher to read the story.'));
-  body.append(metadata, title, actions, content, el('p', 'feed-note', 'This is the content supplied in the publisher’s feed. Visit the original story for updates, images, and the full article.'));
+  body.append(title, metadata, actions, content, el('p', 'feed-note', 'Feed content may be an excerpt. Open the original article for the full version and updates.'));
   $('#article-dialog').showModal(); $('#article-dialog').scrollTop = 0;
 }
 
@@ -220,7 +251,7 @@ async function refreshFeeds() {
   if (refreshing) {refreshAgain = true; return;}
   if (!navigator.onLine) {notice('You’re offline. Previously loaded stories are still available.'); return;}
   const queue = selectedFeeds().filter(feed => !health.get(feed.id)?.nextCheck || health.get(feed.id).nextCheck <= Date.now());
-  if (!queue.length) {$('#feed-progress').replaceChildren(el('span', '', 'Feeds were checked recently. Refresh is available after their 15-minute freshness window; unavailable feeds wait longer.')); return;}
+  if (!queue.length) {renderProgress(); return;}
   refreshing = true; done = 0; total = queue.length;
   $('#refresh').disabled = true; $('#refresh').textContent = '↻ Refreshing'; render();
   // Multiple tabs share a lock and re-read timestamps to avoid duplicate full refreshes.
@@ -242,7 +273,7 @@ async function refreshFeeds() {
 }
 
 function setupNavigation() {
-  $('#feed-count').textContent = catalog.feeds.length; $('#sources-count').textContent = catalog.feeds.length;
+  $('#sources-count').textContent = catalog.feeds.length;
   for (const section of catalog.categories) {
     const node = button('', '', () => {category = category === section.id ? '' : section.id; source = ''; limit = 60; render(); if (category === 'bluesky' && view !== 'sources') refreshFeeds();});
     node.dataset.category = section.id;
@@ -250,7 +281,8 @@ function setupNavigation() {
     $('#categories').append(node);
   }
   for (const feed of [...catalog.feeds].sort((a, b) => a.name.localeCompare(b.name))) {const option = el('option', '', feed.name); option.value = feed.id; $('#source-filter').append(option);}
-  for (const node of document.querySelectorAll('[data-view]')) node.addEventListener('click', () => {view = node.dataset.view; limit = 60; render(); if (view !== 'sources' && view !== 'saved' && (category === 'bluesky' || feedMap.get(source)?.category === 'bluesky')) refreshFeeds();});
+  for (const node of document.querySelectorAll('[data-view]')) node.addEventListener('click', () => {view = node.dataset.view; unavailableOnly = false; limit = 60; render(); if (view !== 'sources' && view !== 'saved' && (category === 'bluesky' || feedMap.get(source)?.category === 'bluesky')) refreshFeeds();});
+  $('#show-all-sources').addEventListener('click', () => {unavailableOnly = false; category = ''; source = ''; query = ''; $('#search').value = ''; render();});
   $('#clear-section').addEventListener('click', () => {category = ''; source = ''; limit = 60; render();});
   $('#source-filter').addEventListener('change', event => {source = event.target.value; category = ''; limit = 60; render(); if (feedMap.get(source)?.category === 'bluesky' && view !== 'sources') refreshFeeds();});
   $('#search').addEventListener('input', event => {query = event.target.value.toLocaleLowerCase().trim(); limit = 60; render();});
@@ -263,7 +295,6 @@ function setupNavigation() {
   });
 }
 
-$('#edition-date').textContent = new Intl.DateTimeFormat('en-US', {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'}).format(new Date());
 $('#refresh').setAttribute('aria-label', 'Refresh');
 $('#about-button').addEventListener('click', () => $('#about-dialog').showModal());
 for (const node of document.querySelectorAll('[data-close]')) node.addEventListener('click', () => document.getElementById(node.dataset.close).close());
@@ -312,6 +343,6 @@ async function start() {
     for (const item of library.state) states.set(item.id, item);
     for (const item of library.feeds) health.set(item.id, item);
     setupNavigation(); await prune(); render(); await refreshFeeds();
-  } catch (error) {notice(error.message); $('#result-label').textContent = 'Collection unavailable'; showEmpty('The collection is taking a moment.', 'Try reloading, or use “Get the feeds” to read the collection in another reader.');}
+  } catch (error) {notice(error.message); $('#result-label').textContent = 'Collection unavailable'; showEmpty('Unable to load the feed list.', 'Try reloading, or use “Download feed list” to open it in another reader.');}
 }
 start();

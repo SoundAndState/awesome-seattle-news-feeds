@@ -1,10 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeFeed, safeUrl, verifyOpml, nextRefresh, inBatches, selectedSources} from '../web/src/feeds.mjs';
+import {normalizeFeed, safeUrl, verifyOpml, nextRefresh, inBatches, selectedSources, archiveUrl} from '../web/src/feeds.mjs';
 import {loadCatalog} from '../scripts/catalog.mjs';
 import {renderOpml} from '../scripts/render.mjs';
 
 const source = {id: 'example', website: 'https://example.com'};
+test('archive searches encode the complete URL once, remove UTM parameters, and preserve article query parameters', () => {
+  const url = archiveUrl('https://example.com/a%20story?utm_source=rss&article=42&UTM_medium=feed&utm_source=duplicate&q=a%26b#comments');
+  const search = new URL(url);
+  assert.equal(search.origin + search.pathname, 'https://ghostarchive.org/search');
+  assert.equal(search.searchParams.get('go'), 'Go');
+  assert.equal(search.searchParams.get('term'), 'https://example.com/a%20story?article=42&q=a%26b');
+  assert.equal(archiveUrl('https://example.com/story'), 'https://ghostarchive.org/search?go=Go&term=https%3A%2F%2Fexample.com%2Fstory');
+  for (const unsafe of ['javascript:alert(1)', 'https://user:secret@example.com', '', '/relative']) assert.equal(archiveUrl(unsafe), '');
+});
 test('RSS content namespaces, stable deduplication, and unordered dates survive normalization', () => {
   const rss = '<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title></title><description>News</description><item><title>Old</title><link>https://example.com/old</link><pubDate>Tue, 16 Jan 2024 09:00:00 GMT</pubDate></item><item><title>New</title><link>https://example.com/new?utm_source=rss</link><pubDate>Tue, 15 Sep 2026 09:00:00 GMT</pubDate><content:encoded><![CDATA[<p>Full story</p>]]></content:encoded></item><item><title>New</title><link>https://example.com/new</link><pubDate>Tue, 15 Sep 2026 09:00:00 GMT</pubDate><content:encoded><![CDATA[<p>Full story</p>]]></content:encoded></item></channel></rss>';
   const articles = normalizeFeed(rss, source, Date.parse('2026-09-15T20:00:00Z'));

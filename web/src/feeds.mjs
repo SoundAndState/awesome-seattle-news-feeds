@@ -33,6 +33,15 @@ export function storyKey(url, feedId, guid) {
   return `${feedId}:${guid}`;
 }
 
+export function archiveUrl(value) {
+  const safe = safeUrl(value);
+  if (!safe) return '';
+  const article = new URL(safe);
+  for (const key of [...article.searchParams.keys()]) if (/^utm_/i.test(key)) article.searchParams.delete(key);
+  article.hash = '';
+  return `https://ghostarchive.org/search?go=Go&term=${encodeURIComponent(article.href)}`;
+}
+
 export function normalizeFeed(text, source, now = Date.now()) {
   if (/<!DOCTYPE|<!ENTITY/i.test(text)) throw new Error('Feed contains unsupported XML declarations.');
   const {feed, format} = parseFeed(text);
