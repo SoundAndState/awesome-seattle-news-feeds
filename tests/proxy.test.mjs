@@ -18,13 +18,24 @@ test('redirects are checked exactly and no visitor credentials reach publishers'
   let calls = 0;
   const handle = createHandler({feedMap, fetcher: async (url, options) => {
     assert.equal(options.redirect,'manual'); assert.equal(new Headers(options.headers).has('authorization'),false); assert.equal(new Headers(options.headers).has('cookie'),false);
+    assert.match(new Headers(options.headers).get('user-agent'), /^Mozilla\/5\.0 \(compatible; SeattleNewsReader\//);
     calls++; return calls === 1 ? new Response(null,{status:302,headers:{Location:'https://cdn.example/rss'}}) : new Response(xml,{headers:{'Cache-Control':'max-age=120'}});
   }});
   const response = await handle(request('/feed/news',{headers:{Origin:'https://example.github.io',Authorization:'private',Cookie:'private'}}),env);
   assert.equal(calls,2); assert.equal(response.status,200); assert.equal(response.headers.get('cache-control'),'public, max-age=120'); assert.equal(response.headers.get('vary'),'Origin');
-  for (const target of ['http://localhost/internal','https://cdn.example/other','https://evil.example/rss']) {
+  for (const target of ['http://localhost/internal','https://cdn.example/other','https://evil.example/rss','https://www.youtube.com/@KING5Seattle']) {
     let attempts=0; const blocked=createHandler({feedMap,fetcher:async()=>{attempts++;return new Response(null,{status:302,headers:{Location:target}});}});
-    assert.equal((await blocked(request(),env)).status,502); assert.equal(attempts,1);
+    const rejected=await blocked(request(),env);
+    assert.equal(rejected.status,502); assert.equal(attempts,1);
+    assert.ok((await rejected.json()).error.includes(new URL(target).hostname));
+  }
+});
+test('publisher denials and explicit browser challenges have distinct, uncached explanations', async () => {
+  for (const [headers,status,expected] of [[{'sg-captcha':'challenge'},202,/browser challenge/],[{'cf-mitigated':'challenge'},403,/browser challenge/],[{},403,/denied the proxy request \(HTTP 403\)/]]) {
+    const response=await createHandler({feedMap,fetcher:async()=>new Response('<html>Blocked</html>',{status,headers})})(request(),env);
+    assert.equal(response.status,502);
+    assert.equal(response.headers.get('cache-control'),'no-store');
+    assert.match((await response.json()).error,expected);
   }
 });
 test('upstream refusals, challenge pages, oversized bodies, and rate limits stay uncached', async () => {

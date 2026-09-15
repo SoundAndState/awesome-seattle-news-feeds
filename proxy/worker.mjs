@@ -3,6 +3,7 @@ import catalog from '../feeds.json' with {type: 'json'};
 const feeds = new Map(catalog.feeds.map(feed => [feed.id, feed]));
 const MAX_BYTES = 5 * 1024 * 1024;
 const REDIRECT_CODES = new Set([301, 302, 303, 307, 308]);
+const USER_AGENT = 'Mozilla/5.0 (compatible; SeattleNewsReader/1.0; +https://github.com/sayhiben/awesome-seattle-news-feeds)';
 
 export function cachePolicy(headers, now = Date.now()) {
   const policy = headers.get('cache-control') || '';
@@ -84,11 +85,11 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
         const parsed = new URL(destination);
         if (parsed.protocol !== 'https:' || parsed.username || parsed.password || !destinations.has(parsed.href)) {
           console.warn('Rejected feed redirect', {feed: match[1], destination: `${parsed.origin}${parsed.pathname}${parsed.search}`});
-          throw new Error('Publisher redirected to an unapproved address.');
+          throw new Error(`Publisher redirected this feed to ${parsed.hostname}, outside its approved feed addresses.`);
         }
         upstream = await fetcher(parsed.href, {
           redirect: 'manual', signal: controller.signal,
-          headers: {'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.1', 'User-Agent': 'SeattleNewsReader/1.0 (+https://github.com/sayhiben/awesome-seattle-news-feeds)'},
+          headers: {'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.1', 'User-Agent': USER_AGENT},
         });
         if (!REDIRECT_CODES.has(upstream.status)) break;
         await upstream.body?.cancel();
@@ -96,9 +97,13 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
         if (!location || hop === 3) throw new Error('Publisher redirected too many times.');
         destination = new URL(location, destination).href;
       }
+      if (upstream.headers.get('sg-captcha') === 'challenge' || upstream.headers.get('cf-mitigated') === 'challenge') {
+        await upstream.body?.cancel();
+        return errorResponse('Publisher requires a browser challenge instead of returning RSS to the proxy.', 502);
+      }
       if (upstream.status !== 200) {
         await upstream.body?.cancel();
-        return errorResponse(`Publisher returned HTTP ${upstream.status}.`, 502);
+        return errorResponse(upstream.status === 403 ? 'Publisher denied the proxy request (HTTP 403).' : `Publisher returned HTTP ${upstream.status}.`, 502);
       }
       const bytes = await readLimited(upstream);
       const head = new TextDecoder().decode(bytes.subarray(0, 16384));
