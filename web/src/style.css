@@ -217,13 +217,13 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
   letter-spacing:normal;
   text-align:left;
 }
-.article-card {container:article-card / inline-size;padding:0}
-.article-card .story-copy {max-width:none;padding-block:1.25rem}
+.article-card {container:article-card / inline-size;padding:0;--card-padding-block:1.25rem;--read-marker:#d0d0cc}
+.article-card.is-read .story-copy::before {content:"";position:absolute;inset-block:var(--card-padding-block);inset-inline-start:.25rem;border-inline-start:.25rem solid var(--read-marker);pointer-events:none}
+.article-card .story-copy {position:relative;max-width:none;padding-block:var(--card-padding-block);padding-inline-start:1.25rem}
 .article-card h2 {max-inline-size:44rem;margin:0 0 .5rem;font:600 1.5rem/1.25 var(--article-serif);hyphens:none}
 .article-card .story-title {max-inline-size:100%;min-block-size:2.75rem;color:var(--article-ink);font:inherit;letter-spacing:normal}
 .article-card.is-read .story-title {color:var(--article-muted)}
 .article-card .story-title:is(:hover,:focus-visible) .headline-text {text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.15em;text-decoration-skip-ink:auto}
-.article-card .preview-cue {display:inline-block;white-space:nowrap;margin-inline-start:.375rem;font:400 .875rem/1.4 var(--article-sans);color:var(--article-ink);vertical-align:baseline}
 .article-metadata {display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:0;margin:0;font:400 .875rem/1.5 var(--article-sans);color:var(--article-muted)}
 .article-attribution {display:flex;flex-wrap:wrap;align-items:center;gap:0 .75rem;min-inline-size:0}
 .article-attribution .publisher {max-inline-size:100%;min-block-size:2.75rem;color:var(--article-ink);font-weight:600;text-decoration-color:currentColor}
@@ -238,7 +238,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-card .publisher-link,.article-preview .publisher-link {max-inline-size:100%;min-block-size:2.75rem;font:500 .875rem/1.4 var(--article-sans);color:var(--article-ink);text-decoration-color:currentColor}
 .article-card :is(.save-button,.read-button),.article-preview .save-button {min-block-size:2.75rem;padding:.375rem .625rem;gap:.5rem;border-color:var(--article-border);border-radius:2px;color:var(--article-ink);font:500 .875rem/1.4 var(--article-sans)}
 .article-card .save-button,.article-preview .save-button {min-inline-size:5.25rem}
-.article-card .read-button {min-inline-size:8.5rem}
+.article-card .read-button {min-inline-size:min(8.5rem,calc(100cqi - 1.25rem))}
 .article-card :is(.save-button,.read-button):hover,.article-preview .save-button:hover {background:var(--article-wash)}
 .article-card :is(.bookmark-icon,.read-icon),.article-preview .bookmark-icon {flex-shrink:0;width:1.125rem;height:1.125rem}
 .article-card :where(button,a):focus-visible,.article-preview :where(button,a,[tabindex]):focus-visible {outline:3px solid var(--article-ink);outline-offset:3px}
@@ -273,9 +273,8 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-preview .dialog-top button {scroll-margin-block:0}
 
 @container article-card (min-width:40rem) {
-  .article-card .story-copy {padding-block:1.5rem}
+  .article-card .story-copy {--card-padding-block:1.5rem}
   .article-card h2 {font-size:1.75rem;line-height:1.2}
-  .article-card .article-metadata {grid-template-columns:minmax(0,1fr) fit-content(50%);column-gap:1.5rem}
   .article-footer {flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;column-gap:1.5rem;margin-block-start:1rem}
   .article-footer .story-actions {margin-inline-start:auto}
 }
@@ -285,6 +284,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
   .article-preview .article-content {font-size:1.1875rem;line-height:1.65}
 }
 @media(forced-colors:active) {
+  .article-card {--read-marker:GrayText}
   .story.article-card,.article-preview {--article-paper:Canvas;--article-ink:CanvasText;--article-text:CanvasText;--article-muted:CanvasText;--article-rule:CanvasText;--article-wash:Canvas;--article-border:ButtonText}
   .article-card :where(button,a):focus-visible,.article-preview :where(button,a,[tabindex]):focus-visible {outline-color:Highlight}
   .article-card .save-button.is-saved,.article-preview .save-button.is-saved {border-width:2px}

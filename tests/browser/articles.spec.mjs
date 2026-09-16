@@ -29,6 +29,7 @@ for (const [category, label] of [['official', 'Official information'], ['satire'
     const card = page.locator('.article-card').first();
     await expect(card.locator('.article-attribution .category-tag')).toHaveText(label);
     const headline = card.locator('.story-title');
+    await expect(headline).toHaveText(headlines[0]);
     await expect(headline).toHaveAccessibleName(`Preview article: ${headlines[0]}`);
     await expect(headline).toHaveAttribute('aria-haspopup', 'dialog');
     await expect(headline).toHaveAttribute('aria-controls', 'article-dialog');
@@ -47,20 +48,28 @@ test('read and saved states preserve card geometry and keep active controls legi
   await load(page);
   const card = page.locator('.article-card').first();
   const height = (await card.boundingBox()).height;
+  const headlineGeometry = () => card.evaluate(node => {
+    const title = node.querySelector('.story-title').getBoundingClientRect(), card = node.getBoundingClientRect();
+    return {x:title.x - card.x, y:title.y - card.y, width:title.width, height:title.height};
+  });
+  const titleBox = await headlineGeometry();
+  await expect(card.locator('.article-read-status')).toHaveCount(0);
   for (const saved of [false, true]) {
     if (saved) await card.locator('.save-button').click();
     await expect(card.locator('.save-button')).toHaveAttribute('aria-pressed', String(saved));
     await expect(card.locator('.save-button')).toHaveAccessibleName(new RegExp(`^${saved ? 'Saved' : 'Save'} `));
     for (const read of [true, false]) {
       await card.locator('.read-button').click();
-      await expect(card.locator('.article-read-status')).toHaveText(read ? 'Read' : 'Unread');
+      await expect(card.locator('.read-button')).toHaveAttribute('aria-pressed', String(read));
+      await expect.poll(() => card.locator('.story-copy').evaluate(node => getComputedStyle(node, '::before').content)).toBe(read ? '""' : 'none');
+      expect(await headlineGeometry()).toEqual(titleBox);
       expect(Math.abs((await card.boundingBox()).height - height)).toBeLessThan(1);
       const ratios = await card.evaluate(node => {
         const luminance = color => {
           const [r,g,b] = color.match(/[\d.]+/g).slice(0,3).map(Number).map(value => value / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);
           return .2126*r + .7152*g + .0722*b;
         };
-        return [...node.querySelectorAll('.headline-text,.excerpt,.publisher,.article-read-status,.story-dates,.save-button,.read-button,.publisher-link')].map(element => {
+        return [...node.querySelectorAll('.headline-text,.excerpt,.publisher,.story-dates,.save-button,.read-button,.publisher-link')].map(element => {
           let background = element;
           while (getComputedStyle(background).backgroundColor === 'rgba(0, 0, 0, 0)') background = background.parentElement;
           const a = luminance(getComputedStyle(element).color), b = luminance(getComputedStyle(background).backgroundColor);
@@ -77,7 +86,8 @@ test('read and saved states preserve card geometry and keep active controls legi
   await page.locator('#reading-options summary').click();
   const y = await card.evaluate(node => scrollY + node.getBoundingClientRect().bottom + 2);
   await page.evaluate(y => scrollTo(0, y), y);
-  await expect(card.locator('.article-read-status')).toHaveText('Read');
+  await expect(card.locator('.read-button')).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(() => card.locator('.story-copy').evaluate(node => getComputedStyle(node, '::before').borderInlineStartWidth)).toBe('4px');
   expect(Math.abs(await page.evaluate(() => scrollY) - y)).toBeLessThan(1);
 });
 
@@ -88,6 +98,8 @@ test('article rows adapt to their available width and preserve full metadata and
     await noHorizontalOverflow(page, 'html');
     for (const card of await page.locator('.article-card').all()) {
       expect(await card.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+      const byline = await card.locator('.article-attribution').boundingBox(), dates = await card.locator('.story-dates').boundingBox();
+      expect(dates.y).toBeGreaterThanOrEqual(byline.y + byline.height);
       for (const target of await card.locator('button,a').all()) {
         const box = await target.boundingBox();
         // Browser geometry can report a 44px target a fraction of a pixel short.
@@ -142,7 +154,7 @@ test('expanded text and long attribution reflow while preview links remain below
   await page.addStyleTag({url:stylesheet});
   await expect(page.locator('html')).toHaveCSS('font-size', '32px');
   await noHorizontalOverflow(page, 'html');
-  await expect(page.locator('.preview-cue').first()).toBeVisible();
+  await expect(page.locator('.story-title').first()).toBeVisible();
   await page.locator('.story-title').first().click();
   await noHorizontalOverflow(page, '#article-dialog');
   await expect(page.locator('.article-content')).toContainText(paragraph);
@@ -179,7 +191,7 @@ test('article fonts load locally with real italics and external destinations wai
   await page.locator('#article-dialog .publisher-link').first().click();
   await (await popup).close();
   await page.keyboard.press('Escape');
-  await expect(page.locator('.article-card .article-read-status').first()).toHaveText('Read');
+  await expect(page.locator('.article-card .read-button').first()).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('font failure and forced colors retain readable articles and explicit states', async ({page}) => {
@@ -191,7 +203,8 @@ test('font failure and forced colors retain readable articles and explicit state
   const card = page.locator('.article-card').first();
   await card.locator('.save-button').click();
   await card.locator('.read-button').click();
-  await expect(card.locator('.article-read-status')).toHaveText('Read');
+  await expect(card.locator('.read-button')).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(() => card.locator('.story-copy').evaluate(node => getComputedStyle(node, '::before').borderInlineStartStyle)).toBe('solid');
   await expect(card.locator('.save-button')).toHaveAttribute('aria-pressed', 'true');
   await card.locator('.story-title').click();
   await expect(page.locator('.article-content')).toContainText(paragraph);
