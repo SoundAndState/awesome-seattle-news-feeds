@@ -2,6 +2,20 @@
 
 Submit feed additions and corrections as pull requests editing only [`data/feeds.json`](../data/feeds.json). GitHub Actions compiles and validates the README and OPML, with generated files available as a workflow artifact for review. After merge, Actions commits the generated files and publishes the reader and proxy.
 
+## Merging pull requests
+
+Submit changes through pull requests to `main`. Use **Merge when ready** on GitHub or `gh pr merge --auto` to enter the merge queue once the required `validate` check passes. Let the queue merge the pull request; do not bypass it or push directly to `main`.
+
+The queue tests each change with the latest `main` and any changes ahead of it. It runs one queue build at a time, requires every queued change to pass, and waits up to 60 minutes for checks. It uses squash merges and can merge up to five passing pull requests together. The queue does not require you to update your branch just because another pull request merged first.
+
+Validation also runs on pull requests and pushes to `main`. A newer run cancels older validation for the same event and branch or pull request. Each merge group runs separately and does not cancel another group's checks. Publication follows successful validation of a push to `main`, or a manual publishing run.
+
+[The ruleset](merge-queue.ruleset.json) records the GitHub settings. The publishing workflow uses the repository's `Generated catalog publication` deploy key, stored in the `CATALOG_PUSH_KEY` Actions secret, to commit generated README and OPML files. The ruleset allows deploy keys to bypass the queue; keep write access limited to this publishing key. Changes to the ruleset file do not update GitHub automatically; a repository administrator must apply them in the repository's rules settings or through the GitHub API.
+
+The generated-file commit uses `[skip ci]` because publication has already compiled and checked those files. Keep that marker out of pull request commits so their required checks can run.
+
+Keep this repository public in the SoundAndState organization on GitHub Free. [Merge queues support public organization repositories](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue). Use standard GitHub-hosted runners and keep the organization's paid-usage budgets at $0 with usage blocking enabled.
+
 ## Catalog changes
 
 - Follow [`data/feeds.schema.json`](../data/feeds.schema.json). Use a unique, stable `id`, an existing category, the publisher's HTTPS website and RSS or Atom URL, a concise description, and a `checkedOn` date in `YYYY-MM-DD` format.

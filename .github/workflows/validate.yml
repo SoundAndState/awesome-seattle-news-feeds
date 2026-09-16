@@ -4,10 +4,18 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
+    types: [checks_requested]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  # Keep each pull request, merge group, and event in its own group.
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  # Replace obsolete validation runs, but let merge-group checks finish.
+  cancel-in-progress: ${{ github.event_name != 'merge_group' }}
 
 jobs:
   validate:
