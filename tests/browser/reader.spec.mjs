@@ -239,6 +239,68 @@ test('switching modes cancels the previous fetch queue without marking sources u
   await page.goto('./');await expect.poll(()=>requests.length).toBeGreaterThan(0);await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);expect(requests.filter(id=>!id.startsWith('bluesky-')).length).toBeLessThanOrEqual(4);await expect(page.locator('.status-link')).toHaveCount(0);
 });
 
+test('feed list guide requires an explicit download and keeps import help available',async({page,context})=>{
+  await load(page);const downloads=[];page.on('download',download=>downloads.push(download));
+  const trigger=page.locator('#feed-list-button'),dialog=page.locator('#feed-list-dialog'),downloadLink=dialog.locator('[download]');
+  await trigger.click();await expect(dialog).toBeVisible();await expect(page.locator('#feed-list-title')).toBeFocused();
+  expect(downloads).toHaveLength(0);
+  const guides=dialog.locator('.import-guides a');await expect(guides).toHaveCount(6);
+  for(const link of await guides.all()) {
+    await expect(link).toHaveAttribute('href',/^https:\/\//);await expect(link).toHaveAttribute('target','_blank');await expect(link).toHaveAttribute('rel','noopener noreferrer');
+  }
+  const helpUrl=await guides.first().getAttribute('href');
+  await context.route(helpUrl,route=>route.fulfill({contentType:'text/html',body:'<h1>Reader import instructions</h1>'}));
+  const popupPromise=page.waitForEvent('popup');await guides.first().click();const popup=await popupPromise;
+  await expect(popup).toHaveURL(helpUrl);await popup.close();await expect(dialog).toBeVisible();expect(downloads).toHaveLength(0);
+  await dialog.locator('.close-button').focus();await trigger.focus();await expect(dialog.locator('.close-button')).toBeFocused();
+  const downloadPromise=page.waitForEvent('download');await downloadLink.click();const download=await downloadPromise;
+  expect(download.suggestedFilename()).toBe('feeds.opml');expect(await download.failure()).toBeNull();
+  expect(await readFile(await download.path(),'utf8')).toBe(await readFile(new URL('../../feeds.opml',import.meta.url),'utf8'));
+  await expect(dialog).toBeVisible();await expect(guides.first()).toBeVisible();expect(downloads).toHaveLength(1);
+  await page.goBack();await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
+  await page.goForward();await expect(dialog).toBeVisible();await page.reload();await expect(dialog).toBeVisible();
+  await page.keyboard.press('Escape');await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
+  await page.goto('./#feed-list=1');await expect(dialog).toBeVisible();await dialog.locator('.close-button').click();await expect(dialog).toBeHidden();
+  await expect(page).not.toHaveURL(/feed-list/);
+  await trigger.click();await page.mouse.click(1,1);await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
+});
+
+test('feed list guide works when the catalog cannot load',async({page})=>{
+  await page.route('**/catalog.json',route=>route.abort('internetdisconnected'));
+  await page.goto('./');await expect(page.locator('#result-label')).toHaveText('The reader could not open your library.');
+  await page.locator('#feed-list-button').click();await expect(page.locator('#feed-list-dialog')).toBeVisible();
+  const downloadPromise=page.waitForEvent('download');await page.locator('#feed-list-dialog [download]').click();const download=await downloadPromise;
+  expect(download.suggestedFilename()).toBe('feeds.opml');expect(await download.failure()).toBeNull();
+  await page.keyboard.press('Escape');await expect(page.locator('#feed-list-dialog')).toBeHidden();await expect(page.locator('#feed-list-button')).toBeFocused();
+  await page.locator('#feed-list-button').click();await page.getByRole('button',{name:'Close feed list guide'}).click();await expect(page.locator('#feed-list-dialog')).toBeHidden();
+});
+
+test('feed list guide stays open when the catalog finishes loading',async({page})=>{
+  let releaseCatalog;const ready=new Promise(resolve=>releaseCatalog=resolve);
+  await page.route('**/catalog.json',async route=>{await ready;await route.continue();});
+  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',route=>route.fulfill({contentType:'application/xml',body:fixture(route.request().url().split('/').pop())}));
+  await page.goto('./',{waitUntil:'domcontentloaded'});await page.locator('#feed-list-button').click();await expect(page.locator('#feed-list-dialog')).toBeVisible();
+  releaseCatalog();await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('#feed-list-dialog')).toBeVisible();
+  await page.goBack();await expect(page.locator('#feed-list-dialog')).toBeHidden();await expect(page.locator('#feed-list-button')).toBeFocused();
+});
+
+test('feed list guide fits desktop, phone, landscape and expanded text',async({page})=>{
+  await load(page);
+  for(const size of [{width:1280,height:900},{width:320,height:568},{width:390,height:844},{width:760,height:360}]) {
+    await page.setViewportSize(size);await page.locator('#feed-list-button').click();const dialog=page.locator('#feed-list-dialog');
+    await expect(dialog.locator('.close-button')).toBeInViewport();await expect(dialog.locator('[download]')).toBeInViewport();
+    expect(await dialog.evaluate(node=>node.scrollWidth<=node.clientWidth)).toBe(true);
+    await dialog.evaluate(node=>node.scrollTop=node.scrollHeight);await expect(dialog.locator('.close-button')).toBeInViewport();
+    await expect(dialog.locator('.import-guides a').last()).toBeInViewport();await page.keyboard.press('Escape');
+  }
+  await page.setViewportSize({width:320,height:568});
+  await page.evaluate(()=>{const style=document.createElement('style');style.textContent='* {line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important} p {margin-bottom:2em!important}';document.head.append(style);});
+  await page.locator('#feed-list-button').click();const dialog=page.locator('#feed-list-dialog');
+  expect(await dialog.evaluate(node=>node.scrollWidth<=node.clientWidth)).toBe(true);
+  for(const link of await dialog.locator('.import-guides a').all()){await link.focus();await expect(link).toBeInViewport();}
+  await expect(dialog.locator('.close-button')).toBeInViewport();await expect(dialog.locator('[download]')).toBeInViewport();
+});
+
 test('phone and landscape dialogs retain close controls and expanded text reflows',async({page})=>{
   await load(page);for(const size of [{width:320,height:568},{width:390,height:844},{width:760,height:360}]){
     await page.setViewportSize(size);await page.locator('#about-button').click();const dialog=page.locator('#about-dialog');expect((await dialog.boundingBox()).height).toBeGreaterThan(size.height-25);

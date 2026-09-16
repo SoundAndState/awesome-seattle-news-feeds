@@ -1,4 +1,4 @@
-const defaults = {mode: '', view: 'all', savedKind: 'all', category: '', source: '', query: '', unavailableOnly: false, limit: 60, article: '', about: false, filters: false};
+const defaults = {mode: '', view: 'all', savedKind: 'all', category: '', source: '', query: '', unavailableOnly: false, limit: 60, article: '', about: false, feedList: false, filters: false};
 
 // Hashes keep searches and article IDs out of requests to the site host.
 export function readerNavigation({normalize, apply}) {
@@ -8,7 +8,7 @@ export function readerNavigation({normalize, apply}) {
   const route = value => normalize({...defaults, ...value});
   const fromUrl = () => {
     const params = new URLSearchParams(location.hash.slice(1));
-    return route({mode: params.get('mode') || '', view: params.get('view') || 'all', savedKind: params.get('kind') || 'all', category: params.get('section') || '', source: params.get('source') || '', query: params.get('q') || '', unavailableOnly: params.has('unavailable'), article: params.get('article') || '', about: params.has('about'), filters: params.has('filters')});
+    return route({mode: params.get('mode') || '', view: params.get('view') || 'all', savedKind: params.get('kind') || 'all', category: params.get('section') || '', source: params.get('source') || '', query: params.get('q') || '', unavailableOnly: params.has('unavailable'), article: params.get('article') || '', about: params.has('about'), feedList: params.has('feed-list'), filters: params.has('filters')});
   };
   const url = state => {
     const params = new URLSearchParams();
@@ -21,13 +21,14 @@ export function readerNavigation({normalize, apply}) {
     if (state.unavailableOnly) params.set('unavailable', '1');
     if (state.article) params.set('article', state.article);
     if (state.about) params.set('about', '1');
+    if (state.feedList) params.set('feed-list', '1');
     if (state.filters) params.set('filters', '1');
     return `${location.pathname}${location.search}${params.size ? `#${params}` : ''}`;
   };
   function remember() {
     if (!current) return;
     positions.set(entryKey, window.scrollY);
-    if (current.view !== 'saved' && !current.article && !current.about && !current.filters) contexts[current.mode] = {route: current, y: window.scrollY};
+    if (current.view !== 'saved' && !current.article && !current.about && !current.feedList && !current.filters) contexts[current.mode] = {route: current, y: window.scrollY};
     history.replaceState({...history.state, reader: true, key: entryKey, route: current, y: window.scrollY, contexts}, '', url(current));
   }
   function restore(state) {
@@ -39,10 +40,10 @@ export function readerNavigation({normalize, apply}) {
     apply(current, Math.max(0, positions.get(entryKey) ?? (Number(state?.y) || 0)));
   }
   function go(changes, {replace = false, keepScroll = false, search = false, scroll} = {}) {
-    const next = route({...current, article: '', about: false, filters: false, limit: 60, ...changes});
+    const next = route({...current, article: '', about: false, feedList: false, filters: false, limit: 60, ...changes});
     if (JSON.stringify(next) === JSON.stringify(current)) return;
     remember();
-    const overlay = Boolean(next.article || next.about || next.filters) && !(current.article || current.about || current.filters);
+    const overlay = Boolean(next.article || next.about || next.feedList || next.filters) && !(current.article || current.about || current.feedList || current.filters);
     const y = scroll ?? (keepScroll || overlay ? window.scrollY : 0);
     const state = {reader: true, key: crypto.randomUUID(), route: next, y, overlay, contexts};
     history[replace || (search && searching) ? 'replaceState' : 'pushState'](state, '', url(next));
@@ -68,7 +69,7 @@ export function readerNavigation({normalize, apply}) {
     endSearch() {searching = false;},
     close() {
       if (history.state?.overlay) history.back();
-      else go({article: '', about: false, filters: false, limit: current.limit}, {replace: true, keepScroll: true});
+      else go({article: '', about: false, feedList: false, filters: false, limit: current.limit}, {replace: true, keepScroll: true});
     },
     start() {
       const state = history.state;

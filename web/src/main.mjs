@@ -284,13 +284,22 @@ function renderFilters() {
   const label=mode==='posts'?'Find an account':'Find a publication';
   $('#source-search-label').textContent=label; $('#source-search').placeholder=`${label}…`; $('#source-search').value=''; renderFilterSources();
 }
+function openFeedList() {
+  dialogReturn={element:'#feed-list-button'};
+  $('#feed-list-dialog').showModal();$('#feed-list-title').focus();
+}
+function closeDialog(dialog) {
+  if(navigation)navigation.close();
+  else {dialog.close();focusItem(dialogReturn);dialogReturn=null;}
+}
 function syncDialogs() {
   const current=navigation?.current; if(!current)return;
-  for(const [id,open] of [['article-dialog',Boolean(current.article)],['about-dialog',current.about],['filter-dialog',current.filters]]) {
+  for(const [id,open] of [['article-dialog',Boolean(current.article)],['about-dialog',current.about],['feed-list-dialog',current.feedList],['filter-dialog',current.filters]]) {
     const dialog=$(`#${id}`);
     if(!open && dialog.open){dialog.close(); if(id==='article-dialog')shownArticle=null; focusItem(dialogReturn); dialogReturn=null;}
   }
   if(current.about && !$('#about-dialog').open){dialogReturn={element:'#about-button'};$('#about-dialog').showModal();$('#about-title').focus();}
+  if(current.feedList && !$('#feed-list-dialog').open)openFeedList();
   if(current.filters && !$('#filter-dialog').open){dialogReturn={element:'#filter-button'};renderFilters();$('#filter-dialog').showModal();}
   if(current.article && (shownArticle!==current.article || !$('#article-dialog').open)) {
     if(!$('#article-dialog').open) dialogReturn={kind:'story',id:current.article,index:[...$('#stories').children].findIndex(card=>card.dataset.article===current.article)};
@@ -391,10 +400,13 @@ function setupNavigation() {
   window.addEventListener('scroll',()=>{if(scrollY>200&&!document.querySelector('dialog[open]'))rememberReading();},{passive:true});
 }
 $('#about-button').addEventListener('click',()=>navigate({about:true,limit},{keepScroll:true}));
-for(const node of document.querySelectorAll('[data-close]'))node.addEventListener('click',()=>navigation?.close());
+$('#feed-list-button').addEventListener('click',()=>{
+  if(navigation)navigate({feedList:true,limit},{keepScroll:true});else openFeedList();
+});
+for(const node of document.querySelectorAll('[data-close]'))node.addEventListener('click',()=>closeDialog($(`#${node.dataset.close}`)));
 for(const dialog of document.querySelectorAll('dialog')) {
-  dialog.addEventListener('cancel',event=>{event.preventDefault();navigation?.close();});
-  dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)navigation?.close();}});
+  dialog.addEventListener('cancel',event=>{event.preventDefault();closeDialog(dialog);});
+  dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closeDialog(dialog);}});
 }
 $('.wordmark').addEventListener('click',event=>{if(event.button||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate({mode:'articles',view:'all',source:'',category:'',query:'',unavailableOnly:false});});
 $('.skip-link').addEventListener('click',event=>{event.preventDefault();$('#main').focus();});
@@ -477,10 +489,12 @@ async function start() {
       ({mode,view,category,source,savedKind,unavailableOnly,limit}=next);query=next.query.toLocaleLowerCase().trim();$('#search').value=next.query;
       if(needsRender)render();else{updateNavigation();syncDialogs();}
       window.scrollTo({top:y,behavior:'instant'});scrolling.sync();
-      if(changed && !next.article && !next.about && !next.filters)announce($('#result-label').textContent);
+      if(changed && !next.article && !next.about && !next.feedList && !next.filters)announce($('#result-label').textContent);
       if(!initial && changed && view!=='saved')refreshFeeds();
     }});
+    const feedListOpen=$('#feed-list-dialog').open;
     navigation.start();initial=false;
+    if(feedListOpen)navigate({feedList:true,limit},{keepScroll:true});
     if(cached)remotePromise.then(async remote=>{
       if(remote.error){notice('The reader could not download the latest feed list, so it is using an earlier copy. You can still browse your library. Reload the page to try again.');return;}
       const changed=JSON.stringify(remote.value)!==JSON.stringify(catalog);

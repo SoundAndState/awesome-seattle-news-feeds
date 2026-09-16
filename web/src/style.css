@@ -115,9 +115,9 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .dialog-top {display:flex;justify-content:space-between;align-items:center;padding:12px 24px;gap:12px;border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:1;font-size:15px}
 .dialog-top h2 {font:600 16px/1.4 system-ui,sans-serif;margin:0}
 .close-button {width:44px;height:44px;flex-shrink:0;border:1px solid #89998c;border-radius:50%;background:none;font-size:26px;line-height:1}
-#article-body,.about-content,.filter-content {padding:24px 36px 32px;overflow-wrap:anywhere}
+#article-body,.about-content,.filter-content,.feed-list-content {padding:24px 36px 32px;overflow-wrap:anywhere}
 .article-meta {font-size:15px;color:var(--muted);line-height:1.6;margin:0}
-.article-title,.about-content h2 {font:normal 32px/1.3 var(--serif);margin:0 0 14px;text-wrap:pretty;overflow-wrap:anywhere}
+.article-title,.about-content h2,.feed-list-content h2 {font:normal 32px/1.3 var(--serif);margin:0 0 14px;text-wrap:pretty;overflow-wrap:anywhere}
 .article-links {display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin:16px 0 20px}
 /* Keep Georgia's familiar reading measure for long article text. */
 .article-content {font:18px/1.75 Georgia,'Times New Roman',serif;color:#2f443a;overflow-wrap:anywhere}
@@ -136,6 +136,16 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .about-content summary {font-size:16px}
 .backup-actions {display:flex;gap:10px;flex-wrap:wrap}
 #backup-status:empty {display:none}
+#feed-list-dialog {width:min(640px,calc(100% - 32px));height:fit-content;margin:auto;scroll-padding-bottom:100px}
+.feed-list-content {padding-bottom:16px}
+.feed-list-content p {margin:0 0 16px}
+.feed-list-content h3 {font-size:18px;margin:24px 0 8px}
+.feed-list-content .hint {margin-bottom:8px}
+.import-guides {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 20px;list-style:none;padding:0;margin:12px 0 20px}
+.import-guides a {display:flex;align-items:center;min-height:44px;padding:8px 0;line-height:1.5}
+.feed-list-actions {position:sticky;bottom:0;padding:16px 36px;border-top:1px solid var(--line);background:var(--paper)}
+.primary-button {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:12px 18px;border-radius:4px;background:var(--ink);color:white;font-size:15px;line-height:1.5;text-decoration:none}
+.primary-button:hover {background:var(--accent);color:white}
 .category-nav {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
 .category-nav button {display:flex;justify-content:space-between;align-items:center;gap:12px;background:none;text-align:left;padding:8px;font-size:14px;border-radius:4px}
 .category-nav button[aria-pressed=true],.source-choice[aria-pressed=true] {background:var(--wash);font-weight:600}
@@ -171,9 +181,13 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
   .source-grid,.source-choices {grid-template-columns:1fr}
   .source-card {padding:16px}
   dialog {width:calc(100% - 16px);max-width:calc(100% - 16px);height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);margin:8px auto}
-  #article-body,.about-content,.filter-content {padding:20px}
-  .article-title,.about-content h2 {font-size:28px}
+  #article-body,.about-content,.filter-content,.feed-list-content {padding:20px}
+  .article-title,.about-content h2,.feed-list-content h2 {font-size:28px}
+  #feed-list-dialog {width:calc(100% - 16px)}
+  .feed-list-actions {padding:16px 20px}
+  .feed-list-actions .primary-button {width:100%}
   .dialog-top {padding:10px 16px}
 }
+@media(max-width:480px) {.import-guides {grid-template-columns:1fr;gap:0}}
 @media(max-height:480px) {.mode-bar {position:static} html {scroll-padding-top:12px}}
 @media(prefers-reduced-motion:reduce) {* {transition:none!important;scroll-behavior:auto!important}}
