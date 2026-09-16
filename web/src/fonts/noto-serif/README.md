@@ -4,7 +4,7 @@ These unmodified WOFF2 files come from [Google Fonts](https://fonts.google.com/n
 
 Noto Serif uses the [SIL Open Font License 1.1](OFL.txt). The font remains under that license, separate from the repository's CC0 license. The build includes its copyright notice and full license in `third-party-notices.txt`, linked from the reader's Software credits.
 
-The reader uses Noto Serif for its wordmark, page and story headings, source names, empty-state headings, About title, and headings inside article previews. Article body text uses Georgia; controls, metadata, and posts use system sans-serif fonts. Vite bundles and fingerprints the fonts with the site; neither the build nor the reader needs to contact Google Fonts. `font-display: swap` keeps text readable while the local fonts load.
+The reader uses Noto Serif for its wordmark, page headings, source-directory headings, empty-state headings, and other dialog headings. Article cards and article previews use Source Serif 4 and Source Sans 3; posts retain their system sans-serif text. Vite bundles and fingerprints the fonts with the site; neither the build nor the reader needs to contact Google Fonts. `font-display: swap` keeps text readable while the local fonts load.
 
 The source stylesheet is [this Google Fonts CSS request](https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400..700;1,400..700&display=swap), requested with a modern browser user agent. `../../typography.css` preserves the matching Unicode ranges. The original font files are:
 

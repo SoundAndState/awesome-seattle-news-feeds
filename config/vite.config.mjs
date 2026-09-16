@@ -68,6 +68,9 @@ export default defineConfig({
         }
       }
       notices += `Noto Serif (Google Fonts)\n${await fs.readFile('web/src/fonts/noto-serif/OFL.txt', 'utf8')}\n`;
+      for (const [name, directory] of [['Source Serif 4', 'source-serif-4'], ['Source Sans 3', 'source-sans-3']]) {
+        notices += `${name} (Adobe / Google Fonts)\n${await fs.readFile(`web/src/fonts/${directory}/OFL.txt`, 'utf8')}\n`;
+      }
       this.emitFile({type: 'asset', fileName: 'third-party-notices.txt', source: notices});
     },
   }],
