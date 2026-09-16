@@ -76,8 +76,8 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
       return errorResponse(message, 502);
     };
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    try {
+    let timer;
+    const fetchLive = async () => {try {
       const destinations = new Set([feed.feed, ...(feed.redirects || [])].map(value => new URL(value).href));
       let destination = feed.feed;
       let upstream;
@@ -115,6 +115,16 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
       return new Response(bytes, {headers});
     } catch (error) {
       return await unavailable(controller.signal.aborted ? 'Publisher took too long to respond.' : error.message === 'fetch failed' ? 'Publisher could not be reached.' : error.message);
+    }};
+    try {
+      // Some upstream streams do not settle after abort. Bound the whole operation,
+      // including reading the response body, so the browser can use its fallback.
+      return await Promise.race([fetchLive(), new Promise(resolve => {
+        timer = setTimeout(() => {
+          controller.abort();
+          resolve(unavailable('Publisher took too long to respond.'));
+        }, timeoutMs);
+      })]);
     } finally {
       clearTimeout(timer);
     }

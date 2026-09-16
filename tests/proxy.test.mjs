@@ -75,3 +75,12 @@ test('a stalled publisher times out without holding the request open', async () 
   assert.match((await response.json()).error, /too long/);
   assert.equal(response.headers.get('cache-control'), 'no-store');
 });
+
+test('timeouts also bound clients and response bodies that ignore cancellation', async () => {
+  for (const fetcher of [async()=>new Promise(()=>{}), async()=>new Response(new ReadableStream({start(controller){controller.enqueue(new TextEncoder().encode('<rss>'));}}))]) {
+    const handle=createHandler({feedMap,timeoutMs:10,fetcher});
+    const response=await handle(request(),env);
+    assert.equal(response.status,502);
+    assert.match((await response.json()).error,/too long/);
+  }
+});
