@@ -266,7 +266,9 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-preview .article-content blockquote {margin-inline:0;padding-inline-start:1.25rem}
 .article-preview .article-content figure {margin-inline:0}
 .article-preview .article-content a {text-decoration-color:currentColor}
-.article-preview .feed-note {font:400 .875rem/1.5 var(--article-sans);margin-block:1.5rem 0;padding-block-start:1rem}
+.article-preview-footer {border-top:1px solid var(--line);margin-block-start:1.5rem;padding-block-start:1rem}
+.article-preview-footer .article-links {margin:0 0 .5rem}
+.article-preview .feed-note {font:400 .875rem/1.5 var(--article-sans);border:0;margin:0;padding:0}
 .article-preview :where(button,a,[tabindex]) {scroll-margin-block:.75rem}
 .article-preview .dialog-top button {scroll-margin-block:0}
 
