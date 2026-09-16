@@ -38,6 +38,19 @@ Use active, direct language throughout the reader, including help text, errors, 
 - Use technical terms only when they help readers understand a limit or make a choice. Explain a term before introducing its abbreviation.
 - Check every claim against the behavior, including exceptions for unavailable storage, offline use, and backups. Preserve those limits when simplifying the wording.
 
+## Describing publishers and communities
+
+The purpose of catalog descriptions is to help readers understand each source's work, audience, and role with respect and consistent standards. Follow the reusable [publisher-description review process](docs/publisher-description-review.md) when adding feeds or auditing existing descriptions. The [September 2026 inventory](docs/feed-description-audit-2026-09-15.md) records the evidence and decisions for all 119 feeds reviewed then.
+
+- Start with the publisher's About page, mission, section description, or account bio. Record the source URL and review date in editorial notes. Use supported community names and professional roles; do not invent identity or viewpoint labels.
+- Distinguish audience, coverage, authorship, ownership, geography, and editorial perspective. Do not infer a person's or organization's identity from names, photographs, neighborhoods, or reporting topics. Preserve relevant self-identification and community agency rather than erasing them.
+- Paraphrase concisely. Do not repeat promotional superlatives or treat a publisher's claims of independence or neutrality as verified facts. Distinguish quoted language from editorial summaries.
+- Describe reporting, analysis, opinion, advocacy, official announcements, marketing, and satire consistently across comparable sources. Name relevant institutional relationships. A cultural mission alone does not turn reporting into advocacy; official or commercial status does not establish neutrality.
+- Review the same publisher across its website and social feeds together. Check categories as well as descriptions, and keep community-serving newsrooms alongside comparable reporting sources.
+- For full audits, inventory every feed ID, category description, and auxiliary resource. Separate supported corrections, optional refinements, unchanged entries, and evidence gaps. Assess wording and framing without claiming to know subconscious intent.
+- Resolve evidence gaps through other publisher-controlled sources when possible. Otherwise record the limitation and avoid unsupported replacements. Keep description-review dates separate from feed-health `checkedOn` dates.
+- Apply approved wording in `data/feeds.json`, preserve unrelated catalog fields, and run the catalog and reader-copy checks below. Inspect generated differences; let the publication workflow commit the compiled README and OPML.
+
 ## Setup and verification
 
 Use Node.js 24 or newer, consistent with `.nvmrc` and `package.json`. Check the active runtime before running commands; an older system installation may appear first on `PATH`. Use `npm ci` when dependencies need installation. Use Python 3.12 or newer for feed health tools.
