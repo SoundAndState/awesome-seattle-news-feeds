@@ -1,28 +1,23 @@
-import {test, expect} from '@playwright/test';
-import catalog from '../../data/feeds.json' with {type: 'json'};
-import site from '../../config/site.config.json' with {type: 'json'};
-import {renderOpml} from '../../scripts/render.mjs';
+import {test, expect, catalog, browserCatalog, mockCatalog, proxyRoute, proxyFeedUrl} from './fixtures.mjs';
+import {defaultFeed as fixture, rssFeed, NOW} from '../fixtures/feeds.mjs';
 
 const news = catalog.feeds.filter(feed => feed.category !== 'bluesky').slice(0, 3);
 const posts = catalog.feeds.filter(feed => feed.category === 'bluesky').slice(0, 2);
-const smallCatalog = {...catalog, feeds: [...news, ...posts]};
-const fixture = id => `<rss version="2.0"><channel><title>Publisher</title><description>Local news</description><item><title>News from ${id}</title><description>Local reporting.</description><link>https://publisher.example/${id}</link><pubDate>${new Date().toUTCString()}</pubDate></item></channel></rss>`;
+const smallCatalog = browserCatalog({feeds:[...news,...posts]});
+test.use({readerCatalog:smallCatalog});
 
 async function prepare(page, feedsCatalog = smallCatalog) {
-  await page.route('**/catalog.json', route => route.fulfill({json: feedsCatalog}));
-  await page.route('**/feeds.opml', route => route.fulfill({contentType: 'application/xml', body: renderOpml(feedsCatalog)}));
-  const urls = new Set(feedsCatalog.feeds.map(feed => new URL(feed.feed).href));
-  await page.route(url => urls.has(url.href), route => route.abort('failed'));
+  await mockCatalog(page, feedsCatalog);
   const requests = new Map();
   page.on('requestfailed', request => {
     const id = request.url().split('/').pop();
     if (requests.get(id)?.request() === request) requests.delete(id);
   });
-  await page.route(`${site.proxy}/feed/*`, route => {requests.set(route.request().url().split('/').pop(), route);});
+  await page.route(proxyRoute, route => {requests.set(route.request().url().split('/').pop(), route);});
   const finish = async (feed, {fail = false, empty = false} = {}) => {
     await expect.poll(() => requests.has(feed.id)).toBe(true);
     const route = requests.get(feed.id); requests.delete(feed.id);
-    await route.fulfill({status: fail ? 502 : 200, contentType: fail ? 'application/json' : 'application/xml', body: fail ? '{"error":"Publisher unavailable"}' : empty ? fixture(feed.id).replace(/<item>[\s\S]*<\/item>/, '') : fixture(feed.id)});
+    await route.fulfill({status: fail ? 502 : 200, contentType: fail ? 'application/json' : 'application/xml', body: fail ? '{"error":"Publisher unavailable"}' : empty ? rssFeed([]) : fixture(feed.id)});
   };
   // Release intercepted requests after cancellation, including WebKit requests
   // that have not reached the network yet. The reader must ignore late responses.
@@ -65,7 +60,7 @@ test('a fresh stored library never flashes a loading strip on reload', async ({p
   let catalogRequest;
   await page.route('**/catalog.json', route => {catalogRequest=route;});
   const requests=[];
-  page.on('request', request=>{if(request.url().startsWith(`${site.proxy}/feed/`))requests.push(request.url());});
+  page.on('request', request=>{if(request.url().startsWith(proxyFeedUrl('')))requests.push(request.url());});
   await page.reload();
   await expect(page.locator('.story')).toHaveCount(3);
   await expect(page.locator('#refresh')).toBeEnabled();
@@ -88,13 +83,14 @@ test('a queued tab checks the shared cache again before showing progress or fetc
     navigator.locks.request('sound-and-state-refresh',()=>new Promise(release=>{window.releaseFeedLock=release;resolve();}));
   }));
   const other=await context.newPage();
+  await other.clock.install({time: NOW});
   await prepare(other);await watchLoading(other);
   const requests=[];
-  other.on('request', request=>{if(request.url().startsWith(`${site.proxy}/feed/`))requests.push(request.url());});
+  other.on('request', request=>{if(request.url().startsWith(proxyFeedUrl('')))requests.push(request.url());});
   await other.goto('./');
   await expect.poll(()=>other.evaluate(async()=>(await navigator.locks.query()).pending.length)).toBeGreaterThan(0);
   await expect(other.locator('#feed-loading')).toBeHidden();
-  await setFeedFreshness(page, Date.now()+15*60*1000);
+  await setFeedFreshness(page, Date.parse(NOW)+15*60*1000);
   await page.evaluate(()=>window.releaseFeedLock());
   await expect(other.locator('#refresh')).toBeEnabled();
   await expect(other.locator('.story')).toHaveCount(3);
@@ -105,7 +101,7 @@ test('a queued tab checks the shared cache again before showing progress or fetc
 
 test('completion keeps the compact strip and articles at the same height until explicit dismissal', async ({page}, testInfo) => {
   const feeds=catalog.feeds.filter(feed=>feed.category!=='bluesky').slice(0,10);
-  const finish = await prepare(page, {...catalog,feeds});
+  const finish = await prepare(page, browserCatalog({feeds}));
   await page.goto('./');
   await finish(feeds[0]);
   for (const feed of feeds.slice(1,-1)) await finish(feed, {empty:true});

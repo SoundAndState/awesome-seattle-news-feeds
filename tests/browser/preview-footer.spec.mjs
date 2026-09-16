@@ -1,10 +1,11 @@
-import {test, expect} from '@playwright/test';
+import {test, expect, proxyRoute} from './fixtures.mjs';
+import {rssFeed} from '../fixtures/feeds.mjs';
 
 test('preview repeats publisher and archive links only for at least 220 characters of content', async ({page}) => {
   const lengths = [0, 219, 220, 500];
-  const xml = `<rss version="2.0"><channel><title>Publisher</title>${lengths.map(length => `<item><title>Preview ${length}</title><link>https://publisher.example/article-${length}</link><description><![CDATA[<p>   <strong>${'x'.repeat(length)}</strong>   </p>]]></description></item>`).join('')}</channel></rss>`;
-  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*', route => route.fulfill({contentType:'application/xml', body:xml}));
-  await page.goto('./#source=seattle-transit-blog');
+  const xml = rssFeed(lengths.map(length => ({title:`Preview ${length}`,url:`https://publisher.example/article-${length}`,text:`<p>   <strong>${'x'.repeat(length)}</strong>   </p>`})));
+  await page.route(proxyRoute, route => route.fulfill({contentType:'application/xml', body:xml}));
+  await page.goto('./#source=transit-news');
   await expect(page.locator('#refresh')).toBeEnabled();
   for (const length of lengths) {
     await page.getByRole('button', {name:`Preview article: Preview ${length}`, exact:true}).click();

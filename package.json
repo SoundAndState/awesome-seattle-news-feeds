@@ -18,11 +18,12 @@
     "test": "node --test tests/*.test.mjs",
     "build:web": "vite build --config config/vite.config.mjs",
     "preview": "vite preview --config config/vite.config.mjs --host 127.0.0.1 --port 4173",
-    "test:browser": "playwright test --config config/playwright.config.mjs",
+    "test:browser": "node scripts/browser-tests.mjs test --config config/playwright.config.mjs",
     "check:proxy": "wrangler deploy --config config/wrangler.jsonc --dry-run",
     "deploy:proxy": "node scripts/deploy-proxy.mjs",
     "ci": "npm run build && npm run check && npm run validate && npm run lint:readme && npm run lint:opml && npm test && npm run build:web",
-    "check:feeds": "python scripts/check_feeds.py"
+    "check:feeds": "python scripts/check_feeds.py",
+    "test:browser:install": "node scripts/browser-tests.mjs install chromium firefox webkit"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

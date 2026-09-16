@@ -29,8 +29,8 @@ Use these entry points selectively; a label change does not require reading ever
 
 ## Verify the result
 
-Run `npm test` for JavaScript behavior changes. For UI or copy edits, run `npm run build:web` before `npm run test:browser`; Playwright previews the built output. [playwright.config.mjs](../../../config/playwright.config.mjs) defines desktop Chromium, Firefox, and WebKit, plus Android-sized Chromium and iPhone-sized WebKit. Install missing browsers with `npx playwright install chromium firefox webkit`.
+Run `npm test` for JavaScript behavior changes. For UI or copy edits, run `npm run build:web` before `npm run test:browser`; Playwright previews the built output. [playwright.config.mjs](../../../config/playwright.config.mjs) defines desktop Chromium, Firefox, and WebKit, plus Android-sized Chromium and iPhone-sized WebKit. Install missing browsers with `npm run test:browser:install`.
 
-Use the feed fixtures and request interception in [tests/browser/reader.spec.mjs](../../../tests/browser/reader.spec.mjs) for reproducible scenarios. Do not turn browser tests into live publisher checks. Exercise the changed state, long text, phone and desktop layouts, and relevant expanded dialogs. Inspect the rendered result when layout changes; source inspection alone is not visual verification.
+Use the [shared test fixtures](../../../tests/fixtures/README.md) and request interception in [tests/browser/fixtures.mjs](../../../tests/browser/fixtures.mjs) for reproducible scenarios. Do not turn browser tests into live publisher checks. Exercise the changed state, long text, phone and desktop layouts, and relevant expanded dialogs. Inspect the rendered result when layout changes; source inspection alone is not visual verification.
 
 Update behavior tests when behavior changes. For routine copy edits, update existing accessible-name expectations if needed without adding assertions that merely duplicate prose. Report what you exercised, check results, and any visual or browser checks you could not run.

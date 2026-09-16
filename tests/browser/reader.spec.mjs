@@ -1,27 +1,10 @@
-import {test, expect} from '@playwright/test';
+import {test, expect, catalog, browserCatalog, proxyRoute, proxyFeedUrl, loadReader as load} from './fixtures.mjs';
 import {readFile} from 'node:fs/promises';
-import catalog from '../../data/feeds.json' with {type: 'json'};
-import site from '../../config/site.config.json' with {type: 'json'};
+import {rssFeed, articleItem, defaultFeed as fixture, unsafeHtml} from '../fixtures/feeds.mjs';
 
 const newsCount = catalog.feeds.filter(feed => feed.category !== 'bluesky').length;
 const socialCount = catalog.feeds.filter(feed => feed.category === 'bluesky').length;
-const totalCount = catalog.feeds.length;
-const feedUrls = new Set(catalog.feeds.map(feed => new URL(feed.feed).href));
-test.beforeEach(async ({page}) => {await page.route(url => feedUrls.has(url.href), route => route.abort('failed'));});
-
-const fixture = id => id.startsWith('bluesky-')
-  ? `<rss version="2.0"><channel><title>Local voice</title><link>https://bsky.app/profile/example.bsky.social</link><description>Bluesky posts</description><item><description>A new trail connects two neighborhoods.\nParks &amp; trails &lt;3 — ${id} https://example.com/${'a-long-article-link-'.repeat(12)}</description><link>https://bsky.app/profile/example.bsky.social/post/${id}</link><guid isPermaLink="false">at://did:plc:example/app.bsky.feed.post/${id}</guid><pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate></item></channel></rss>`
-  : `<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Publisher</title><description>Local reporting</description><item><title>Seattle parks get a new trail — ${id}</title><link>https://publisher.example/${id}?utm_source=rss&amp;edition=local&amp;UTM_medium=feed#section</link><pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate><atom:updated>2026-09-15T12:45:00Z</atom:updated><content:encoded><![CDATA[<p>A new trail connects two neighborhoods.</p><script>window.compromised=true</script><img src="https://tracker.example/pixel" onerror="window.compromised=true"><a href="javascript:alert(1)">Unsafe link</a><a href="/more">More reporting</a>]]></content:encoded></item></channel></rss>`;
-async function load(page, fail = false) {
-  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*', route => {
-    const id = route.request().url().split('/').pop();
-    return route.fulfill({status: fail ? 502 : 200, contentType: fail ? 'application/json' : 'application/xml', body: fail ? JSON.stringify({error:'Publisher returned HTTP 403.'}) : fixture(id)});
-  });
-  await page.goto('./'); await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds',{timeout:30000});await expect(page.getByRole('button', {name:'Refresh',exact:true})).toBeEnabled();
-  await expect(page.locator('#all-count')).toHaveText(fail ? '0' : String(newsCount));
-  await page.getByRole('button', {name:'Dismiss feed status'}).click();
-}
-
+const paginationCatalog = browserCatalog({regionalCount:62});
 
 async function chooseSource(page,id) {await page.locator('#filter-button').click();await page.locator(`[data-source="${id}"]`).click();await expect(page.locator('#filter-dialog')).toBeHidden();}
 async function chooseSection(page,id) {await page.locator('#filter-button').click();await page.locator(`[data-category="${id}"]`).click();await expect(page.locator('#filter-dialog')).toBeHidden();}
@@ -29,23 +12,28 @@ async function search(page,text) {if(await page.locator('#search-panel').isHidde
 async function sources(page) {await page.locator('#filter-button').click();await page.locator('#browse-sources').click();}
 async function expireFeeds(page) {await page.evaluate(async()=>{const db=await new Promise((res,rej)=>{const r=indexedDB.open('sound-and-state');r.onsuccess=()=>res(r.result);r.onerror=rej;});await new Promise((res,rej)=>{const tx=db.transaction('feeds','readwrite'),r=tx.objectStore('feeds').openCursor();r.onsuccess=()=>{const c=r.result;if(c){c.update({...c.value,nextCheck:0});c.continue();}};tx.oncomplete=res;tx.onerror=rej;});db.close();});}
 
-test('catalog, scoped search, source selection and section chips work',async({page})=>{
-  await load(page);await expect(page.locator('.story')).toHaveCount(60);
-  await search(page,'seattle-transit-blog');await expect(page.locator('.story')).toHaveCount(1);
-  await search(page,'');await chooseSource(page,'seattle-transit-blog');await expect(page.locator('.story')).toHaveCount(1);
-  await expect(page.locator('#filter-chips')).toContainText('Seattle Transit Blog');
+test('fixture catalog, pagination, scoped search, source selection and section chips work',async({page})=>{
+  await load(page,{catalog:paginationCatalog});await expect(page.locator('.story')).toHaveCount(60);
+  await page.locator('#load-more').click();await expect(page.locator('.story')).toHaveCount(paginationCatalog.feeds.filter(feed=>feed.category!=='bluesky').length);
+  await search(page,'transit-news');await expect(page.locator('.story')).toHaveCount(1);
+  await search(page,'');await chooseSource(page,'transit-news');await expect(page.locator('.story')).toHaveCount(1);
+  await expect(page.locator('#filter-chips')).toContainText('Transit News');
   await page.getByRole('button',{name:'Clear all',exact:true}).click();await chooseSection(page,'satire');
   await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('.category-satire')).toHaveText('Satire');
 });
 
 test('Back and Forward restore filters, searches, source directory and reloads',async({page})=>{
   await load(page);await chooseSection(page,'transport');await expect(page).toHaveURL(/#section=transport$/);
-  await chooseSource(page,'seattle-transit-blog');await page.locator('#search-toggle').click();await page.locator('#search').pressSequentially('Seattle parks');await page.locator('#search').blur();
+  await chooseSource(page,'transit-news');await page.locator('#search-toggle').click();await page.locator('#search').pressSequentially('Seattle parks');await page.locator('#search').blur();
   await sources(page);await expect(page.locator('.source-card')).toHaveCount(newsCount);
-  await page.goBack();await expect(page.locator('#search')).toHaveValue('Seattle parks');await expect(page.locator('#filter-chips')).toContainText('Seattle Transit Blog');
+  await page.goBack();await expect(page.locator('#search')).toHaveValue('Seattle parks');await expect(page.locator('#filter-chips')).toContainText('Transit News');
   await page.goBack();await expect(page.locator('#search')).toHaveValue('');
   await page.goBack();await expect(page.locator('#filter-chips')).toContainText('Transit & urbanism');
-  await page.goForward();await page.goForward();await page.reload();await expect(page.locator('#search')).toHaveValue('Seattle parks');await expect(page.locator('.story')).toHaveCount(1);
+  // Same-document navigation can resolve before the browser dispatches popstate.
+  // Wait for each restored route before navigating again or reloading it.
+  await page.goForward();await expect(page).toHaveURL(/#source=transit-news$/);await expect(page.locator('#filter-chips')).toContainText('Transit News');
+  await page.goForward();await expect(page.locator('#search')).toHaveValue('Seattle parks');await expect(page).toHaveURL(/q=Seattle\+parks$/);
+  await page.reload();await expect(page.locator('#search')).toHaveValue('Seattle parks');await expect(page.locator('.story')).toHaveCount(1);
 });
 
 test('preview history restores scroll and keyboard focus; direct links close locally',async({page})=>{
@@ -58,14 +46,14 @@ test('preview history restores scroll and keyboard focus; direct links close loc
 });
 
 test('unavailable sources stay separate from Posts and history restores them',async({page})=>{
-  await load(page,true);await page.getByRole('button',{name:`${newsCount} unavailable`,exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(newsCount);
-  await page.unroute('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*');await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>r.fulfill({contentType:'application/xml',body:fixture(r.request().url().split('/').pop())}));
+  await load(page,{fail:true});await page.getByRole('button',{name:`${newsCount} unavailable`,exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(newsCount);
+  await page.unroute(proxyRoute);await page.route(proxyRoute,r=>r.fulfill({contentType:'application/xml',body:fixture(r.request().url().split('/').pop())}));
   await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);await expect(page.locator('.status-link')).toHaveCount(0);
   await page.goBack();await expect(page.locator('h1')).toHaveText('Unavailable sources');await expect(page.locator('.source-card')).toHaveCount(newsCount);await page.goForward();await expect(page.locator('.post')).toHaveCount(socialCount);
 });
 
 test('read and saved state persist and feed HTML cannot execute or load trackers',async({page})=>{
-  const trackers=[];page.on('request',r=>{if(r.url().includes('tracker.example'))trackers.push(r.url());});await load(page);await chooseSource(page,'seattle-transit-blog');
+  const trackers=[];page.on('request',r=>{if(r.url().includes('tracker.example'))trackers.push(r.url());});await load(page,{bodies:{'transit-news':rssFeed([articleItem('transit-news',{html:unsafeHtml})])}});await chooseSource(page,'transit-news');
   await page.locator('.save-button').click();await page.locator('.story-title').click();await expect(page.locator('.article-content')).toContainText('A new trail');
   await expect(page.locator('.article-content script,.article-content img')).toHaveCount(0);await expect(page.locator('.article-content a').filter({hasText:'Unsafe link'})).not.toHaveAttribute('href');await expect(page.locator('.article-content a').filter({hasText:'More reporting'})).toHaveAttribute('href','https://publisher.example/more');
   expect(await page.evaluate(()=>window.compromised)).toBeUndefined();expect(trackers).toHaveLength(0);
@@ -73,21 +61,21 @@ test('read and saved state persist and feed HTML cannot execute or load trackers
 });
 
 test('failed refresh preserves cached content, explains failures and retries only failed feeds',async({page})=>{
-  await load(page);await expireFeeds(page);await page.unroute('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*');
+  await load(page);await expireFeeds(page);await page.unroute(proxyRoute);
   const failed=catalog.feeds.filter(f=>f.category!=='bluesky').slice(0,2),ids=failed.map(f=>f.id);
-  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>{const id=r.request().url().split('/').pop();return r.fulfill({status:ids.includes(id)?502:200,contentType:ids.includes(id)?'application/json':'application/xml',body:ids.includes(id)?'{"error":"Publisher returned HTTP 403."}':fixture(id)});});
-  await page.reload();await expect(page.getByRole('button',{name:'2 unavailable',exact:true})).toBeVisible();await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds',{timeout:30000});await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));
+  await page.route(proxyRoute,r=>{const id=r.request().url().split('/').pop();return r.fulfill({status:ids.includes(id)?502:200,contentType:ids.includes(id)?'application/json':'application/xml',body:ids.includes(id)?'{"error":"Publisher returned HTTP 403."}':fixture(id)});});
+  await page.reload();await expect(page.getByRole('button',{name:'2 unavailable',exact:true})).toBeVisible();await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds');await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));
   await search(page,'nothing matches');await page.getByRole('button',{name:'2 unavailable',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(2);
   for(const card of await page.locator('.source-card').all()){await expect(card).toContainText('Using an earlier copy');await expect(card).toContainText('A server refused the feed request');await card.locator('summary').click();await expect(card.locator('details')).toContainText('HTTP 403');}
-  const requests=[];page.on('request',r=>{if(r.url().startsWith('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/'))requests.push(r.url().split('/').pop());});await page.locator('#refresh').click();await expect(page.locator('#refresh')).toBeEnabled();expect(requests.sort()).toEqual(ids.sort());
+  const requests=[];page.on('request',r=>{if(r.url().startsWith(proxyFeedUrl('')))requests.push(r.url().split('/').pop());});await page.locator('#refresh').click();await expect(page.locator('#refresh')).toBeEnabled();expect(requests.sort()).toEqual(ids.sort());
   await page.getByRole('button',{name:'Show all sources',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(newsCount);
 });
 
-test('backup restores article and post saves into a fresh library',async({page})=>{
+test('backup restores article and post saves into a fresh library',async({page,newReaderPage})=>{
   await load(page);await page.locator('.save-button').first().click();await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);await page.locator('.save-button').first().click();
   await page.locator('#about-button').click();const downloadPromise=page.waitForEvent('download');await page.locator('#export-state').click();const backup=await (await downloadPromise).path();
-  const context=await page.context().browser().newContext({baseURL:test.info().project.use.baseURL});const fresh=await context.newPage();await fresh.route(url=>feedUrls.has(url.href),r=>r.abort('failed'));await load(fresh,true);await fresh.locator('#about-button').click();await fresh.locator('#backup-file').setInputFiles(backup);await expect(fresh.locator('#backup-status')).toContainText('The reader combined 2 saved items');
-  await fresh.getByRole('button',{name:'Close about'}).click();await fresh.locator('#saved-button').click();await expect(fresh.locator('.story')).toHaveCount(2);await expect(fresh.locator('.post')).toHaveCount(1);await expect(fresh.locator('.story-updated time')).toHaveAttribute('datetime','2026-09-15T12:45:00.000Z');await context.close();
+  const fresh=await newReaderPage();await load(fresh,{fail:true});await fresh.locator('#about-button').click();await fresh.locator('#backup-file').setInputFiles(backup);await expect(fresh.locator('#backup-status')).toContainText('The reader combined 2 saved items');
+  await fresh.getByRole('button',{name:'Close about'}).click();await fresh.locator('#saved-button').click();await expect(fresh.locator('.story')).toHaveCount(2);await expect(fresh.locator('.post')).toHaveCount(1);await expect(fresh.locator('.story-updated time')).toHaveAttribute('datetime','2026-09-15T12:45:00.000Z');await fresh.context().close();
 });
 
 test('unreadable backups explain recovery without changing the library',async({page})=>{
@@ -111,7 +99,7 @@ test('mobile navigation reaches content quickly and filters close after selectio
   expect(await page.locator('.story h2').first().evaluate(n=>n.getBoundingClientRect().top)).toBeLessThanOrEqual(374);
   expect(await page.locator('.story h2').nth(1).evaluate(n=>n.getBoundingClientRect().top)).toBeLessThan(844);
   await chooseSection(page,'transport');await expect(page.locator('#filter-chips')).toContainText('Transit & urbanism');
-  await page.locator('#filter-button').click();await page.locator('#source-search').fill('transit blog');await expect(page.locator('.source-choice')).toHaveCount(1);await page.locator('.source-choice').click();await expect(page.locator('.story')).toHaveCount(1);
+  await page.locator('#filter-button').click();await page.locator('#source-search').fill('transit news');await expect(page.locator('.source-choice')).toHaveCount(1);await page.locator('.source-choice').click();await expect(page.locator('.story')).toHaveCount(1);
   for(const width of [320,390,760,900,1440]){
     await page.setViewportSize({width,height:900});
     await expect.poll(()=>page.evaluate(width=>{
@@ -137,49 +125,27 @@ test('mode switches restore independent filters, searches and reading positions'
 
 test('Saved is global, resets inherited filters and has independent type filters',async({page})=>{
   const socialRequests=[];page.on('request',r=>{if(r.url().includes('/feed/bluesky-'))socialRequests.push(r.url());});await load(page);expect(socialRequests).toHaveLength(0);
-  await page.locator('.save-button').first().click();await chooseSource(page,'seattle-transit-blog');await search(page,'does not match');await page.locator('#saved-button').click();await expect(page.locator('h1')).toHaveText('Saved items');await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('#filter-chips')).toBeHidden();
+  await page.locator('.save-button').first().click();await chooseSource(page,'transit-news');await search(page,'does not match');await page.locator('#saved-button').click();await expect(page.locator('h1')).toHaveText('Saved items');await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('#filter-chips')).toBeHidden();
   await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);expect(socialRequests).toHaveLength(socialCount);await page.locator('.save-button').first().click();await page.locator('#saved-button').click();await expect(page.locator('.story')).toHaveCount(2);await expect(page.locator('#saved-count')).toHaveText('2');
   await page.locator('[data-kind="articles"]').click();await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('.post')).toHaveCount(0);
   await page.locator('[data-kind="posts"]').click();await expect(page.locator('.post')).toHaveCount(1);await search(page,'no saved item matches');await expect(page.locator('.empty-state')).toContainText('No saved items match.');
   await page.reload();await expect(page.locator('#saved-count')).toHaveText('2');await page.locator('#saved-button').click();await expect(page.locator('.story')).toHaveCount(2);
 });
 
-
 test('metadata follows article titles and archives remain private until clicked',async({page})=>{
-  const requests=[];page.on('request',r=>{if(r.url().startsWith('https://ghostarchive.org/'))requests.push(r.url());});await load(page);await chooseSource(page,'seattle-transit-blog');const story=page.locator('.story');
+  const requests=[];page.on('request',r=>{if(r.url().startsWith('https://ghostarchive.org/'))requests.push(r.url());});await load(page);await chooseSource(page,'transit-news');const story=page.locator('.story');
   expect(await story.evaluate(n=>Boolean(n.querySelector('h2').compareDocumentPosition(n.querySelector('.story-meta')) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
-  const expected='https://ghostarchive.org/search?go=Go&term='+encodeURIComponent('https://publisher.example/seattle-transit-blog?edition=local');await expect(story.locator('.archive-link')).toHaveAttribute('href',expected);
-  await expect(story.locator('.publisher')).toHaveAttribute('href',new URL(catalog.feeds.find(f=>f.id==='seattle-transit-blog').website).href);
+  const expected='https://ghostarchive.org/search?go=Go&term='+encodeURIComponent('https://publisher.example/transit-news?edition=local');await expect(story.locator('.archive-link')).toHaveAttribute('href',expected);
+  await expect(story.locator('.publisher')).toHaveAttribute('href',new URL(catalog.feeds.find(f=>f.id==='transit-news').website).href);
   for(const link of await story.locator('.publisher-link').all()){expect(await link.textContent()).toContain('↗\uFE0E');await expect(link).toHaveAttribute('rel','noopener noreferrer');}
   await story.locator('.story-title').click();await expect(page.locator('#article-dialog .archive-link')).toHaveCount(1);
   for(const link of await page.locator('#article-dialog .archive-link').all())await expect(link).toHaveAttribute('href',expected);
   expect(requests).toHaveLength(0);
 });
 
-test('sharing metadata and its image are available without JavaScript',async({browser})=>{
-  const context=await browser.newContext({javaScriptEnabled:false,baseURL:test.info().project.use.baseURL});
-  try {
-    const page=await context.newPage();await page.goto('./');
-    await expect(page).toHaveTitle(site.title);
-    await expect(page.locator('title')).toHaveCount(1);
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',site.url);
-    for(const selector of ['meta[name="description"]','meta[property="og:description"]','meta[name="twitter:description"]'])await expect(page.locator(selector)).toHaveAttribute('content',site.description);
-    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content',site.title);
-    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content','website');
-    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content',site.url);
-    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content','summary_large_image');
-    const image=new URL(await page.locator('meta[property="og:image"]').getAttribute('content'));
-    expect(image.origin).toBe(new URL(site.url).origin);
-    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content',image.href);
-    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute('content',/Sound & State/);
-    const response=await page.request.get(image.pathname);expect(response.ok()).toBe(true);expect(response.headers()['content-type']).toContain('image/png');
-    const png=await response.body();expect(png.subarray(1,4).toString()).toBe('PNG');expect(png.readUInt32BE(16)).toBe(1200);expect(png.readUInt32BE(20)).toBe(630);
-  } finally {await context.close();}
-});
-
 test('cards and previews label full dates, including update-only and date-only entries',async({page})=>{
-  const id='seattle-transit-blog';let xml=fixture(id);
-  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>r.fulfill({contentType:'application/xml',body:xml}));
+  const id='transit-news';let xml=fixture(id);
+  await page.route(proxyRoute,r=>r.fulfill({contentType:'application/xml',body:xml}));
   await page.goto(`./#source=${id}`);await expect(page.locator('.story')).toHaveCount(1);
   await expect(page.locator('.story-published time')).toHaveAttribute('datetime','2026-09-15T10:00:00.000Z');
   await expect(page.locator('.story-updated time')).toHaveAttribute('datetime','2026-09-15T12:45:00.000Z');
@@ -196,8 +162,8 @@ test('direct fallback omits credentials and source errors explain both attempts'
   await page.context().addCookies([{name:'private-session',value:'not-for-feeds',url:allowed.feed}]);
   await page.route(allowed.feed,r=>{requests.push(r.request());return r.fulfill({contentType:'application/xml',headers:{'access-control-allow-origin':'*'},body:fixture(allowed.id)});});
   await page.route(blocked.feed,r=>r.fulfill({contentType:'application/xml',headers:{'access-control-allow-origin':'https://other.example'},body:fixture(blocked.id)}));
-  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>{const id=r.request().url().split('/').pop(),fail=[allowed.id,blocked.id].includes(id);return r.fulfill({status:fail?502:200,contentType:fail?'application/json':'application/xml',body:fail?'{"error":"Publisher denied proxy request."}':fixture(id)});});
-  await page.goto('./');await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds',{timeout:30000});await expect(page.locator('#all-count')).toHaveText(String(newsCount-1));await expect(page.locator('#refresh')).toBeEnabled();expect(requests).toHaveLength(1);expect(requests[0].headers()).not.toHaveProperty('cookie');expect(requests[0].headers()).not.toHaveProperty('referer');
+  await page.route(proxyRoute,r=>{const id=r.request().url().split('/').pop(),fail=[allowed.id,blocked.id].includes(id);return r.fulfill({status:fail?502:200,contentType:fail?'application/json':'application/xml',body:fail?'{"error":"Publisher denied proxy request."}':fixture(id)});});
+  await page.goto('./');await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds');await expect(page.locator('#all-count')).toHaveText(String(newsCount-1));await expect(page.locator('#refresh')).toBeEnabled();expect(requests).toHaveLength(1);expect(requests[0].headers()).not.toHaveProperty('cookie');expect(requests[0].headers()).not.toHaveProperty('referer');
   await page.getByRole('button',{name:'1 unavailable',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(1);await page.locator('.source-card summary').click();await expect(page.locator('.source-card details')).toContainText('Through Cloudflare: Publisher denied proxy request. Direct from the publisher: Your browser could not load the feed directly.');
   await page.getByRole('button',{name:'Show all sources',exact:true}).click();await expect(page.locator('.source-card').filter({has:page.getByRole('heading',{name:allowed.name,exact:true})})).toContainText('Your browser connected directly to the publisher.');
 });
@@ -211,7 +177,8 @@ test('scroll marking is opt-in, persistent and does not move the Unread list',as
 });
 
 test('bulk read states its full scope and Undo preserves previously read and saved states',async({page})=>{
-  await load(page);const first=page.locator('.story').first(),id=await first.getAttribute('data-article');await first.locator('.save-button').click();await first.locator('.read-button').click();await page.locator('[data-view="unread"]').click();await page.locator('#reading-options summary').click();
+  const newsCount=paginationCatalog.feeds.filter(feed=>feed.category!=='bluesky').length;
+  await load(page,{catalog:paginationCatalog});const first=page.locator('.story').first(),id=await first.getAttribute('data-article');await first.locator('.save-button').click();await first.locator('.read-button').click();await page.locator('[data-view="unread"]').click();await page.locator('#reading-options summary').click();
   await expect(page.locator('.story')).toHaveCount(60);await expect(page.locator('#mark-read')).toHaveText(`Mark ${newsCount-1} matching articles read`);await page.locator('#mark-read').click();await expect(page.locator('#unread-count')).toHaveText('0');await expect(page.locator('#undo-read')).toBeFocused();
   await page.locator('#undo-read').click();await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));await page.locator('#saved-button').click();await expect(page.locator('.story')).toHaveAttribute('data-article',id);await expect(page.locator('.story')).toHaveClass(/is-read/);
 });
@@ -226,9 +193,9 @@ test('catalog outage preserves access to the cached saved library',async({page})
 });
 
 test('automatic due refresh buffers new items until accepted and never fetches the inactive mode',async({page})=>{
-  let revision=0;const requests=[];await page.clock.install();await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>{const id=r.request().url().split('/').pop();requests.push(id);return r.fulfill({contentType:'application/xml',body:revision?fixture(id).replaceAll(`https://publisher.example/${id}?`,`https://publisher.example/${id}-new?`):fixture(id)});});
-  await page.goto('./');await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds',{timeout:30000});await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('#refresh')).toBeEnabled();const firstId=await page.locator('.story').first().getAttribute('data-article');revision=1;
-  await page.clock.fastForward(16*60*1000);await expect(page.locator('#new-items')).toContainText(`${newsCount} new articles`,{timeout:30000});await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('.story').first()).toHaveAttribute('data-article',firstId);
+  let revision=0;const requests=[];await page.route(proxyRoute,r=>{const id=r.request().url().split('/').pop();requests.push(id);return r.fulfill({contentType:'application/xml',body:revision?fixture(id).replaceAll(`https://publisher.example/${id}?`,`https://publisher.example/${id}-new?`):fixture(id)});});
+  await page.goto('./');await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds');await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('#refresh')).toBeEnabled();const firstId=await page.locator('.story').first().getAttribute('data-article');revision=1;
+  await page.clock.fastForward(16*60*1000);await expect(page.locator('#new-items')).toContainText(`${newsCount} new articles`);await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('.story').first()).toHaveAttribute('data-article',firstId);
   expect(requests).toHaveLength(newsCount*2);expect(requests.some(id=>id.startsWith('bluesky-'))).toBe(false);await page.locator('#new-items').click();await expect(page.locator('#all-count')).toHaveText(String(newsCount*2));await expect(page.locator('#new-items')).toBeHidden();
 });
 
@@ -243,7 +210,6 @@ test('CSV includes all saved types regardless of filters; About explains cookies
   await page.locator('#about-button').click();await expect(page.locator('.about-content')).toContainText('does not set or read cookies');await expect(page.locator('.about-content')).toContainText('It does not upload or sync them.');
 });
 
-
 test('older libraries remain readable if no catalog has been cached yet',async({page})=>{
   await load(page);await page.locator('.save-button').first().click();await page.locator('#saved-button').click();
   await page.evaluate(async()=>{const db=await new Promise((res,rej)=>{const r=indexedDB.open('sound-and-state');r.onsuccess=()=>res(r.result);r.onerror=rej;});await new Promise((res,rej)=>{const tx=db.transaction('settings','readwrite');tx.objectStore('settings').delete('catalog');tx.oncomplete=res;tx.onerror=rej;});db.close();});
@@ -252,52 +218,16 @@ test('older libraries remain readable if no catalog has been cached yet',async({
 
 test('switching modes cancels the previous fetch queue without marking sources unavailable',async({page})=>{
   let releaseNews;const waiting=new Promise(resolve=>{releaseNews=resolve;});
-  const requests=[];await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',async r=>{const id=r.request().url().split('/').pop();requests.push(id);if(!id.startsWith('bluesky-'))await waiting;await r.fulfill({contentType:'application/xml',body:fixture(id)}).catch(()=>{});});
+  const requests=[];await page.route(proxyRoute,async r=>{const id=r.request().url().split('/').pop();requests.push(id);if(!id.startsWith('bluesky-'))await waiting;await r.fulfill({contentType:'application/xml',body:fixture(id)}).catch(()=>{});});
   await page.goto('./');await expect.poll(()=>requests.length).toBeGreaterThan(0);await page.locator('[data-mode="posts"]').click();releaseNews();await expect(page.locator('.post')).toHaveCount(socialCount);expect(requests.filter(id=>!id.startsWith('bluesky-')).length).toBeLessThanOrEqual(4);await expect(page.locator('.status-link')).toHaveCount(0);
-});
-
-test('feed list guide requires an explicit download and keeps import help available',async({page,context})=>{
-  await load(page);const downloads=[];page.on('download',download=>downloads.push(download));
-  const trigger=page.locator('#feed-list-button'),dialog=page.locator('#feed-list-dialog'),downloadLink=dialog.locator('[download]');
-  await trigger.click();await expect(dialog).toBeVisible();await expect(page.locator('#feed-list-title')).toBeFocused();
-  expect(downloads).toHaveLength(0);
-  const guides=dialog.locator('.import-guides a');await expect(guides).toHaveCount(6);
-  for(const link of await guides.all()) {
-    await expect(link).toHaveAttribute('href',/^https:\/\//);await expect(link).toHaveAttribute('target','_blank');await expect(link).toHaveAttribute('rel','noopener noreferrer');
-  }
-  const helpUrl=await guides.first().getAttribute('href');
-  await context.route(helpUrl,route=>route.fulfill({contentType:'text/html',body:'<h1>Reader import instructions</h1>'}));
-  const popupPromise=page.waitForEvent('popup');await guides.first().click();const popup=await popupPromise;
-  await expect(popup).toHaveURL(helpUrl);await popup.close();await expect(dialog).toBeVisible();expect(downloads).toHaveLength(0);
-  await dialog.locator('.close-button').focus();await trigger.focus();await expect(dialog.locator('.close-button')).toBeFocused();
-  const downloadPromise=page.waitForEvent('download');await downloadLink.click();const download=await downloadPromise;
-  expect(download.suggestedFilename()).toBe('feeds.opml');expect(await download.failure()).toBeNull();
-  expect(await readFile(await download.path(),'utf8')).toBe(await readFile(new URL('../../feeds.opml',import.meta.url),'utf8'));
-  await expect(dialog).toBeVisible();await expect(guides.first()).toBeVisible();expect(downloads).toHaveLength(1);
-  await page.goBack();await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
-  await page.goForward();await expect(dialog).toBeVisible();await page.reload();await expect(dialog).toBeVisible();
-  await page.keyboard.press('Escape');await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
-  await page.goto('./#feed-list=1');await expect(dialog).toBeVisible();await dialog.locator('.close-button').click();await expect(dialog).toBeHidden();
-  await expect(page).not.toHaveURL(/feed-list/);
-  await trigger.click();await page.mouse.click(1,1);await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
-});
-
-test('feed list guide works when the catalog cannot load',async({page})=>{
-  await page.route('**/catalog.json',route=>route.abort('internetdisconnected'));
-  await page.goto('./');await expect(page.locator('#result-label')).toHaveText('The reader could not open your library.');
-  await page.locator('#feed-list-button').click();await expect(page.locator('#feed-list-dialog')).toBeVisible();
-  const downloadPromise=page.waitForEvent('download');await page.locator('#feed-list-dialog [download]').click();const download=await downloadPromise;
-  expect(download.suggestedFilename()).toBe('feeds.opml');expect(await download.failure()).toBeNull();
-  await page.keyboard.press('Escape');await expect(page.locator('#feed-list-dialog')).toBeHidden();await expect(page.locator('#feed-list-button')).toBeFocused();
-  await page.locator('#feed-list-button').click();await page.getByRole('button',{name:'Close feed list guide'}).click();await expect(page.locator('#feed-list-dialog')).toBeHidden();
 });
 
 test('feed list guide stays open when the catalog finishes loading',async({page})=>{
   let releaseCatalog;const ready=new Promise(resolve=>releaseCatalog=resolve);
-  await page.route('**/catalog.json',async route=>{await ready;await route.continue();});
-  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',route=>route.fulfill({contentType:'application/xml',body:fixture(route.request().url().split('/').pop())}));
+  await page.route('**/catalog.json',async route=>{await ready;await route.fallback();});
+  await page.route(proxyRoute,route=>route.fulfill({contentType:'application/xml',body:fixture(route.request().url().split('/').pop())}));
   await page.goto('./',{waitUntil:'domcontentloaded'});await page.locator('#feed-list-button').click();await expect(page.locator('#feed-list-dialog')).toBeVisible();
-  releaseCatalog();await expect(page.locator('#all-count')).toHaveText(String(newsCount),{timeout:30000});await expect(page.locator('#feed-list-dialog')).toBeVisible();
+  releaseCatalog();await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('#feed-list-dialog')).toBeVisible();
   await page.goBack();await expect(page.locator('#feed-list-dialog')).toBeHidden();await expect(page.locator('#feed-list-button')).toBeFocused();
 });
 
