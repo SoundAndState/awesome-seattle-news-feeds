@@ -67,6 +67,7 @@ export default defineConfig({
           if (error.code !== 'ENOENT') throw error;
         }
       }
+      notices += `Noto Serif (Google Fonts)\n${await fs.readFile('web/src/fonts/noto-serif/OFL.txt', 'utf8')}\n`;
       this.emitFile({type: 'asset', fileName: 'third-party-notices.txt', source: notices});
     },
   }],

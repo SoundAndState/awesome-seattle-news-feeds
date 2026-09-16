@@ -8,7 +8,7 @@ Submit feed additions and corrections as pull requests editing only [`feeds.json
 - Check that the feed has current, relevant stories. Prefer original reporting and direct publisher feeds. Label opinion, advocacy, official announcements, and satire accurately.
 - Check existing entries and `aliases` for duplicates. Keep distinct topic feeds. Add `redirects` only for verified, exact HTTPS destinations needed by the proxy.
 - Put Bluesky accounts in the `bluesky` category. Use the native `https://bsky.app/profile/<did>/rss` feed and the current profile URL; account IDs keep subscriptions stable across handle changes.
-- Low-quality sources may not be accepted. Inclusion is subject to the maintainer's discretion.
+- The maintainer decides which sources to include and may decline sources that do not meet these standards.
 
 ## Development
 

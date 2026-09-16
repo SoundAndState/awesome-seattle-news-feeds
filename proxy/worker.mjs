@@ -46,13 +46,13 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
       'Content-Security-Policy': "default-src 'none'; sandbox",
     });
     const errorResponse = (message, status) => Response.json({error: message}, {status, headers});
-    if (origin && !allowed.has(origin)) return errorResponse('Origin is not allowed.', 403);
+    if (origin && !allowed.has(origin)) return errorResponse('This feed service does not accept requests from this website.', 403);
     if (origin) headers.set('Access-Control-Allow-Origin', origin);
     headers.set('Access-Control-Expose-Headers', 'Retry-After, X-Feed-Fetched-At, X-Feed-Transport, X-Feed-Stale, CF-Cache-Status');
     const url = new URL(request.url);
     const match = /^\/feed\/([a-z0-9-]+)$/.exec(url.pathname);
     const feed = match && feedMap.get(match[1]);
-    if (!feed || url.search) return errorResponse('Unknown feed.', 404);
+    if (!feed || url.search) return errorResponse('This feed service does not recognize that feed address.', 404);
     if (request.method === 'OPTIONS') {
       headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
       headers.set('Access-Control-Max-Age', '86400');
@@ -60,13 +60,13 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
     }
     if (request.method !== 'GET') {
       headers.set('Allow', 'GET, OPTIONS');
-      return errorResponse('Only GET is supported.', 405);
+      return errorResponse('This feed service accepts only GET requests to load feeds.', 405);
     }
     // No public client secret exists. This generous per-IP limit tolerates shared networks;
     // exact destinations and bounded work are the primary safeguards.
     if (env.FEED_LIMITER && !(await env.FEED_LIMITER.limit({key: request.headers.get('CF-Connecting-IP') || 'unknown'})).success) {
       headers.set('Retry-After', '60');
-      return errorResponse('Too many requests. Try again shortly.', 429);
+      return errorResponse('This feed service has received too many requests from your IP address. Wait a minute, then try again.', 429);
     }
     const unavailable = async message => {
       try {
@@ -86,7 +86,7 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
         if (parsed.protocol !== 'https:' || parsed.username || parsed.password || !destinations.has(parsed.href)) {
           console.warn('Rejected feed redirect', {feed: match[1], destination: `${parsed.origin}${parsed.pathname}${parsed.search}`});
           const target = parsed.hostname === 'www.youtube.com' ? `${parsed.origin}${parsed.pathname}` : parsed.hostname;
-          throw new Error(`Publisher redirected this feed to ${target}, outside its approved feed addresses.`);
+          throw new Error(`The publisher sent this feed request to ${target}. This feed service cannot follow that address because its feed list does not include it.`);
         }
         upstream = await fetcher(parsed.href, {
           redirect: 'manual', signal: controller.signal,
@@ -100,11 +100,11 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
       }
       if (upstream.headers.get('sg-captcha') === 'challenge' || upstream.headers.get('cf-mitigated') === 'challenge') {
         await upstream.body?.cancel();
-        return await unavailable('Publisher requires a browser challenge instead of returning RSS to the proxy.');
+        return await unavailable('The publisher requires a browser check that this feed service cannot complete.');
       }
       if (upstream.status !== 200) {
         await upstream.body?.cancel();
-        return await unavailable(upstream.status === 403 ? 'Publisher denied the proxy request (HTTP 403).' : `Publisher returned HTTP ${upstream.status}.`);
+        return await unavailable(upstream.status === 403 ? 'The publisher denied this feed service’s request (HTTP 403).' : `The publisher returned HTTP ${upstream.status}.`);
       }
       const bytes = await readLimited(upstream);
       const head = new TextDecoder().decode(bytes.subarray(0, 16384));
@@ -114,7 +114,7 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
       headers.set('X-Feed-Fetched-At', new Date().toISOString());
       return new Response(bytes, {headers});
     } catch (error) {
-      return await unavailable(controller.signal.aborted ? 'Publisher took too long to respond.' : error.message === 'fetch failed' ? 'Publisher could not be reached.' : error.message);
+      return await unavailable(controller.signal.aborted ? 'The publisher took too long to respond.' : error.message === 'fetch failed' ? 'This feed service could not connect to the publisher.' : error.message);
     }};
     try {
       // Some upstream streams do not settle after abort. Bound the whole operation,
@@ -122,7 +122,7 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
       return await Promise.race([fetchLive(), new Promise(resolve => {
         timer = setTimeout(() => {
           controller.abort();
-          resolve(unavailable('Publisher took too long to respond.'));
+          resolve(unavailable('The publisher took too long to respond.'));
         }, timeoutMs);
       })]);
     } finally {

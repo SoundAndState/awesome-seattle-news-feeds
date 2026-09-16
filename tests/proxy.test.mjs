@@ -32,7 +32,7 @@ test('redirects are checked exactly and no visitor credentials reach publishers'
   }
 });
 test('publisher denials and explicit browser challenges have distinct, uncached explanations', async () => {
-  for (const [headers,status,expected] of [[{'sg-captcha':'challenge'},202,/browser challenge/],[{'cf-mitigated':'challenge'},403,/browser challenge/],[{},403,/denied the proxy request \(HTTP 403\)/]]) {
+  for (const [headers,status,expected] of [[{'sg-captcha':'challenge'},202,/browser check/],[{'cf-mitigated':'challenge'},403,/browser check/],[{},403,/denied this feed service’s request \(HTTP 403\)/]]) {
     const response=await createHandler({feedMap,fetcher:async()=>new Response('<html>Blocked</html>',{status,headers})})(request(),env);
     assert.equal(response.status,502);
     assert.equal(response.headers.get('cache-control'),'no-store');

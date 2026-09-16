@@ -34,14 +34,14 @@ test('proxy refusals, invalid feed bodies, and timeouts retry directly without c
 });
 test('both failure reasons survive, and oversized direct feeds are rejected', async () => {
   for (const [direct, reason] of [
-    [() => {throw new TypeError('Failed to fetch');}, /CORS or network error/],
+    [() => {throw new TypeError('Failed to fetch');}, /publisher may block access from other websites \(CORS\), or a network problem/],
     [() => new Response('',{status:403}), /HTTP 403/],
     [() => new Response(xml,{headers:{'Content-Length':'6000000'}}), /5 MB limit/],
     [() => new Response('x'.repeat(5*1024*1024+1)), /5 MB limit/],
   ]) {
     let calls=0;
     await assert.rejects(loadFeed(feed,proxy,{fetchImpl:async()=>++calls===1?new Response('{"error":"Publisher blocked proxy."}',{status:502}):direct()}), error=>{
-      assert.match(error.message,/Proxy: Publisher blocked proxy\. Direct:/); assert.match(error.message,reason); return true;
+      assert.match(error.message,/Through Cloudflare: Publisher blocked proxy\. Direct from the publisher:/); assert.match(error.message,reason); return true;
     });
     assert.equal(calls,2);
   }
