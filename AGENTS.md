@@ -1,18 +1,22 @@
 # Repository instructions
 
-These instructions apply throughout this repository. Keep shared agent guidance in this file; `CLAUDE.md` imports it. Read [CONTRIBUTING.md](CONTRIBUTING.md) for feed selection criteria and the contribution process.
+These instructions apply throughout this repository. Keep shared agent guidance in this file; `CLAUDE.md` imports it. Read [CONTRIBUTING.md](.github/CONTRIBUTING.md) for feed selection criteria and the contribution process.
 
 ## Project structure
 
 Sound & State is a browser-based news reader and a curated catalog of Seattle-area RSS and Atom feeds.
 
-- `feeds.json` is the source of truth for the catalog; `feeds.schema.json` defines its structure.
+- `data/feeds.json` is the source of truth for the catalog; `data/feeds.schema.json` defines its structure.
 - `scripts/render.mjs` and `scripts/build.mjs` generate `readme.md` and `feeds.opml`. Change the source or generator, never the generated files by hand. For feed-only pull requests, submit the catalog change; GitHub Actions generates and commits the published files after merge.
 - `web/index.html` contains the reader shell and About text. `web/src/` contains the browser behavior, dynamic messages, and styles.
 - `proxy/` contains the Cloudflare feed service, caching rules, and backup-feed handling.
-- `site.config.json` contains the site metadata and service URL. `vite.config.mjs` builds the reader and its public assets into `dist/`.
+- `config/site.config.json` contains the site metadata and service URL. `config/vite.config.mjs` builds the reader and its public assets into `dist/`.
+- `config/playwright.config.mjs` configures browser tests; `config/wrangler.jsonc` configures the feed service. Use the npm commands below so each tool loads its configuration from `config/`.
 - `tests/*.test.mjs` covers catalog and application logic. `tests/browser/reader.spec.mjs` covers desktop Chromium and mobile WebKit. `tests/*_test.py` covers the feed health tools.
+- `.github/CONTRIBUTING.md` and `.github/code-of-conduct.md` describe how to contribute.
 - `.github/workflows/validate.yml` defines CI checks; `.github/workflows/pages.yml` handles publication.
+
+Keep the generated `readme.md` and `feeds.opml` at the root so GitHub displays the catalog and existing OPML download links keep working. Keep package manifests, agent entry points, the license, and repository-wide dotfiles at the root for tool discovery.
 
 ## Working conventions
 
@@ -44,7 +48,7 @@ Run checks that match the change:
 - **JavaScript behavior:** run `npm test`.
 - **Reader UI or copy:** run `npm run build:web`, then `npm run test:browser`. Install missing browsers with `npx playwright install chromium webkit`. Check longer text in phone and desktop layouts, including expanded dialogs.
 - **Catalog or generation:** run `npm run ci` to generate and check the published files, validate the catalog, lint the README and OPML, run unit tests, and build the reader. Review generated differences without hand-editing them.
-- **Cloudflare feed service:** run `npm test` and `npx wrangler deploy --dry-run` to check the Worker bundle.
+- **Cloudflare feed service:** run `npm test` and `npm run check:proxy` to check the Worker bundle.
 - **Python feed health tools:** run `python -m unittest discover -s tests -p '*_test.py'`. Use `npm run check:feeds` when the task calls for live publisher checks.
 
 Run `git diff --check` before finishing. Report what changed, which checks passed, and any checks you could not complete. Keep tests focused on behavior; do not add tests that merely duplicate wording for a routine copy edit.

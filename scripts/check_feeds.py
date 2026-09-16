@@ -124,7 +124,7 @@ def main():
     parser.add_argument('--output', default='reports/feed-health.json')
     parser.add_argument('--max-age-days', type=int, default=365)
     args = parser.parse_args()
-    catalog = json.loads((ROOT / 'feeds.json').read_text(encoding='utf-8'))
+    catalog = json.loads((ROOT / 'data' / 'feeds.json').read_text(encoding='utf-8'))
     feeds = [feed for feed in catalog['feeds'] if not args.only or feed['id'] == args.only]
     if not feeds:
         parser.error('No matching feeds')

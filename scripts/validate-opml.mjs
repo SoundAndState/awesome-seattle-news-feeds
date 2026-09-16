@@ -23,7 +23,7 @@ export function validateOpml(text, catalog) {
     }))},
     '@_version': '2.0',
   };
-  assert.deepEqual(document.opml, expected, 'OPML 2.0 structure, required attributes, folders, and subscriptions must match feeds.json exactly');
+  assert.deepEqual(document.opml, expected, 'OPML 2.0 structure, required attributes, folders, and subscriptions must match data/feeds.json exactly');
   if (/\r|[\t ]+\n/.test(text) || !text.endsWith('\n')) throw new Error('OPML must use LF, a final newline, and no trailing whitespace');
   return true;
 }

@@ -1,7 +1,7 @@
 import {test, expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-import catalog from '../../feeds.json' with {type: 'json'};
-import site from '../../site.config.json' with {type: 'json'};
+import catalog from '../../data/feeds.json' with {type: 'json'};
+import site from '../../config/site.config.json' with {type: 'json'};
 
 const newsCount = catalog.feeds.filter(feed => feed.category !== 'bluesky').length;
 const socialCount = catalog.feeds.filter(feed => feed.category === 'bluesky').length;

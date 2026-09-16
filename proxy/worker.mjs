@@ -1,4 +1,4 @@
-import catalog from '../feeds.json' with {type: 'json'};
+import catalog from '../data/feeds.json' with {type: 'json'};
 import {cachePolicy} from './cache.mjs';
 import {snapshotResponse} from './snapshots.mjs';
 export {cachePolicy} from './cache.mjs';
