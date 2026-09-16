@@ -10,7 +10,7 @@ let warning = () => {};
 async function operation(store, method, args) {
   if (persistent) {
     try {return await db[store][method](...args);}
-    catch {persistent = false; warning('Browser storage is unavailable or full. This session still works, but new reading changes may not be saved. Export a backup before closing.');}
+    catch {persistent = false; warning('The reader cannot save changes in this browser. You can keep reading, but you will lose new saves and read marks when you close or reload this page. Open About this reader and choose Export reading backup before you leave.');}
   }
   const map = memory[store];
   if (method === 'toArray') return [...map.values()];

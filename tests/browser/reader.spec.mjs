@@ -17,7 +17,7 @@ async function load(page, fail = false) {
     const id = route.request().url().split('/').pop();
     return route.fulfill({status: fail ? 502 : 200, contentType: fail ? 'application/json' : 'application/xml', body: fail ? JSON.stringify({error:'Publisher returned HTTP 403.'}) : fixture(id)});
   });
-  await page.goto('./'); await expect(page.locator('#feed-progress')).toContainText('Checked',{timeout:30000});await expect(page.getByRole('button', {name:'Refresh',exact:true})).toBeEnabled();
+  await page.goto('./'); await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds',{timeout:30000});await expect(page.getByRole('button', {name:'Refresh',exact:true})).toBeEnabled();
   await expect(page.locator('#all-count')).toHaveText(fail ? '0' : String(newsCount));
 }
 
@@ -77,7 +77,7 @@ test('failed refresh preserves cached content, explains failures and retries onl
   await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>{const id=r.request().url().split('/').pop();return r.fulfill({status:ids.includes(id)?502:200,contentType:ids.includes(id)?'application/json':'application/xml',body:ids.includes(id)?'{"error":"Publisher returned HTTP 403."}':fixture(id)});});
   await page.reload();await expect(page.getByRole('button',{name:'2 unavailable',exact:true})).toBeVisible();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));
   await search(page,'nothing matches');await page.getByRole('button',{name:'2 unavailable',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(2);
-  for(const card of await page.locator('.source-card').all()){await expect(card).toContainText('Showing cached content');await expect(card).toContainText('blocked automated requests');await card.locator('summary').click();await expect(card.locator('details')).toContainText('HTTP 403');}
+  for(const card of await page.locator('.source-card').all()){await expect(card).toContainText('Using an earlier copy');await expect(card).toContainText('A server refused the feed request');await card.locator('summary').click();await expect(card.locator('details')).toContainText('HTTP 403');}
   const requests=[];page.on('request',r=>{if(r.url().startsWith('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/'))requests.push(r.url().split('/').pop());});await page.locator('#refresh').click();await expect(page.locator('#refresh')).toBeEnabled();expect(requests.sort()).toEqual(ids.sort());
   await page.getByRole('button',{name:'Show all sources',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(newsCount);
 });
@@ -85,8 +85,24 @@ test('failed refresh preserves cached content, explains failures and retries onl
 test('backup restores article and post saves into a fresh library',async({page})=>{
   await load(page);await page.locator('.save-button').first().click();await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);await page.locator('.save-button').first().click();
   await page.locator('#about-button').click();const downloadPromise=page.waitForEvent('download');await page.locator('#export-state').click();const backup=await (await downloadPromise).path();
-  const context=await page.context().browser().newContext({baseURL:test.info().project.use.baseURL});const fresh=await context.newPage();await fresh.route(url=>feedUrls.has(url.href),r=>r.abort('failed'));await load(fresh,true);await fresh.locator('#about-button').click();await fresh.locator('#backup-file').setInputFiles(backup);await expect(fresh.locator('#backup-status')).toContainText('Restored 2 saved stories');
+  const context=await page.context().browser().newContext({baseURL:test.info().project.use.baseURL});const fresh=await context.newPage();await fresh.route(url=>feedUrls.has(url.href),r=>r.abort('failed'));await load(fresh,true);await fresh.locator('#about-button').click();await fresh.locator('#backup-file').setInputFiles(backup);await expect(fresh.locator('#backup-status')).toContainText('The reader combined 2 saved items');
   await fresh.getByRole('button',{name:'Close about'}).click();await fresh.locator('#saved-button').click();await expect(fresh.locator('.story')).toHaveCount(2);await expect(fresh.locator('.post')).toHaveCount(1);await expect(fresh.locator('.story-updated time')).toHaveAttribute('datetime','2026-09-15T12:45:00.000Z');await context.close();
+});
+
+test('unreadable backups explain recovery without changing the library',async({page})=>{
+  await load(page);await page.locator('.save-button').first().click();await page.locator('#about-button').click();
+  const backup={format:'sound-and-state',version:1,state:[],savedArticles:[]};
+  for(const [body,message] of [
+    ['{broken','Choose a file from Export reading backup.'],
+    ['null','Choose a JSON backup from Export reading backup.'],
+    [JSON.stringify({...backup,state:[null]}),'cannot read which items this backup marks as read or saved'],
+    [JSON.stringify({...backup,savedArticles:[null]}),'cannot read a saved item in this backup'],
+  ]) {
+    await page.locator('#backup-file').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(body)});
+    await expect(page.locator('#backup-status')).toContainText(message);
+    await expect(page.locator('#saved-count')).toHaveText('1');
+  }
+  await page.getByRole('button',{name:'Close about'}).click();await page.locator('#saved-button').click();await expect(page.locator('.story')).toHaveCount(1);
 });
 
 test('mobile navigation reaches content quickly and filters close after selection',async({page})=>{
@@ -156,7 +172,7 @@ test('cards and previews label full dates, including update-only and date-only e
   await page.locator('.story .save-button').click();const download=page.waitForEvent('download');await page.locator('#export-saved').click();const csv=await readFile(await(await download).path(),'utf8');expect(csv).toContain('"Read","Updated"');expect(csv).toContain('2026-09-15T12:45:00.000Z');
   xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-published')).toHaveCount(0);await expect(page.locator('.story-updated')).toContainText('2026');
   xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'<pubDate>2026-09-14</pubDate>').replace(/<atom:updated>.*?<\/atom:updated>/,'<atom:updated>2026-09-15</atom:updated>');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-published')).toHaveText('Published Sep 14, 2026');await expect(page.locator('.story-updated')).toHaveText('Updated Sep 15, 2026');await expect(page.locator('.story-published time')).toHaveAttribute('datetime','2026-09-14');
-  xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'').replace(/<atom:updated>.*?<\/atom:updated>/,'');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-dates')).toHaveText('Date not provided');await expect(page.locator('.story time')).toHaveCount(0);
+  xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'').replace(/<atom:updated>.*?<\/atom:updated>/,'');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-dates')).toHaveText('No date in feed');await expect(page.locator('.story time')).toHaveCount(0);
 });
 
 test('direct fallback omits credentials and source errors explain both attempts',async({page})=>{
@@ -166,8 +182,8 @@ test('direct fallback omits credentials and source errors explain both attempts'
   await page.route(blocked.feed,r=>r.fulfill({contentType:'application/xml',headers:{'access-control-allow-origin':'https://other.example'},body:fixture(blocked.id)}));
   await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>{const id=r.request().url().split('/').pop(),fail=[allowed.id,blocked.id].includes(id);return r.fulfill({status:fail?502:200,contentType:fail?'application/json':'application/xml',body:fail?'{"error":"Publisher denied proxy request."}':fixture(id)});});
   await page.goto('./');await expect(page.locator('#all-count')).toHaveText(String(newsCount-1));await expect(page.locator('#refresh')).toBeEnabled();expect(requests).toHaveLength(1);expect(requests[0].headers()).not.toHaveProperty('cookie');expect(requests[0].headers()).not.toHaveProperty('referer');
-  await page.getByRole('button',{name:'1 unavailable',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(1);await page.locator('.source-card summary').click();await expect(page.locator('.source-card details')).toContainText('Proxy: Publisher denied proxy request. Direct: Browser request failed (CORS or network error).');
-  await page.getByRole('button',{name:'Show all sources',exact:true}).click();await expect(page.locator('.source-card').filter({has:page.getByRole('heading',{name:allowed.name,exact:true})})).toContainText('Direct from publisher');
+  await page.getByRole('button',{name:'1 unavailable',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(1);await page.locator('.source-card summary').click();await expect(page.locator('.source-card details')).toContainText('Through Cloudflare: Publisher denied proxy request. Direct from the publisher: Your browser could not load the feed directly.');
+  await page.getByRole('button',{name:'Show all sources',exact:true}).click();await expect(page.locator('.source-card').filter({has:page.getByRole('heading',{name:allowed.name,exact:true})})).toContainText('Your browser connected directly to the publisher.');
 });
 
 test('scroll marking is opt-in, persistent and does not move the Unread list',async({page})=>{
@@ -190,7 +206,7 @@ test('removing a focused unread or saved item moves focus to the next item',asyn
 });
 
 test('catalog outage preserves access to the cached saved library',async({page})=>{
-  await load(page);await page.locator('.save-button').first().click();await page.locator('#saved-button').click();await page.route('**/catalog.json',r=>r.abort('internetdisconnected'));await page.route('**/feeds.opml',r=>r.abort('internetdisconnected'));await page.reload();await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('#notice')).toContainText('Using the saved feed catalog');await expect(page.locator('#saved-count')).toHaveText('1');
+  await load(page);await page.locator('.save-button').first().click();await page.locator('#saved-button').click();await page.route('**/catalog.json',r=>r.abort('internetdisconnected'));await page.route('**/feeds.opml',r=>r.abort('internetdisconnected'));await page.reload();await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('#notice')).toContainText('The reader could not download the latest feed list, so it is using an earlier copy.');await expect(page.locator('#saved-count')).toHaveText('1');
 });
 
 test('automatic due refresh buffers new items until accepted and never fetches the inactive mode',async({page})=>{
@@ -208,14 +224,14 @@ test('legacy Bluesky links resolve to Posts with a scoped account picker',async(
 test('CSV includes all saved types regardless of filters; About explains cookies and storage',async({page})=>{
   await load(page);await expect(page.locator('#export-saved')).toBeDisabled();await page.locator('.save-button').first().click();await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);await page.locator('.save-button').first().click();await search(page,'nothing matches');
   const promise=page.waitForEvent('download');await page.locator('#export-saved').click();const download=await promise,csv=await readFile(await download.path(),'utf8');expect(csv).toContain('"Title","Source","Published","URL","Content","Read"');expect(csv).toContain('https://publisher.example/');expect(csv).toContain('https://bsky.app/profile/');expect(csv.split('\r\n').filter(Boolean)).toHaveLength(3);
-  await page.locator('#about-button').click();await expect(page.locator('.about-content')).toContainText('does not set or read cookies');await expect(page.locator('.about-content')).toContainText('IndexedDB');await expect(page.locator('.about-content')).toContainText('The maintainer collects no user data.');
+  await page.locator('#about-button').click();await expect(page.locator('.about-content')).toContainText('does not set or read cookies');await expect(page.locator('.about-content')).toContainText('It does not send that information to a server or sync it to other browsers or devices.');await expect(page.locator('.about-content')).toContainText('collects no user data.');
 });
 
 
 test('older libraries remain readable if no catalog has been cached yet',async({page})=>{
   await load(page);await page.locator('.save-button').first().click();await page.locator('#saved-button').click();
   await page.evaluate(async()=>{const db=await new Promise((res,rej)=>{const r=indexedDB.open('sound-and-state');r.onsuccess=()=>res(r.result);r.onerror=rej;});await new Promise((res,rej)=>{const tx=db.transaction('settings','readwrite');tx.objectStore('settings').delete('catalog');tx.oncomplete=res;tx.onerror=rej;});db.close();});
-  await page.route('**/catalog.json',r=>r.abort('internetdisconnected'));await page.route('**/feeds.opml',r=>r.abort('internetdisconnected'));await page.reload();await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('#notice')).toContainText('Showing content already stored');await page.locator('[data-mode="articles"]').click();await expect(page.locator('#all-count')).toHaveText(String(newsCount));
+  await page.route('**/catalog.json',r=>r.abort('internetdisconnected'));await page.route('**/feeds.opml',r=>r.abort('internetdisconnected'));await page.reload();await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('#notice')).toContainText('You can still browse the items it already has in your library.');await page.locator('[data-mode="articles"]').click();await expect(page.locator('#all-count')).toHaveText(String(newsCount));
 });
 
 test('switching modes cancels the previous fetch queue without marking sources unavailable',async({page})=>{
