@@ -115,8 +115,15 @@ test('mobile navigation reaches content quickly and filters close after selectio
     await page.setViewportSize({width,height:900});
     await expect.poll(()=>page.evaluate(width=>{
       const read=document.querySelector('.read-button').getBoundingClientRect(),save=document.querySelector('.save-button').getBoundingClientRect(),logo=document.querySelector('.brand-icon').getBoundingClientRect();
-      return innerWidth===width && document.documentElement.scrollWidth<=innerWidth && read.height>=44 && Math.abs(read.y-save.y)<.5 && logo.width===logo.height;
-    },width)).toBe(true);
+      return {
+        viewportMatches: innerWidth===width,
+        fitsViewport: document.documentElement.scrollWidth<=innerWidth,
+        touchTargetFits: read.height>=44,
+        actionsAlign: Math.abs(read.y-save.y)<.5,
+        // Browser layout rounds fractional SVG dimensions independently.
+        logoIsSquare: Math.abs(logo.width-logo.height)<.1,
+      };
+    },width)).toEqual({viewportMatches:true,fitsViewport:true,touchTargetFits:true,actionsAlign:true,logoIsSquare:true});
   }
 });
 
