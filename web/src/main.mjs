@@ -1,4 +1,5 @@
 import './style.css';
+import './loading.css';
 import {verifyOpml, inBatches, nextRefresh, safeUrl, archiveUrl} from './feeds.mjs';
 import {cleanText, articleContent} from './content.mjs';
 import {openLibrary, save, removeArticles} from './storage.mjs';
@@ -129,16 +130,33 @@ function updateNavigation() {
   if (category || source || query) chips.append(button('Clear all', 'text-button', () => navigate({category:'',source:'',query:''})));
   chips.hidden = !chips.childElementCount;
 }
+function renderLoading(run = null, preparing = false) {
+  const active = Boolean(run || preparing), panel = $('#feed-loading'), bar = $('#loading-bar');
+  const starting = active && panel.hidden;
+  panel.hidden = !active;
+  $('#stories').setAttribute('aria-busy', String(active));
+  if (!active) {$('#stories').removeAttribute('aria-describedby'); return;}
+  $('#stories').setAttribute('aria-describedby', 'loading-guidance');
+  $('#loading-label').textContent = preparing ? 'Preparing your reader' : view === 'sources' ? 'Checking sources' : `Loading ${mode}`;
+  $('#loading-guidance').textContent = preparing ? 'Wait to start reading. The reader is opening your library and feed list.' : view === 'sources' ? 'The reader is checking these sources. Their availability can still change.' : 'Wait to start reading. The reader is still updating this list.';
+  $('#loading-count').textContent = run ? `${run.done} of ${run.total} feeds checked` : '';
+  if (run) {bar.max = run.total; bar.value = run.done;}
+  else bar.removeAttribute('value');
+  if (starting) announce(`${$('#loading-label').textContent}. ${$('#loading-guidance').textContent}`);
+}
 function renderProgress() {
   if (!catalog) return;
+  const active = session && session.mode === mode && !session.controller.signal.aborted && view !== 'saved';
+  renderLoading(active ? session : null);
   const node = $('#feed-progress'); node.replaceChildren();
   if (view === 'saved') {node.append(el('span', '', 'Your saved articles and posts')); return;}
   const feeds = selectedFeeds(true), failures = feeds.filter(feed => health.get(feed.id)?.error);
   const attempts = feeds.map(feed => health.get(feed.id)?.lastAttempt || health.get(feed.id)?.lastSuccess || 0).filter(Boolean);
-  const active = session && session.mode === mode && !session.controller.signal.aborted;
-  const checked = el('span', '', active ? `Checking ${session.done} of ${session.total} feeds` : attempts.length ? `The reader last checked feeds ${dateLabel(Math.max(...attempts))}` : 'The reader has not checked feeds yet.');
-  if (!active && attempts.length) checked.title = `The reader last checked feeds ${dateLabel(Math.max(...attempts), true)}`;
-  node.append(checked);
+  if (!active) {
+    const checked = el('span', '', attempts.length ? `The reader last checked feeds ${dateLabel(Math.max(...attempts))}` : 'The reader has not checked feeds yet.');
+    if (attempts.length) checked.title = `The reader last checked feeds ${dateLabel(Math.max(...attempts), true)}`;
+    node.append(checked);
+  }
   if (failures.length) node.append(button(`${failures.length} unavailable`, 'text-button status-link', () => navigate({view:'sources',unavailableOnly:true,source:'',category:'',query:''})));
   $('#refresh').disabled = Boolean(active); $('#refresh').textContent = active ? '↻ Checking' : '↻ Refresh';
 }
@@ -372,7 +390,7 @@ async function refreshFeeds({retryFailed=false,only=''}={}) {
   };
   try {if(navigator.locks)await navigator.locks.request('sound-and-state-refresh',{signal:run.controller.signal},work);else await work();await prune();}
   catch(error){if(!run.controller.signal.aborted)notice('The reader could not finish checking for new items. You can still read your library. Choose Refresh to try again.');}
-  finally {session=null;render();if(!run.controller.signal.aborted && run.mode===mode && view!=='saved')announce($('#result-label').textContent);if(retryAgain){const next=retryAgain;retryAgain=null;refreshFeeds(next);}}
+  finally {session=null;render();if(!run.controller.signal.aborted && run.mode===mode && view!=='saved')announce(`${run.done===run.total?'Feed check complete. ':''}${$('#result-label').textContent}`);if(retryAgain){const next=retryAgain;retryAgain=null;refreshFeeds(next);}}
 }
 function rememberReading() {if(view!=='saved'&&view!=='sources')readingStarted.add(mode);}
 function setupNavigation() {
@@ -460,6 +478,7 @@ $('#backup-file').addEventListener('change', async event => {
 
 
 async function start() {
+  renderLoading(null, true);
   try {
     const libraryPromise=openLibrary(notice);
     const remotePromise=Promise.all([fetch(`${import.meta.env.BASE_URL}catalog.json`,{signal:AbortSignal.timeout(10000)}),fetch(`${import.meta.env.BASE_URL}feeds.opml`,{signal:AbortSignal.timeout(10000)})]).then(async([json,xml])=>{
@@ -503,6 +522,6 @@ async function start() {
     });
     refreshFeeds();
     setInterval(()=>{if(!document.hidden){renderProgress();refreshFeeds();}},60000);
-  } catch(error) {notice(error.message);$('#result-label').textContent='The reader could not open your library.';showEmpty('The reader could not load the feed list.','Check your connection and reload the page, or choose Download feed list to use another reader.');}
+  } catch(error) {renderLoading();notice(error.message);$('#result-label').textContent='The reader could not open your library.';showEmpty('The reader could not load the feed list.','Check your connection and reload the page, or choose Download feed list to use another reader.');}
 }
 start();

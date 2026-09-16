@@ -26,6 +26,11 @@
 </div>
 <div id="search-panel" hidden><label class="search"><span class="sr-only" id="search-label">Search articles</span><input id="search" type="search" placeholder="Search articles…" aria-labelledby="search-label" aria-describedby="search-help"></label><p id="search-help" class="hint">Search the items this reader has loaded in your current view.</p></div>
 <div id="filter-chips" class="filter-chips" aria-label="Active filters" hidden></div>
+<div id="feed-loading" class="feed-loading" hidden>
+  <div class="loading-heading"><span class="sk-flow" aria-hidden="true"><span class="sk-flow-dot"></span><span class="sk-flow-dot"></span><span class="sk-flow-dot"></span></span><strong id="loading-label">Preparing your reader</strong><span id="loading-count"></span></div>
+  <progress id="loading-bar" aria-labelledby="loading-label" aria-describedby="loading-count loading-guidance"></progress>
+  <p id="loading-guidance">Wait to start reading. The reader is opening your library and feed list.</p>
+</div>
 <div class="status-row"><div id="feed-progress" class="feed-progress"></div><button id="refresh" class="text-button" aria-label="Refresh">↻ Refresh</button></div>
 <div class="reading-utility"><details id="reading-options"><summary>Reading options</summary><div class="options-content"><label class="scroll-read-control"><input id="scroll-read" type="checkbox">Mark items read as I scroll past them</label><button id="mark-read" class="secondary-button">Mark matching items read</button><p class="hint">Mark every item that matches your filters and search as read, including items you have not scrolled to or opened with Show more.</p></div></details><button id="export-saved" class="text-button download-link" disabled>Export saved items as CSV</button></div>
 <div class="reading-bar"><span id="result-label" class="sr-only">The reader is opening your library…</span><button id="show-all-sources" class="text-button" hidden>Show all sources</button></div>
@@ -74,6 +79,7 @@
 <details><summary>How the reader refreshes and stores items</summary>
 <p>While you view Articles or Posts, the reader checks the feeds that match your filters. It pauses those checks when you leave the tab and checks again when you return. After a feed loads successfully, the reader waits at least 15 minutes before checking it again. If a feed fails, the reader waits longer between attempts. Choose Refresh to retry failed feeds immediately.</p>
 <p>When the reader finds new items while you are reading, it shows a button above the list. Choose that button to add the new items when you are ready.</p>
+<p>Wait for the progress bar to disappear before you start reading. The reader can still update the list while it checks feeds. The bar counts completed checks, including feeds the reader could not load. It does not estimate how much time remains.</p>
 <p>The reader keeps unsaved items for up to 30 days and up to 150 items per feed. It keeps saved items until you remove them or clear this site's browser data.</p>
 <p>Cloudflare keeps copies of feeds for up to 15 minutes so it can reuse them across requests. It keeps them for less time when the publisher requires it, and it does not store error responses or content the publisher marks as private.</p>
 <p>GitHub also runs a scheduled task to collect backup copies of the KING 5, KREM 2, and MyNorthwest feeds. The task runs every 15 minutes, though GitHub may delay it. Cloudflare stops using each backup within 6 hours, or sooner if the publisher requires it. Browse publications to see when the task collected a copy. The task does not send your information to publishers.</p>
