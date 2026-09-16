@@ -174,7 +174,7 @@ function renderProgress() {
   const feeds = selectedFeeds(true), failures = feeds.filter(feed => health.get(feed.id)?.error);
   const attempts = feeds.map(feed => health.get(feed.id)?.lastAttempt || health.get(feed.id)?.lastSuccess || 0).filter(Boolean);
   if (!active) {
-    const checked = el('span', '', attempts.length ? `The reader last checked feeds ${dateLabel(Math.max(...attempts))}` : 'The reader has not checked feeds yet.');
+    const checked = el('span', '', attempts.length ? `The reader last checked feeds ${dateLabel(Math.max(...attempts), true)}` : 'The reader has not checked feeds yet.');
     checked.hidden = !$('#feed-loading').hidden;
     if (attempts.length) checked.title = `The reader last checked feeds ${dateLabel(Math.max(...attempts), true)}`;
     node.append(checked);
