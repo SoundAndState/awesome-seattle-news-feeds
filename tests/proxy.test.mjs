@@ -14,14 +14,16 @@ test('proxy rejects arbitrary targets, queries, writes, and disallowed origins b
   assert.equal(fetched,0);
   const preflight = await handle(request('/feed/news',{method:'OPTIONS',headers:{Origin:'https://example.github.io'}}),env); assert.equal(preflight.status,204); assert.equal(preflight.headers.get('access-control-allow-origin'),'https://example.github.io');
 });
-test('redirects are checked exactly and no visitor credentials reach publishers', async () => {
+test('redirects are checked without logging and no visitor headers are copied to publishers', async t => {
+  const logs = ['log', 'info', 'warn', 'error', 'debug'].map(method => t.mock.method(console, method, () => {}));
   let calls = 0;
   const handle = createHandler({feedMap, fetcher: async (url, options) => {
     assert.equal(options.redirect,'manual'); assert.equal(new Headers(options.headers).has('authorization'),false); assert.equal(new Headers(options.headers).has('cookie'),false);
+    assert.deepEqual([...new Headers(options.headers).keys()].sort(), ['accept', 'user-agent']);
     assert.match(new Headers(options.headers).get('user-agent'), /^Mozilla\/5\.0 \(compatible; SeattleNewsReader\//);
     calls++; return calls === 1 ? new Response(null,{status:302,headers:{Location:'https://cdn.example/rss'}}) : new Response(xml,{headers:{'Cache-Control':'public, max-age=120','Set-Cookie':'incidental=1'}});
   }});
-  const response = await handle(request('/feed/news',{headers:{Origin:'https://example.github.io',Authorization:'private',Cookie:'private'}}),env);
+  const response = await handle(request('/feed/news',{headers:{Origin:'https://example.github.io',Authorization:'private',Cookie:'private',Referer:'https://private.example/', 'CF-Connecting-IP':'192.0.2.1','X-Forwarded-For':'192.0.2.1','User-Agent':'Private browser',traceparent:'private'}}),env);
   assert.equal(calls,2); assert.equal(response.status,200); assert.equal(response.headers.get('cache-control'),'public, max-age=120'); assert.equal(response.headers.get('vary'),'Origin');
   assert.equal(response.headers.has('set-cookie'), false);
   for (const target of ['http://localhost/internal','https://cdn.example/other','https://evil.example/rss','https://www.youtube.com/@KING5Seattle']) {
@@ -30,6 +32,7 @@ test('redirects are checked exactly and no visitor credentials reach publishers'
     assert.equal(rejected.status,502); assert.equal(attempts,1);
     assert.ok((await rejected.json()).error.includes(new URL(target).hostname));
   }
+  for (const log of logs) assert.equal(log.mock.callCount(), 0);
 });
 test('publisher denials and explicit browser challenges have distinct, uncached explanations', async () => {
   for (const [headers,status,expected] of [[{'sg-captcha':'challenge'},202,/browser check/],[{'cf-mitigated':'challenge'},403,/browser check/],[{},403,/denied this feed service’s request \(HTTP 403\)/]]) {

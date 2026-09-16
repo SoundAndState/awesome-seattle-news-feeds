@@ -121,7 +121,7 @@ test('mobile navigation reaches content quickly and filters close after selectio
         touchTargetFits: read.height>=44,
         actionsAlign: Math.abs(read.y-save.y)<.5,
         // Browser layout rounds fractional SVG dimensions independently.
-        logoIsSquare: Math.abs(logo.width-logo.height)<.1,
+        logoIsSquare: Math.abs(logo.width-logo.height)<.01,
       };
     },width)).toEqual({viewportMatches:true,fitsViewport:true,touchTargetFits:true,actionsAlign:true,logoIsSquare:true});
   }
@@ -237,7 +237,7 @@ test('legacy Bluesky links resolve to Posts with a scoped account picker',async(
 test('CSV includes all saved types regardless of filters; About explains cookies and storage',async({page})=>{
   await load(page);await expect(page.locator('#export-saved')).toBeDisabled();await page.locator('.save-button').first().click();await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);await page.locator('.save-button').first().click();await search(page,'nothing matches');
   const promise=page.waitForEvent('download');await page.locator('#export-saved').click();const download=await promise,csv=await readFile(await download.path(),'utf8');expect(csv).toContain('"Title","Source","Published","URL","Content","Read"');expect(csv).toContain('https://publisher.example/');expect(csv).toContain('https://bsky.app/profile/');expect(csv.split('\r\n').filter(Boolean)).toHaveLength(3);
-  await page.locator('#about-button').click();await expect(page.locator('.about-content')).toContainText('does not set or read cookies');await expect(page.locator('.about-content')).toContainText('It does not send that information to a server or sync it to other browsers or devices.');await expect(page.locator('.about-content')).toContainText('collects no user data.');
+  await page.locator('#about-button').click();await expect(page.locator('.about-content')).toContainText('does not set or read cookies');await expect(page.locator('.about-content')).toContainText('It does not send that information to a server or sync it to other browsers or devices.');
 });
 
 

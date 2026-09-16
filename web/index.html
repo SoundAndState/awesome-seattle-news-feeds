@@ -45,7 +45,7 @@
 <section id="section-filter"><h3>Sections</h3><p class="hint">Choose a section to see publications that cover that area or topic. Individual stories may cover other topics.</p><nav id="categories" class="category-nav" aria-label="Sections"></nav></section>
 <h3 id="source-picker-title">Publications</h3><label class="search"><span class="sr-only" id="source-search-label">Find a publication</span><input id="source-search" type="search" placeholder="Find a publication…" aria-labelledby="source-search-label"></label><div id="source-choices" class="source-choices"></div><p id="source-choice-status" class="hint" role="status"></p>
 </div></dialog>
-<dialog id="article-dialog" aria-labelledby="article-title"><div class="dialog-top"><span class="eyebrow">Feed preview</span><button class="close-button" data-close="article-dialog" aria-label="Close story">×</button></div><div id="article-body"></div></dialog>
+<dialog id="article-dialog" aria-labelledby="article-title"><div class="dialog-top"><span class="eyebrow">Feed preview</span><div class="article-dialog-actions"><span id="article-save" hidden></span><button class="close-button" data-close="article-dialog" aria-label="Close story">×</button></div></div><div id="article-body"></div></dialog>
 <dialog id="feed-list-dialog" aria-labelledby="feed-list-title"><div class="dialog-top"><span>Download feed list</span><button class="close-button" data-close="feed-list-dialog" aria-label="Close feed list guide">×</button></div><div class="feed-list-content">
 <h2 id="feed-list-title" tabindex="-1">Use these feeds in another reader</h2>
 <p>Download the complete feed list, then import it into your RSS reader to follow these sources. The file uses OPML, a format for sharing lists of feeds.</p>
@@ -62,7 +62,7 @@
 </div><div class="feed-list-actions"><a class="primary-button" href="./feeds.opml" download="feeds.opml">Download feed list (.opml) <svg class="resource-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v10m-4-4 4 4 4-4M3 14h10"/></svg></a></div></dialog>
 <dialog id="about-dialog" aria-labelledby="about-title"><div class="dialog-top"><span>About this reader</span><button class="close-button" data-close="about-dialog" aria-label="Close about">×</button></div><div class="about-content">
 <h2 id="about-title" tabindex="-1">Sound &amp; State</h2>
-<h3>Why this reader exists</h3><p>Sound &amp; State was made for testing changes to the <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds</a> list. It is not a commercial service. The maintainer, (<a href="https://github.com/sayhiben">sayhiben</a>), runs it without a profit motive and collects no user data.</p>
+<h3>Why this reader exists</h3><p>Sound &amp; State was made for testing changes to the <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds</a> list. It is not a commercial service. The maintainer, (<a href="https://github.com/sayhiben">sayhiben</a>), runs it without a profit motive.</p>
 <h3>Privacy at a glance</h3><ul>
 <li><strong>The reader uses no cookies or analytics.</strong> It does not set or read cookies, track your visits with analytics, or load fonts from other services.</li>
 <li><strong>Your library stays in this browser.</strong> The reader stores your saved items, which items you have read, and your preferences in this browser. It does not send that information to a server or sync it to other browsers or devices. If you clear this site's browser data, you delete your library and preferences.</li>
@@ -70,6 +70,7 @@
 <li><strong>Other websites have their own privacy policies.</strong> When you follow a publisher or archive link, you open that website in a new tab. That site follows its own privacy policy and may use cookies.</li>
 </ul>
 <details><summary>How the reader connects and displays content</summary>
+<p>The maintainer disables stored request logs and tracing for the feed service. The service uses your IP address to limit repeated requests. Cloudflare and GitHub may still keep service and security records under their own policies. These settings do not guarantee that those companies retain no information about your visits.</p>
 <p>Your browser loads feeds through Cloudflare. If Cloudflare cannot get a feed from the publisher, it tries a previously saved copy, when one is available. If Cloudflare still cannot provide the feed, your browser tries to load it directly from the publisher.</p>
 <p>For that direct attempt to work, the publisher must allow other websites, including this reader, to read its feed in a browser. This permission is called cross-origin resource sharing (CORS). Without it, your browser blocks the reader from accessing the feed.</p>
 <p>When this reader loads a feed, your browser does not save any cookies the publisher sends. The reader keeps track of which items you have read in this browser and never sends that information to a server. When you search or change views, the reader puts your selection after the <code>#</code> in the page address. Your browser does not send that part of the address to GitHub.</p>

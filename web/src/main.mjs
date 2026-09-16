@@ -26,6 +26,11 @@ const external = (label, url, className = '') => {
 const articles = new Map(), states = new Map(), health = new Map(), pending = new Map();
 const readingStarted = new Set(), expandedPosts = new Set();
 const scrolling = scrollReader($('#stories'), markScrolledArticles);
+// Keep keyboard targets below the sticky preview header when its text wraps.
+const previewHeaderObserver = new ResizeObserver(() => {
+  $('#article-dialog').style.setProperty('--preview-header-height', `${$('#article-dialog .dialog-top').getBoundingClientRect().height}px`);
+});
+previewHeaderObserver.observe($('#article-dialog .dialog-top'));
 let catalog, feedMap, categoryMap, navigation, shownArticle, renderedSelection, renderTimer, session, retryAgain;
 let mode = 'articles', view = 'all', category = '', source = '', query = '', savedKind = 'all', unavailableOnly = false, limit = 60;
 let searchOpen = false, undoRead = [], dialogReturn, initial = true, catalogFallback = false;
@@ -60,7 +65,7 @@ function saveButton(article, className = 'save-button') {
     const saved = Boolean(states.get(article.id)?.saved);
     node.replaceChildren(bookmarkIcon(), el('span', '', saved ? 'Saved' : 'Save'));
     node.classList.toggle('is-saved', saved); node.setAttribute('aria-pressed', String(saved));
-    node.setAttribute('aria-label', `${saved ? 'Unsave' : 'Save'} ${article.title}`);
+    node.setAttribute('aria-label', `${saved ? 'Saved' : 'Save'} ${article.title || 'Untitled article'}${saved ? '; remove from Saved' : ''}`);
   }
   node.dataset.save = article.id; update(); return node;
 }
@@ -99,6 +104,16 @@ function itemDates(item) {
   }
   if (!node.childElementCount) node.textContent = 'No date in feed';
   return node;
+}
+function articleMetadata(item, className) {
+  const metadata = el('div', `${className} article-metadata`), attribution = el('div', 'article-attribution');
+  attribution.append(sourceLink(item));
+  const categoryId = item.feedIds.map(id => feedMap.get(id)?.category).find(Boolean);
+  const classification = {satire:'Satire', commentary:'Commentary & advocacy', official:'Official information'}[categoryId];
+  if (classification) attribution.append(el('span', `category-tag category-${categoryId}`, classification));
+  attribution.append(el('span', 'article-read-status', states.get(item.id)?.read ? 'Read' : 'Unread'));
+  metadata.append(attribution, itemDates(item));
+  return metadata;
 }
 function updateNavigation() {
   for (const node of document.querySelectorAll('[data-mode]')) node.setAttribute('aria-pressed', String(view !== 'saved' && node.dataset.mode === mode));
@@ -167,13 +182,13 @@ function renderPending() {
 
 function storyCard(item) {
   const state = states.get(item.id) || {}, social = itemMode(item, feedMap) === 'posts';
-  const card = el('article', `story ${social ? 'post' : ''} ${state.read ? 'is-read' : ''}`); card.dataset.article = item.id;
+  const card = el('article', `story ${social ? 'post' : 'article-card'} ${state.read ? 'is-read' : ''}`); card.dataset.article = item.id;
   if(social)card.setAttribute('aria-label', `Post by ${sourceName(item)}`);
-  const body = el('div', 'story-copy'), metadata = el('div', 'story-meta');
-  metadata.append(sourceLink(item));
-  if (!state.read) metadata.append(el('span','unread-dot','Unread'));
-  metadata.append(itemDates(item));
+  const body = el('div', 'story-copy'), metadata = social ? el('div', 'story-meta') : articleMetadata(item, 'story-meta');
   if (social) {
+    metadata.append(sourceLink(item));
+    if (!state.read) metadata.append(el('span','unread-dot','Unread'));
+    metadata.append(itemDates(item));
     body.append(metadata);
     const text = cleanText(item.html).replace(/\[contains quote post or other embedded content\]/gi,'').trim();
     const post = el('p','post-text', text || item.title);
@@ -188,15 +203,20 @@ function storyCard(item) {
     if (/\[contains quote post or other embedded content\]/i.test(cleanText(item.html))) body.append(el('p','embed-note','Open this post on Bluesky to see quoted posts and other embedded content.'));
     const preview = button('Preview post', 'text-button preview-post', () => navigate({article:item.id,limit},{keepScroll:true})); preview.dataset.story = item.id; body.append(preview);
   } else {
-    const title = el('h2'), open = button(item.title || 'Untitled article', 'story-title', () => navigate({article:item.id,limit},{keepScroll:true}));
+    const headline = item.title || 'Untitled article';
+    const title = el('h2'), open = button('', 'story-title', () => navigate({article:item.id,limit},{keepScroll:true}));
+    const cue = el('span', 'preview-cue', 'Preview →'); cue.setAttribute('aria-hidden', 'true');
+    open.append(el('span', 'headline-text', headline), ' ', cue);
+    open.setAttribute('aria-label', `Preview article: ${headline}`);
+    open.setAttribute('aria-haspopup', 'dialog'); open.setAttribute('aria-controls', 'article-dialog');
     open.dataset.story = item.id; title.append(open); body.append(title,metadata);
     if (item.excerpt) body.append(el('p','excerpt',item.excerpt));
   }
-  const categoryId = item.feedIds.map(id => feedMap.get(id)?.category).find(Boolean);
-  if (['satire','commentary','official'].includes(categoryId)) body.append(el('span',`category-tag category-${categoryId}`,{satire:'Satire',commentary:'Commentary & advocacy',official:'Official information'}[categoryId]));
   const footer = el('div','story-foot'); footer.append(...articleLinks(item));
   const actions = el('div','story-actions'); actions.append(saveButton(item),readButton(item));
-  body.append(footer,actions); card.append(body); return card;
+  if (social) body.append(footer,actions);
+  else {const utility = el('div', 'article-footer'); utility.append(footer,actions); body.append(utility);}
+  card.append(body); return card;
 }
 function friendlyError(error) {
   if (/403|denied/i.test(error)) return 'A server refused the feed request. Try opening the publisher’s website.';
@@ -278,7 +298,11 @@ async function setState(id,changes) {const state={...states.get(id),id,...change
 async function markScrolledArticles(ids) {
   const updates=ids.map(id=>({...states.get(id),id,read:true}));
   for (const state of updates) states.set(state.id,state);
-  for (const card of $('#stories').querySelectorAll('.story')) if(ids.includes(card.dataset.article)){card.classList.add('is-read');card.querySelector('.unread-dot')?.remove();updateReadButton(card.querySelector('[data-read]'),articles.get(card.dataset.article));}
+  for (const card of $('#stories').querySelectorAll('.story')) if(ids.includes(card.dataset.article)) {
+    card.classList.add('is-read'); card.querySelector('.unread-dot')?.remove();
+    const status = card.querySelector('.article-read-status'); if (status) status.textContent = 'Read';
+    updateReadButton(card.querySelector('[data-read]'), articles.get(card.dataset.article));
+  }
   updateNavigation(); await save('state',updates);
 }
 function renderFilterSources() {
@@ -323,6 +347,7 @@ function syncDialogs() {
     if(!$('#article-dialog').open) dialogReturn={kind:'story',id:current.article,index:[...$('#stories').children].findIndex(card=>card.dataset.article===current.article)};
     const item=articles.get(current.article);
     if(item){shownArticle=item.id;openArticle(item);} else {
+      $('#article-dialog').classList.remove('article-preview'); $('#article-save').replaceChildren(); $('#article-save').hidden=true;
       const heading=el('h2','article-title','The reader cannot find this item in your library'); heading.id='article-title'; heading.tabIndex=-1;
       $('#article-body').replaceChildren(heading,el('p','','It may appear after feeds finish loading. Close this preview to browse available items.'));
       if(!$('#article-dialog').open){$('#article-dialog').showModal();heading.focus();}
@@ -332,10 +357,14 @@ function syncDialogs() {
 function openArticle(item) {
   setState(item.id,{read:true});
   const social=itemMode(item,feedMap)==='posts', body=$('#article-body'); body.replaceChildren();
-  const title=el('h2','article-title',social?'Post preview':item.title); title.id='article-title'; title.tabIndex=-1;
-  if(!social && safeUrl(item.url))title.replaceChildren(external(item.title,item.url));
-  const metadata=el('p','article-meta'); metadata.append(sourceLink(item),itemDates(item));
-  const actions=el('div','article-links'); actions.append(...articleLinks(item),saveButton(item));
+  $('#article-dialog').classList.toggle('article-preview', !social);
+  const headerSave=$('#article-save'); headerSave.replaceChildren(); headerSave.hidden=social;
+  const title=el('h2','article-title',social?'Post preview':item.title||'Untitled article'); title.id='article-title'; title.tabIndex=-1;
+  if(!social && safeUrl(item.url))title.replaceChildren(external(item.title||'Untitled article',item.url));
+  const metadata=social?el('p','article-meta'):articleMetadata(item,'article-meta');
+  if(social)metadata.append(sourceLink(item),itemDates(item));
+  const actions=el('div','article-links'); actions.append(...articleLinks(item));
+  if(social)actions.append(saveButton(item)); else headerSave.append(saveButton(item));
   const content=el('div',`article-content ${social?'post-content':''}`); content.append(articleContent(item.html,item.url||feedMap.get(item.feedIds[0])?.website));
   if(!content.textContent.trim())content.append(el('p','','The publisher includes only a headline in this feed. Visit the publisher to read the story.'));
   body.append(title,metadata,actions,content);

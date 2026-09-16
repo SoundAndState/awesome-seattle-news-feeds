@@ -22,12 +22,31 @@
     }
   ],
   "observability": {
-    "enabled": false
+    "enabled": false,
+    "head_sampling_rate": 0,
+    "redact_query_string": true,
+    "logs": {
+      "enabled": false,
+      "invocation_logs": false,
+      "head_sampling_rate": 0,
+      "persist": false,
+      "destinations": []
+    },
+    "traces": {
+      "enabled": false,
+      "head_sampling_rate": 0,
+      "persist": false,
+      "destinations": []
+    }
   },
   "kv_namespaces": [
     {
       "binding": "FEED_SNAPSHOTS",
       "id": "e20c7a99ffb94842b611122997d2b46b"
     }
-  ]
+  ],
+  "send_metrics": false,
+  "logpush": false,
+  "tail_consumers": [],
+  "streaming_tail_consumers": []
 }

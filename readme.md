@@ -20,7 +20,7 @@
 - [South King County and South Sound](#south-king-county-and-south-sound)
 - [Washington State](#washington-state)
 - [Transportation and Urbanism](#transportation-and-urbanism)
-- [Food Culture and History](#food-culture-and-history)
+- [Food, Culture, and History](#food-culture-and-history)
 - [Commentary and Advocacy](#commentary-and-advocacy)
 - [Government and Public Services](#government-and-public-services)
 - [Community Organizations](#community-organizations)
@@ -32,24 +32,24 @@
 
 Citywide reporting and community journalism.
 
-- [Cascade PBS News](https://www.cascadepbs.org/news) - Regional public-media journalism and analysis, using the news feed instead of television-program listings. [RSS](https://www.cascadepbs.org/articles/rss/).
-- [Converge Media](https://www.whereweconverge.com/post) - Local reporting, interviews, and cultural coverage centered on Seattle-area Black communities. [RSS](https://www.whereweconverge.com/post?format=rss).
+- [Cascade PBS News](https://www.cascadepbs.org/news) - Regional reporting and analysis from the Cascade PBS public-media newsroom. [RSS](https://www.cascadepbs.org/articles/rss/).
+- [Converge Media](https://www.whereweconverge.com/post) - Pacific Northwest reporting, interviews, and cultural storytelling for Black and urban audiences. [RSS](https://www.whereweconverge.com/post?format=rss).
 - [GeekWire](https://www.geekwire.com) - Seattle-area technology, startups, major employers, and business reporting, with national technology coverage. [RSS](https://www.geekwire.com/feed/).
-- [HardPressed](https://www.hardpressed-info.com) - Independent Seattle-area investigations and public-records reporting. [RSS](https://www.hardpressed-info.com/rss/).
+- [HardPressed](https://www.hardpressed-info.com) - Independent investigations, public-records reporting, and commentary by Seattle journalist Glen Stellmacher. [RSS](https://www.hardpressed-info.com/rss/).
 - [KING 5 Local](https://www.king5.com) - Television newsroom reporting on Seattle and Western Washington from the local section. [RSS](https://www.king5.com/feeds/syndication/rss/news/local).
 - [KNKX News](https://www.knkx.org/news) - Public-radio reporting from Seattle, Tacoma, and the Northwest, with some national news. [RSS](https://www.knkx.org/news.rss).
 - [KUOW Local Stories](https://www.kuow.org/tags/local-stories) - Public-radio reporting on Seattle and Washington using the publisher's Local Stories feed. [RSS](https://www.kuow.org/tags/local-stories.rss).
 - [MyNorthwest Local](https://mynorthwest.com/local) - Regional radio-news reporting and commentary using the local section feed. [RSS](https://mynorthwest.com/local/feed).
-- [Northwest Asian Weekly](https://nwasianweekly.com) - Reporting on Asian American communities in Seattle and the Pacific Northwest, plus broader community issues. [RSS](https://nwasianweekly.com/feed/).
-- [PubliCola](https://publicola.com) - Independent reporting and analysis on city government, housing, transportation, and public policy. [RSS](https://publicola.com/feed/).
-- [Real Change](https://www.realchangenews.org) - Local reporting and commentary on homelessness, poverty, housing, and social justice. [RSS](https://www.realchangenews.org/rss.xml).
+- [Northwest Asian Weekly](https://nwasianweekly.com) - News and community coverage serving Asian American and Pacific Islander communities in Washington. [RSS](https://nwasianweekly.com/feed/).
+- [PubliCola](https://publicola.com) - Reader-supported reporting, analysis, and commentary on Seattle-area government, housing, transportation, and public policy. [RSS](https://publicola.com/feed/).
+- [Real Change](https://www.realchangenews.org) - Local reporting and commentary on housing, poverty, and social justice from a Seattle newspaper supporting vendor income. [RSS](https://www.realchangenews.org/rss.xml).
 - [Seattle Daily Journal of Commerce](https://www.djc.com) - Regional construction, development, real estate, and business news; full articles may require a subscription. [RSS](https://www.djc.com/cust/rss/rss2.php).
-- [The Bulletin](https://thebulletinsea.org) - Independent reporting and analysis on Seattle Public Schools and education. [RSS](https://thebulletinsea.org/rss/).
-- [The Burner](https://www.theburnerseattle.com) - Independent Seattle-area reporting and commentary on government and public accountability. [RSS](https://www.theburnerseattle.com/blog-feed.xml).
-- [The Seattle Medium](https://seattlemedium.com/category/local-news) - Local reporting on Seattle-area Black communities, using the local-news section feed. [RSS](https://seattlemedium.com/category/local-news/feed/).
-- [The Seattle Times Local Politics](https://www.seattletimes.com/seattle-news/politics) - Seattle and Washington government, elections, and civic affairs; the preferred narrower local feed. [RSS](https://www.seattletimes.com/seattle-news/politics/feed/).
-- [The Seattle Times Real Estate](https://www.seattletimes.com/business/real-estate) - Regional housing and development coverage mixed with broader property and home features. [RSS](https://www.seattletimes.com/real-estate/feed/).
-- [The Stranger](https://www.thestranger.com) - Alternative local reporting, arts, and progressive commentary, with some national coverage. [RSS](https://www.thestranger.com/feed/).
+- [The Bulletin](https://thebulletinsea.org) - Reporting and commentary on Seattle Public Schools from an independent publication founded by progressive SPS parents. [RSS](https://thebulletinsea.org/rss/).
+- [The Burner](https://www.theburnerseattle.com) - Seattle-area reporting and commentary on government and public accountability, with an explicitly left editorial outlook. [RSS](https://www.theburnerseattle.com/blog-feed.xml).
+- [The Seattle Medium](https://seattlemedium.com/category/local-news) - Seattle-area local news from an African American newspaper serving communities across the Pacific Northwest. [RSS](https://seattlemedium.com/category/local-news/feed/).
+- [The Seattle Times Local Politics](https://www.seattletimes.com/seattle-news/politics) - Seattle and Washington government, elections, and public policy from The Seattle Times Local Politics section. [RSS](https://www.seattletimes.com/seattle-news/politics/feed/).
+- [The Seattle Times Real Estate](https://www.seattletimes.com/business/real-estate) - Regional housing and development reporting, property news, and home features. [RSS](https://www.seattletimes.com/real-estate/feed/).
+- [The Stranger](https://www.thestranger.com) - Seattle reporting, arts and culture, and progressive commentary, with some national coverage. [RSS](https://www.thestranger.com/feed/).
 
 ## Seattle Neighborhoods
 
@@ -61,7 +61,7 @@ Neighborhood reporting, local businesses, and community events.
 - [PhinneyWood](https://phinneywood.com) - Phinney Ridge and Greenwood news, businesses, and community events. [RSS](https://phinneywood.com/feed/).
 - [Wallyhood](https://www.wallyhood.org) - Wallingford neighborhood news, businesses, and community events. [RSS](https://www.wallyhood.org/feed/).
 - [West Seattle Blog](https://westseattleblog.com) - Neighborhood news, local government, transportation, and community events. [RSS](https://westseattleblog.com/feed/).
-- [Westside Seattle](https://www.westsideseattle.com) - West Seattle and nearby Westside community reporting, businesses, and local events. [RSS](https://www.westsideseattle.com/rss.xml).
+- [Westside Seattle](https://www.westsideseattle.com) - Community news, businesses, and events in West Seattle, Ballard, Burien, White Center, Des Moines, and nearby areas. [RSS](https://www.westsideseattle.com/rss.xml).
 
 ## Eastside
 
@@ -75,7 +75,7 @@ Bellevue, Kirkland, Redmond, and surrounding communities.
 
 Shoreline, Lake Forest Park, Snohomish County, and communities farther north in Whatcom, Skagit, and San Juan counties.
 
-- [Lynnwood Times](https://lynnwoodtimes.com) - Local and state reporting with a Snohomish County focus. [RSS](https://lynnwoodtimes.com/feed/).
+- [Lynnwood Times](https://lynnwoodtimes.com) - Local and state reporting, opinion, and community announcements with a Snohomish County focus. [RSS](https://lynnwoodtimes.com/feed/).
 - [My Edmonds News](https://myedmondsnews.com) - Community reporting, local government, and events in Edmonds. [RSS](https://myedmondsnews.com/feed/).
 - [Salish Current](https://salish-current.org) - Community reporting, arts, and civic coverage for Whatcom, Skagit, and San Juan counties. [RSS](https://salish-current.org/feed/).
 - [Shoreline Area News](https://www.shorelineareanews.com) - Shoreline and Lake Forest Park reporting, community announcements, and local events. [Atom](https://www.shorelineareanews.com/feeds/posts/default).
@@ -90,7 +90,7 @@ Burien, SeaTac, Tukwila, White Center, and the Tacoma area.
 - [The SeaTac Blog](https://seatacblog.com) - Local government, transportation, businesses, and community news. [RSS](https://seatacblog.com/feed/).
 - [The Tukwila Blog](https://tukwilablog.com) - Local news, public safety, city government, and community events. [RSS](https://tukwilablog.com/feed/).
 - [The Waterland Blog](https://waterlandblog.com) - Des Moines reporting, local government, businesses, and community events. [RSS](https://waterlandblog.com/feed/).
-- [White Center Now](https://whitecenternow.com) - Neighborhood reporting, restaurants, events, and community developments. [RSS](https://whitecenternow.com/feed/).
+- [White Center Now](https://whitecenternow.com) - White Center neighborhood reporting, commentary, restaurants, events, and community developments. [RSS](https://whitecenternow.com/feed/).
 
 ## Washington State
 
@@ -106,12 +106,12 @@ State policy and reporting across Washington.
 
 Transit, cycling, housing, and street design.
 
-- [Seattle Bike Blog](https://www.seattlebikeblog.com) - Local cycling news, street safety reporting, and bicycle advocacy. [RSS](https://www.seattlebikeblog.com/feed/).
+- [Seattle Bike Blog](https://www.seattlebikeblog.com) - Independent Seattle cycling news and opinion, street-safety reporting, and bicycle advocacy. [RSS](https://www.seattlebikeblog.com/feed/).
 - [Seattle Transit Blog](https://seattletransitblog.com) - Regional transit reporting, service changes, and transit advocacy. [RSS](https://seattletransitblog.com/feed/).
 - [The Seattle Times Traffic Lab](https://www.seattletimes.com/seattle-news/transportation) - Regional transportation reporting on roads, transit, and travel policy. [RSS](https://www.seattletimes.com/transportation/feed/).
-- [The Urbanist](https://www.theurbanist.org) - Housing and transportation reporting alongside pro-transit and pro-density commentary. [RSS](https://www.theurbanist.org/rss/).
+- [The Urbanist](https://www.theurbanist.org) - Advocacy journalism on housing, transportation, and cities in the Puget Sound region. [RSS](https://www.theurbanist.org/rss/).
 
-## Food Culture and History
+## Food, Culture, and History
 
 Regional dining, arts, events, and local history.
 
@@ -119,31 +119,31 @@ Regional dining, arts, events, and local history.
 - [Seattle Met Eat and Drink](https://www.seattlemet.com/eat-and-drink) - Regional restaurant coverage, dining guides, and food-related features. [Atom](https://www.seattlemet.com/eat-and-drink/feed?format=atom).
 - [Seattle Now and Then](https://pauldorpat.com) - Local history, archival photographs, and present-day comparisons. [RSS](https://pauldorpat.com/feed/).
 - [Seattleite](https://seattleite.com) - Dining, travel, entertainment, and lifestyle coverage with a Seattle focus. [RSS](https://seattleite.com/feed/).
-- [The Seattle Star](https://www.seattlestar.net) - Local arts, literature, comics, and cultural commentary. [RSS](https://www.seattlestar.net/feed/).
+- [The Seattle Star](https://www.seattlestar.net) - Arts, literature, comics, and commentary from Seattle’s journal of politics and culture. [RSS](https://www.seattlestar.net/feed/).
 - [The Seattle Times Food and Drink](https://www.seattletimes.com/life/food-drink) - Restaurant coverage and food features, including national stories and recipes. [RSS](https://www.seattletimes.com/food-drink/feed/).
-- [Visit Seattle](https://visitseattle.org) - Visitor guides, events, and destination features from the region's tourism organization. [RSS](https://visitseattle.org/feed/).
+- [Visit Seattle](https://visitseattle.org) - Visitor guides, events, and destination features from Seattle and King County’s nonprofit tourism marketing organization. [RSS](https://visitseattle.org/feed/).
 
 ## Commentary and Advocacy
 
 Opinion, analysis, and advocacy.
 
-- [Cascadia Journal](https://www.cascadia-journal.com) - Andrew Engelson's regional news roundups, reporting, and opinionated essays, including Oregon and British Columbia. [RSS](https://www.cascadia-journal.com/rss/).
-- [DivestSPD](https://www.divestspd.com) - Police accountability investigations and commentary from an advocacy perspective. [RSS](https://www.divestspd.com/feed).
-- [Hacks & Wonks](https://www.officialhacksandwonks.com) - Washington politics interviews and episode transcripts hosted by political consultant Crystal Fincher; audio-first and published intermittently. [RSS](https://www.officialhacksandwonks.com/rss/).
+- [Cascadia Journal](https://www.cascadia-journal.com) - Andrew Engelson’s news roundups, reporting, and commentary on Cascadia politics, the environment, and arts, including Oregon and British Columbia. [RSS](https://www.cascadia-journal.com/rss/).
+- [DivestSPD](https://www.divestspd.com) - Seattle police-accountability reporting, commentary, and advocacy from a grassroots watchdog. [RSS](https://www.divestspd.com/feed).
+- [Hacks & Wonks](https://www.officialhacksandwonks.com) - Washington politics and policy interviews, podcasts, and transcripts hosted by political consultant Crystal Fincher. [RSS](https://www.officialhacksandwonks.com/rss/).
 - [HorsesAss](https://horsesass.org) - Progressive political commentary on Seattle, Washington, and national issues. [RSS](https://horsesass.org/feed/).
 - [NPI Cascadia Advocate](https://www.nwprogressive.org/weblog) - Progressive political research, analysis, and advocacy for Washington and the wider Northwest. [RSS](https://www.nwprogressive.org/weblog/feed).
 - [Post Alley](https://www.postalley.org) - Regional essays and commentary on politics, civic life, and culture, including national topics. [RSS](https://www.postalley.org/feed/).
-- [Puget Sound Anarchists](https://pugetsoundanarchists.org) - Movement reports, anonymous submissions, reposts, and commentary from anarchist contributors across the Northwest. [RSS](https://pugetsoundanarchists.org/feed/).
-- [Rondezvous](https://www.rondezvouswa.com) - Ron Davis's Seattle housing, transportation, and city-government commentary, including advocacy and personal campaign updates. [RSS](https://www.rondezvouswa.com/feed).
+- [Puget Sound Anarchists](https://pugetsoundanarchists.org) - Reports, analysis, reposts, and event announcements for Pacific Northwest anarchists and anti-authoritarians, including signed and anonymous submissions. [RSS](https://pugetsoundanarchists.org/feed/).
+- [Rondezvous](https://www.rondezvouswa.com) - Ron Davis’s progressive commentary on Seattle and Washington politics, housing, transportation, and city government. [RSS](https://www.rondezvouswa.com/feed).
 - [Seattle Schools Community Forum](https://saveseattleschools.blogspot.com) - Community news, commentary, and discussion about Seattle Public Schools, budgets, and education policy. [Atom](https://saveseattleschools.blogspot.com/feeds/posts/default).
 - [Seattle Solidarity Network](https://seasol.net) - First-person accounts of workplace and tenant campaigns from participating organizers. [RSS](https://seasol.net/feed/).
 - [Seattle Streets Alliance](https://www.streetsalliance.org/get-involved/blog) - Street safety and transportation advocacy from the organization formerly known as Seattle Neighborhood Greenways. [RSS](https://www.streetsalliance.org/get-involved/blog/feed/).
-- [Sightline Institute](https://www.sightline.org) - Research and advocacy on housing, land use, climate, and public policy across the Northwest. [RSS](https://www.sightline.org/feed/).
-- [The Harbor Rat Report](https://sabot.media) - Grays Harbor reporting mixed with movement essays, interviews, podcasts, and national and international organizing coverage. [RSS](https://sabot.media/feeds/projects/the-harbor-rat-report.xml).
+- [Sightline Institute](https://www.sightline.org) - Research and policy advocacy on housing, climate, democracy, and sustainability from a Cascadia think tank. [RSS](https://www.sightline.org/feed/).
+- [The Harbor Rat Report](https://sabot.media) - Grays Harbor reporting, essays, interviews, podcasts, and wider organizing coverage from the Sabot Media collective. [RSS](https://sabot.media/feeds/projects/the-harbor-rat-report.xml).
 - [The Seattle Times Opinion](https://www.seattletimes.com/opinion) - Editorials, guest essays, and opinion columns on regional and national issues. [RSS](https://www.seattletimes.com/opinion/feed/).
-- [The STAND](https://www.thestand.org) - Washington labor reporting and news roundups published by the Washington State Labor Council, AFL-CIO. [RSS](https://www.thestand.org/feed/).
-- [Through the Static](https://throughthestatic.org) - Seattle community reporting and commentary with a focus on local activism. [RSS](https://throughthestatic.org/feed/).
-- [Transit Riders Union](https://transitriders.org) - Transit access, labor campaigns, and political endorsements from a membership advocacy organization. [RSS](https://transitriders.org/feed/).
+- [The STAND](https://www.thestand.org) - Washington labor news, opinion, and roundups from a publication of the Washington State Labor Council, AFL-CIO. [RSS](https://www.thestand.org/feed/).
+- [Through the Static](https://throughthestatic.org) - Independent Pacific Northwest reporting and commentary with an antifascist editorial perspective. [RSS](https://throughthestatic.org/feed/).
+- [Transit Riders Union](https://transitriders.org) - Transit access, labor campaigns, and political endorsements from a member-run union of transit riders in Seattle, King County, and beyond. [RSS](https://transitriders.org/feed/).
 - [Urban Living](https://www.urbnlivn.com) - Seattle-area housing market analysis and property news from a real estate brokerage. [RSS](https://cms.urbnlivn.com/feed/).
 - [West Seattle Bike Connections](https://westseattlebikeconnections.org) - Cycling advocacy, neighborhood rides, and safer-street campaigns. [RSS](https://westseattlebikeconnections.org/feed/).
 
@@ -151,7 +151,7 @@ Opinion, analysis, and advocacy.
 
 Announcements from agencies, elected officials, public libraries, and service providers.
 
-- [City of Seattle News](https://news.seattle.gov) - Combined city department announcements; overlaps with the individual city feeds below. [RSS](https://news.seattle.gov/feed/).
+- [City of Seattle News](https://news.seattle.gov) - Announcements from City of Seattle departments, including posts that also appear in individual department feeds. [RSS](https://news.seattle.gov/feed/).
 - [King County Library System](https://kcls.org) - Library services, events, reading programs, and community announcements. [RSS](https://kcls.org/feed/).
 - [King County Metro Matters](https://kingcountymetro.blog) - Bus service changes, transit projects, and rider information from the transit agency. [RSS](https://kingcountymetro.blog/feed/).
 - [King County Parks Blog](https://kingcountyparks.org) - County parks, regional trails, recreation, and facilities updates. [RSS](https://kingcountyparks.org/feed/).
@@ -163,8 +163,8 @@ Announcements from agencies, elected officials, public libraries, and service pr
 - [Seattle Parks Parkways](https://parkways.seattle.gov) - City parks, recreation programs, facilities, and service announcements. [RSS](https://parkways.seattle.gov/feed/).
 - [Seattle Police Blotter](https://spdblotter.seattle.gov) - Police department incident reports and announcements; an agency account of events. [RSS](https://spdblotter.seattle.gov/feed/).
 - [Sound Transit Platform](https://www.soundtransit.org) - Rail and bus projects, service information, and agency updates. [RSS](https://www.soundtransit.org/blog/platform/feed).
-- [Washington Smoke Blog](https://wasmoke.blogspot.com) - Seasonal wildfire-smoke and air-quality updates from participating public agencies. [Atom](https://wasmoke.blogspot.com/feeds/posts/default).
-- [Washington State House Democrats](https://housedemocrats.wa.gov) - Partisan legislative caucus announcements and news roundups from House Democrats. [RSS](https://housedemocrats.wa.gov/feed/).
+- [Washington Smoke Blog](https://wasmoke.blogspot.com) - Seasonal wildfire-smoke and air-quality updates from state, county, and federal agencies, and Tribes. [Atom](https://wasmoke.blogspot.com/feeds/posts/default).
+- [Washington State House Democrats](https://housedemocrats.wa.gov) - Legislative announcements, statements, and news roundups from the Washington State House Democratic Caucus. [RSS](https://housedemocrats.wa.gov/feed/).
 - [WSDOT Blog](https://wsdotblog.blogspot.com) - State highway projects, ferries, travel information, and transportation updates. [Atom](https://feeds.feedburner.com/wsdotblog).
 
 ## Community Organizations
@@ -172,7 +172,7 @@ Announcements from agencies, elected officials, public libraries, and service pr
 Neighborhood associations and nonprofit announcements.
 
 - [Town Hall Seattle](https://townhallseattle.org) - Civic and cultural programming, organization news, and event announcements. [RSS](https://townhallseattle.org/feed/).
-- [West Seattle Junction Association](https://wsjunction.org) - Neighborhood business district events and organization announcements. [RSS](https://wsjunction.org/feed/).
+- [West Seattle Junction Association](https://wsjunction.org) - Business district events, services, and announcements from the West Seattle Junction Association. [RSS](https://wsjunction.org/feed/).
 
 ## Satire
 
@@ -188,13 +188,13 @@ Social feeds from Seattle-region journalists, publications, and commentators.
 - [Andrew Engelson (Bluesky)](https://bsky.app/profile/andyengelson.bsky.social) - Cascadia news, commentary, and organizing updates from the writer behind Cascadia Journal. [RSS](https://bsky.app/profile/did:plc:fwjwke65squvrpp5jgv3gxrj/rss).
 - [Daniel Beekman (Bluesky)](https://bsky.app/profile/dbeekman.bsky.social) - Seattle politics and community reporting from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:mrnizqztaonp6r32k3bbqp5g/rss).
 - [David Goldstein (Goldy) (Bluesky)](https://bsky.app/profile/goldy.horsesass.org) - Economic and political commentary from a Civic Ventures senior fellow and Pitchfork Economics co-host. [RSS](https://bsky.app/profile/did:plc:ap2panaty2yhp6dnwe7kyqxj/rss).
-- [David Kroman (Bluesky)](https://bsky.app/profile/kromandavid.bsky.social) - Seattle news and public-affairs commentary from a co-host of KUOW Soundside. [RSS](https://bsky.app/profile/did:plc:i2sx4ke5f3gs3zvfn7nm647v/rss).
+- [David Kroman (Bluesky)](https://bsky.app/profile/kromandavid.bsky.social) - Seattle news and public affairs from a co-host of KUOW’s Soundside. [RSS](https://bsky.app/profile/did:plc:i2sx4ke5f3gs3zvfn7nm647v/rss).
 - [DivestSPD (Bluesky)](https://bsky.app/profile/divestspd.bsky.social) - Seattle police-accountability investigations and advocacy from a community watchdog. [RSS](https://bsky.app/profile/did:plc:2bbp5fjgbsci4fvu2lx4dedx/rss).
 - [Doug Trumm (Bluesky)](https://bsky.app/profile/metropolitanglide.bsky.social) - Housing, transportation, and urban-policy commentary from the publisher of The Urbanist. [RSS](https://bsky.app/profile/did:plc:mq5viv4jtwtjr2clfpjn6o6z/rss).
 - [Erica C. Barnett (Bluesky)](https://bsky.app/profile/ericacbarnett.bsky.social) - Seattle politics and public-policy reporting from the cofounder and editor of PubliCola. [RSS](https://bsky.app/profile/did:plc:mvuk5qvagm4ljx3lwj4vmb6v/rss).
 - [Guy Oron (Bluesky)](https://bsky.app/profile/guyoron.net) - Seattle reporting and commentary from the journalist behind Gossip Guy. [RSS](https://bsky.app/profile/did:plc:4zshn55gkmcp6whwkuwatkbe/rss).
 - [Hannah Krieg (Bluesky)](https://bsky.app/profile/hannahkrieg.bsky.social) - Independent Seattle reporting and commentary from the writer behind The Burner. [RSS](https://bsky.app/profile/did:plc:ua6zefzngv2ogn7drkp5cdy6/rss).
-- [Jake Goldstein-Street (Bluesky)](https://bsky.app/profile/goldsteinstreet.bsky.social) - Washington government and legal reporting from a Washington State Standard journalist. [RSS](https://bsky.app/profile/did:plc:d5oaljwsxuvvkmxkhliscya3/rss).
+- [Jake Goldstein-Street (Bluesky)](https://bsky.app/profile/goldsteinstreet.bsky.social) - Washington policy and politics reporting from a Washington State Standard journalist. [RSS](https://bsky.app/profile/did:plc:d5oaljwsxuvvkmxkhliscya3/rss).
 - [Jim Brunner (Bluesky)](https://bsky.app/profile/jimbrunner.bsky.social) - Washington politics and government reporting from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:xhl3w4tvtedx35e5tlcvayzu/rss).
 - [KUOW Public Radio (Bluesky)](https://bsky.app/profile/kuow.org) - Puget Sound public-radio reporting and NPR news. [RSS](https://bsky.app/profile/did:plc:sgpikk2uv7446555gx2mawpz/rss).
 - [Megan Burbank (Bluesky)](https://bsky.app/profile/meganburbank.bsky.social) - Independent reporting and commentary on culture, politics, and abortion policy. [RSS](https://bsky.app/profile/did:plc:5wkuyf6gpcm5k4ipd223i75n/rss).
@@ -202,12 +202,12 @@ Social feeds from Seattle-region journalists, publications, and commentators.
 - [Naomi Ishisaka (Bluesky)](https://bsky.app/profile/naomiishisaka.bsky.social) - Social-justice columns and analysis from a Seattle Times columnist. [RSS](https://bsky.app/profile/did:plc:wdxoaq3hdmmp7i3wwbxaxn5i/rss).
 - [Nick Deshais (Bluesky)](https://bsky.app/profile/nickdeshais.bsky.social) - Transportation reporting from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:wtvs2quhyrvxcbkutyi6zfby/rss).
 - [Ryan Packer (Bluesky)](https://bsky.app/profile/typewriteralley.bsky.social) - Transportation reporting and advocacy from a contributing editor at The Urbanist. [RSS](https://bsky.app/profile/did:plc:6vatl6lhsv3ninhf7n4ssria/rss).
-- [Seattle Bike Blog (Bluesky)](https://bsky.app/profile/seattlebikeblog.com) - Seattle cycling news, street-safety coverage, and bicycle advocacy. [RSS](https://bsky.app/profile/did:plc:6wamrktolx6e37qid6666cu5/rss).
+- [Seattle Bike Blog (Bluesky)](https://bsky.app/profile/seattlebikeblog.com) - Independent Seattle cycling news and opinion, street-safety reporting, and bicycle advocacy. [RSS](https://bsky.app/profile/did:plc:6wamrktolx6e37qid6666cu5/rss).
 - [Shauna Sowersby (Bluesky)](https://bsky.app/profile/ssowersby.bsky.social) - Washington state-politics reporting from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:fkn3bqvtepdgxum2drbl6kla/rss).
-- [South Seattle Emerald (Bluesky)](https://bsky.app/profile/soseaemerald.bsky.social) - Community reporting and perspectives from South Seattle. [RSS](https://bsky.app/profile/did:plc:f4uz72wxjpztu3o27blzkqas/rss).
+- [South Seattle Emerald (Bluesky)](https://bsky.app/profile/soseaemerald.bsky.social) - Community-led journalism and perspectives from South Seattle. [RSS](https://bsky.app/profile/did:plc:f4uz72wxjpztu3o27blzkqas/rss).
 - [Sydney Brownstone (Bluesky)](https://bsky.app/profile/sydbrownstone.bsky.social) - Investigative reporting and accountability coverage from a Seattle Times journalist. [RSS](https://bsky.app/profile/did:plc:l6gbvxbrvw62diazih4xyb2t/rss).
 - [The Needling (Bluesky)](https://bsky.app/profile/theneedling.com) - Seattle satire and parody from a local humor publication. [RSS](https://bsky.app/profile/did:plc:pxsx6uebhylyfaxejchrr7ls/rss).
-- [The Stranger (Bluesky)](https://bsky.app/profile/thestranger.com) - Seattle reporting, commentary, arts, food, and culture. [RSS](https://bsky.app/profile/did:plc:ekf3smdiurl26mmjjzguxq64/rss).
+- [The Stranger (Bluesky)](https://bsky.app/profile/thestranger.com) - Seattle reporting, progressive commentary, arts, food, and culture. [RSS](https://bsky.app/profile/did:plc:ekf3smdiurl26mmjjzguxq64/rss).
 - [The Urbanist (Bluesky)](https://bsky.app/profile/theurbanist.org) - Advocacy journalism on housing, transportation, and cities in the Seattle region. [RSS](https://bsky.app/profile/did:plc:4cehxdx5hfam37oos3yh5tta/rss).
 - [Through the Static (Bluesky)](https://bsky.app/profile/throughthestatic.bsky.social) - Independent Pacific Northwest reporting and commentary with an antifascist editorial perspective. [RSS](https://bsky.app/profile/did:plc:4e2htgs6lcmsahh6oxast42p/rss).
 - [Washington State Standard (Bluesky)](https://bsky.app/profile/washingtonstatestandard.com) - Washington state-government reporting, policy analysis, and political commentary. [RSS](https://bsky.app/profile/did:plc:26375peygwnrijoepmy2fdcs/rss).

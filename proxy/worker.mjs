@@ -84,7 +84,6 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
       for (let hop = 0; hop <= 3; hop++) {
         const parsed = new URL(destination);
         if (parsed.protocol !== 'https:' || parsed.username || parsed.password || !destinations.has(parsed.href)) {
-          console.warn('Rejected feed redirect', {feed: match[1], destination: `${parsed.origin}${parsed.pathname}${parsed.search}`});
           const target = parsed.hostname === 'www.youtube.com' ? `${parsed.origin}${parsed.pathname}` : parsed.hostname;
           throw new Error(`The publisher sent this feed request to ${target}. This feed service cannot follow that address because its feed list does not include it.`);
         }
