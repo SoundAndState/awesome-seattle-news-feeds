@@ -11,10 +11,12 @@ Sound & State is a browser-based news reader and a curated catalog of Seattle-ar
 
 ## Sources of truth
 
-- [feeds.json](feeds.json) owns the catalog; [feeds.schema.json](feeds.schema.json) defines its structure. Read [CONTRIBUTING.md](CONTRIBUTING.md) for catalog selection and contribution criteria.
+- [data/feeds.json](data/feeds.json) owns the catalog; [data/feeds.schema.json](data/feeds.schema.json) defines its structure. Read [CONTRIBUTING.md](.github/CONTRIBUTING.md) for catalog selection and contribution criteria.
 - [scripts/render.mjs](scripts/render.mjs) and [scripts/build.mjs](scripts/build.mjs) generate `readme.md` and `feeds.opml`. Change the source or generator, never generated files by hand. Feed-only pull requests include the catalog change; Actions generates and commits the published files after merge.
 - [web/index.html](web/index.html) owns the reader shell and About text; [web/src/](web/src/) owns browser behavior and styles. [proxy/](proxy/) owns the Cloudflare feed service. Check reader-facing explanations when either behavior changes.
-- [site.config.json](site.config.json) owns site metadata and the service URL; [vite.config.mjs](vite.config.mjs) builds `dist/`. Consult [package.json](package.json) and the relevant [.github/workflows/](.github/workflows/) file for commands and automation.
+- [config/site.config.json](config/site.config.json) owns site metadata and the service URL; [config/vite.config.mjs](config/vite.config.mjs) builds `dist/`. Consult [package.json](package.json) and the relevant [.github/workflows/](.github/workflows/) file for commands and automation.
+
+Keep the generated `readme.md` and `feeds.opml` at the root so GitHub displays the catalog and existing OPML download links keep working. Keep package manifests, agent entry points, the license, and repository-wide dotfiles at the root for tool discovery. [config/playwright.config.mjs](config/playwright.config.mjs) and [config/wrangler.jsonc](config/wrangler.jsonc) configure browser tests and the feed service; use the npm commands below to load them.
 
 ## Constraints to preserve
 
@@ -56,7 +58,7 @@ For edits, combine the applicable rows below. After fixing a failure, rerun affe
 | JavaScript behavior | `npm test` |
 | Reader UI or copy | `npm run build:web`, then `npm run test:browser`. Install missing browsers with `npx playwright install chromium webkit`. Inspect affected phone and desktop layouts, including expanded dialogs and long text. |
 | Catalog or generation | `npm run ci`. Review generated differences without hand-editing them. |
-| Cloudflare feed service | `npm test` and `npx wrangler deploy --dry-run` |
+| Cloudflare feed service | `npm test` and `npm run check:proxy` |
 | Python tools or guidance checker | Install `scripts/requirements-agent-guidance.txt` in the active Python environment, then run `python -m unittest discover -s tests -p '*_test.py'`. Use `npm run check:feeds` when the task calls for live publisher checks. |
 
 `npm run ci` does not include the guidance checker, Python tests, browser tests, or Worker dry run; [the validation workflow](.github/workflows/validate.yml) runs those separately. Live publisher checks also run separately from deterministic tests.

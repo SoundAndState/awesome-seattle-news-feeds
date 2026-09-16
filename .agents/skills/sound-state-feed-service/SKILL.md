@@ -25,7 +25,7 @@ Record the tested feed ID, response or error, and where the request ran. A publi
 
 ## Verify before publication
 
-Run `npm test` and `npx wrangler deploy --dry-run` for service changes. Add focused behavior coverage in [tests/proxy.test.mjs](../../../tests/proxy.test.mjs), [tests/snapshots.test.mjs](../../../tests/snapshots.test.mjs), or [tests/network.test.mjs](../../../tests/network.test.mjs) for the changed contract. Run the root Python checks if changing Python tooling.
+Run `npm test` and `npm run check:proxy` for service changes. Add focused behavior coverage in [tests/proxy.test.mjs](../../../tests/proxy.test.mjs), [tests/snapshots.test.mjs](../../../tests/snapshots.test.mjs), or [tests/network.test.mjs](../../../tests/network.test.mjs) for the changed contract. Run the root Python checks if changing Python tooling.
 
 The dry run checks the Worker bundle; it does not demonstrate live Cloudflare behavior. `npm run deploy:proxy` and `node scripts/refresh-snapshots.mjs` write to Cloudflare and are not validation substitutes. Use them only when that external action is part of the authorized task; do not request approval again when the user already authorized it.
 

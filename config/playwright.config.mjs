@@ -1,8 +1,10 @@
 import {defineConfig, devices} from '@playwright/test';
+import {fileURLToPath} from 'node:url';
 import site from './site.config.json' with {type: 'json'};
 const baseURL = `http://127.0.0.1:4173${site.base}`;
 export default defineConfig({
-  testDir: './tests/browser',
+  testDir: '../tests/browser',
+  outputDir: '../test-results',
   fullyParallel: true,
   workers: 2,
   timeout: 45000,
@@ -11,5 +13,5 @@ export default defineConfig({
     {name: 'chromium', use: {browserName: 'chromium'}},
     {name: 'webkit-mobile', use: {...devices['iPhone 13'], browserName: 'webkit'}},
   ],
-  webServer: {command: 'node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173', url: baseURL, reuseExistingServer: !process.env.CI},
+  webServer: {command: 'npm run preview', cwd: fileURLToPath(new URL('../', import.meta.url)), url: baseURL, reuseExistingServer: !process.env.CI},
 });

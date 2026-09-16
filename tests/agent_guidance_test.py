@@ -18,7 +18,7 @@ class AgentGuidanceTests(unittest.TestCase):
         self.write('package.json', '{"scripts":{"check:agents":"python checker.py"}}')
         self.write('AGENTS.md', f'# Instructions\n[Example]({self.canonical})\n')
         self.write('CLAUDE.md', '@AGENTS.md\n')
-        self.write('CONTRIBUTING.md', '[Rules](AGENTS.md#instructions)\n`npm run check:agents`\n')
+        self.write('.github/CONTRIBUTING.md', '[Rules](../AGENTS.md#instructions)\n`npm run check:agents`\n')
         self.write(self.canonical, header + '# Example\n')
         self.write(self.adapter, header + f'[Workflow](../../../{self.canonical})\n')
 
@@ -32,9 +32,9 @@ class AgentGuidanceTests(unittest.TestCase):
         self.assertEqual(check_guidance(self.root), {'files': 6, 'local_links_and_anchors': 4, 'skill_pairs': 1})
 
     def test_missing_file_and_heading_fail(self):
-        for link in ['missing.md', 'AGENTS.md#missing']:
+        for link in ['../missing.md', '../AGENTS.md#missing']:
             with self.subTest(link=link):
-                self.write('CONTRIBUTING.md', f'[Broken]({link})\n')
+                self.write('.github/CONTRIBUTING.md', f'[Broken]({link})\n')
                 with self.assertRaisesRegex(GuidanceError, 'missing (link target|heading)'):
                     check_guidance(self.root)
 
@@ -65,9 +65,9 @@ class AgentGuidanceTests(unittest.TestCase):
                     self.write(name, old)
 
     def test_unknown_command_and_outside_link_fail(self):
-        for content, error in [('`npm run missing`', 'unknown npm script'), ('[Outside](../outside.md)', 'leaves the repository')]:
+        for content, error in [('`npm run missing`', 'unknown npm script'), ('[Outside](../../outside.md)', 'leaves the repository')]:
             with self.subTest(content=content):
-                self.write('CONTRIBUTING.md', content)
+                self.write('.github/CONTRIBUTING.md', content)
                 with self.assertRaisesRegex(GuidanceError, error):
                     check_guidance(self.root)
 

@@ -29,7 +29,7 @@ Use these entry points selectively; a label change does not require reading ever
 
 ## Verify the result
 
-Run `npm test` for JavaScript behavior changes. For UI or copy edits, run `npm run build:web` before `npm run test:browser`; Playwright previews the built output. [playwright.config.mjs](../../../playwright.config.mjs) defines desktop Chromium and mobile WebKit. Install missing browsers with `npx playwright install chromium webkit`.
+Run `npm test` for JavaScript behavior changes. For UI or copy edits, run `npm run build:web` before `npm run test:browser`; Playwright previews the built output. [playwright.config.mjs](../../../config/playwright.config.mjs) defines desktop Chromium and mobile WebKit. Install missing browsers with `npx playwright install chromium webkit`.
 
 Use the feed fixtures and request interception in [tests/browser/reader.spec.mjs](../../../tests/browser/reader.spec.mjs) for reproducible scenarios. Do not turn browser tests into live publisher checks. Exercise the changed state, long text, phone and desktop layouts, and relevant expanded dialogs. Inspect the rendered result when layout changes; source inspection alone is not visual verification.
 

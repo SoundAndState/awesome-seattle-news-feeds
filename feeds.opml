@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated from feeds.json. Run npm run build. -->
+<!-- Generated from data/feeds.json. Run npm run build. -->
 <opml version="2.0">
   <head>
     <title>Awesome Seattle News Feeds</title>

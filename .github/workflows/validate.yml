@@ -43,12 +43,12 @@ jobs:
         run: npm run lint:opml
       - name: Test generation and validation failures
         run: npm test
-      - name: Test feed health parser
+      - name: Test Python tools and guidance checker
         run: python -m unittest discover -s tests -p '*_test.py'
       - name: Build public reader
         run: npm run build:web
       - name: Check Worker bundle
-        run: npx wrangler deploy --dry-run
+        run: npm run check:proxy
         env:
           WRANGLER_SEND_METRICS: 'false'
       - name: Install desktop and mobile test browsers

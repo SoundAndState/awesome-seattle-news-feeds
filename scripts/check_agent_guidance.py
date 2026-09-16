@@ -75,7 +75,7 @@ def check_guidance(root=ROOT):
     adapters = {path.parent.name: path for path in (root / '.claude/skills').glob('*/SKILL.md')}
     require(canonical, 'No canonical repository skills found')
     require(canonical.keys() == adapters.keys(), 'Canonical and Claude skill directories must match')
-    files = [root / name for name in ['AGENTS.md', 'CLAUDE.md', 'CONTRIBUTING.md']]
+    files = [root / name for name in ['AGENTS.md', 'CLAUDE.md', '.github/CONTRIBUTING.md']]
     files += sorted((root / 'docs').glob('agent-guidance*.md'))
     for directory in ['.agents/skills', '.claude/skills']:
         files += sorted((root / directory).rglob('*.md'))
