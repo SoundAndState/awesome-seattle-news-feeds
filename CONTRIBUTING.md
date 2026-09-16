@@ -16,6 +16,8 @@ Use Node.js 24 or newer. `npm ci && npm run ci` builds and validates the catalog
 
 For reader changes, run `npx playwright install chromium webkit` and `npm run test:browser`. Tests cover desktop Chromium and mobile WebKit. For live feed checks, use Python 3.12 or newer and `npm run check:feeds`.
 
+Follow the [writing guidelines](AGENTS.md#writing-for-readers) when changing reader text. [AGENTS.md](AGENTS.md) contains shared agent instructions; [CLAUDE.md](CLAUDE.md) imports them. The [agent guidance design note](docs/agent-guidance.md) explains the repository skills, supporting research, and how to maintain them.
+
 Deployment uses the repository's `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` Actions secrets. Local deployment reads the same variables from the environment or ignored `.env`; run `npm run deploy:proxy`. Never commit credentials.
 
 Contributions use [CC0 1.0](license). Publisher content retains its original copyright.
