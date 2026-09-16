@@ -42,7 +42,7 @@
     },
     {
       "id": "culture",
-      "title": "Food Culture and History",
+      "title": "Food, Culture, and History",
       "description": "Regional dining, arts, events, and local history."
     },
     {
@@ -89,7 +89,7 @@
       "website": "https://www.thestranger.com",
       "feed": "https://www.thestranger.com/feed/",
       "category": "regional",
-      "description": "Alternative local reporting, arts, and progressive commentary, with some national coverage.",
+      "description": "Seattle reporting, arts and culture, and progressive commentary, with some national coverage.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -103,7 +103,7 @@
       "website": "https://transitriders.org",
       "feed": "https://transitriders.org/feed/",
       "category": "commentary",
-      "description": "Transit access, labor campaigns, and political endorsements from a membership advocacy organization.",
+      "description": "Transit access, labor campaigns, and political endorsements from a member-run union of transit riders in Seattle, King County, and beyond.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -138,7 +138,7 @@
       "website": "https://seattlemedium.com/category/local-news",
       "feed": "https://seattlemedium.com/category/local-news/feed/",
       "category": "regional",
-      "description": "Local reporting on Seattle-area Black communities, using the local-news section feed.",
+      "description": "Seattle-area local news from an African American newspaper serving communities across the Pacific Northwest.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -187,7 +187,7 @@
       "website": "https://www.seattletimes.com/seattle-news/politics",
       "feed": "https://www.seattletimes.com/seattle-news/politics/feed/",
       "category": "regional",
-      "description": "Seattle and Washington government, elections, and civic affairs; the preferred narrower local feed.",
+      "description": "Seattle and Washington government, elections, and public policy from The Seattle Times Local Politics section.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -212,7 +212,7 @@
       "website": "https://nwasianweekly.com",
       "feed": "https://nwasianweekly.com/feed/",
       "category": "regional",
-      "description": "Reporting on Asian American communities in Seattle and the Pacific Northwest, plus broader community issues.",
+      "description": "News and community coverage serving Asian American and Pacific Islander communities in Washington.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -234,7 +234,7 @@
       "website": "https://thebulletinsea.org",
       "feed": "https://thebulletinsea.org/rss/",
       "category": "regional",
-      "description": "Independent reporting and analysis on Seattle Public Schools and education.",
+      "description": "Reporting and commentary on Seattle Public Schools from an independent publication founded by progressive SPS parents.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -256,7 +256,7 @@
       "website": "https://housedemocrats.wa.gov",
       "feed": "https://housedemocrats.wa.gov/feed/",
       "category": "official",
-      "description": "Partisan legislative caucus announcements and news roundups from House Democrats.",
+      "description": "Legislative announcements, statements, and news roundups from the Washington State House Democratic Caucus.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -304,7 +304,7 @@
       "website": "https://www.seattlebikeblog.com",
       "feed": "https://www.seattlebikeblog.com/feed/",
       "category": "transport",
-      "description": "Local cycling news, street safety reporting, and bicycle advocacy.",
+      "description": "Independent Seattle cycling news and opinion, street-safety reporting, and bicycle advocacy.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -326,7 +326,7 @@
       "website": "https://lynnwoodtimes.com",
       "feed": "https://lynnwoodtimes.com/feed/",
       "category": "north-sound",
-      "description": "Local and state reporting with a Snohomish County focus.",
+      "description": "Local and state reporting, opinion, and community announcements with a Snohomish County focus.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -420,7 +420,7 @@
       "website": "https://publicola.com",
       "feed": "https://publicola.com/feed/",
       "category": "regional",
-      "description": "Independent reporting and analysis on city government, housing, transportation, and public policy.",
+      "description": "Reader-supported reporting, analysis, and commentary on Seattle-area government, housing, transportation, and public policy.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -444,7 +444,7 @@
       "website": "https://www.cascadepbs.org/news",
       "feed": "https://www.cascadepbs.org/articles/rss/",
       "category": "regional",
-      "description": "Regional public-media journalism and analysis, using the news feed instead of television-program listings.",
+      "description": "Regional reporting and analysis from the Cascade PBS public-media newsroom.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -457,7 +457,7 @@
       "website": "https://news.seattle.gov",
       "feed": "https://news.seattle.gov/feed/",
       "category": "official",
-      "description": "Combined city department announcements; overlaps with the individual city feeds below.",
+      "description": "Announcements from City of Seattle departments, including posts that also appear in individual department feeds.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -468,7 +468,7 @@
       "website": "https://www.divestspd.com",
       "feed": "https://www.divestspd.com/feed",
       "category": "commentary",
-      "description": "Police accountability investigations and commentary from an advocacy perspective.",
+      "description": "Seattle police-accountability reporting, commentary, and advocacy from a grassroots watchdog.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -501,7 +501,7 @@
       "website": "https://www.theurbanist.org",
       "feed": "https://www.theurbanist.org/rss/",
       "category": "transport",
-      "description": "Housing and transportation reporting alongside pro-transit and pro-density commentary.",
+      "description": "Advocacy journalism on housing, transportation, and cities in the Puget Sound region.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -514,7 +514,7 @@
       "website": "https://throughthestatic.org",
       "feed": "https://throughthestatic.org/feed/",
       "category": "commentary",
-      "description": "Seattle community reporting and commentary with a focus on local activism.",
+      "description": "Independent Pacific Northwest reporting and commentary with an antifascist editorial perspective.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -550,7 +550,7 @@
       "website": "https://www.whereweconverge.com/post",
       "feed": "https://www.whereweconverge.com/post?format=rss",
       "category": "regional",
-      "description": "Local reporting, interviews, and cultural coverage centered on Seattle-area Black communities.",
+      "description": "Pacific Northwest reporting, interviews, and cultural storytelling for Black and urban audiences.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -647,7 +647,7 @@
       "website": "https://wsjunction.org",
       "feed": "https://wsjunction.org/feed/",
       "category": "community",
-      "description": "Neighborhood business district events and organization announcements.",
+      "description": "Business district events, services, and announcements from the West Seattle Junction Association.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -669,7 +669,7 @@
       "website": "https://www.theburnerseattle.com",
       "feed": "https://www.theburnerseattle.com/blog-feed.xml",
       "category": "regional",
-      "description": "Independent Seattle-area reporting and commentary on government and public accountability.",
+      "description": "Seattle-area reporting and commentary on government and public accountability, with an explicitly left editorial outlook.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -680,7 +680,7 @@
       "website": "https://www.seattlestar.net",
       "feed": "https://www.seattlestar.net/feed/",
       "category": "culture",
-      "description": "Local arts, literature, comics, and cultural commentary.",
+      "description": "Arts, literature, comics, and commentary from Seattle’s journal of politics and culture.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -691,7 +691,7 @@
       "website": "https://www.hardpressed-info.com",
       "feed": "https://www.hardpressed-info.com/rss/",
       "category": "regional",
-      "description": "Independent Seattle-area investigations and public-records reporting.",
+      "description": "Independent investigations, public-records reporting, and commentary by Seattle journalist Glen Stellmacher.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -738,7 +738,7 @@
       "website": "https://whitecenternow.com",
       "feed": "https://whitecenternow.com/feed/",
       "category": "south-sound",
-      "description": "Neighborhood reporting, restaurants, events, and community developments.",
+      "description": "White Center neighborhood reporting, commentary, restaurants, events, and community developments.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -762,7 +762,7 @@
       "website": "https://wasmoke.blogspot.com",
       "feed": "https://wasmoke.blogspot.com/feeds/posts/default",
       "category": "official",
-      "description": "Seasonal wildfire-smoke and air-quality updates from participating public agencies.",
+      "description": "Seasonal wildfire-smoke and air-quality updates from state, county, and federal agencies, and Tribes.",
       "format": "Atom",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -817,7 +817,7 @@
       "website": "https://www.realchangenews.org",
       "feed": "https://www.realchangenews.org/rss.xml",
       "category": "regional",
-      "description": "Local reporting and commentary on homelessness, poverty, housing, and social justice.",
+      "description": "Local reporting and commentary on housing, poverty, and social justice from a Seattle newspaper supporting vendor income.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -894,7 +894,7 @@
       "website": "https://www.sightline.org",
       "feed": "https://www.sightline.org/feed/",
       "category": "commentary",
-      "description": "Research and advocacy on housing, land use, climate, and public policy across the Northwest.",
+      "description": "Research and policy advocacy on housing, climate, democracy, and sustainability from a Cascadia think tank.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -905,7 +905,7 @@
       "website": "https://www.cascadia-journal.com",
       "feed": "https://www.cascadia-journal.com/rss/",
       "category": "commentary",
-      "description": "Andrew Engelson's regional news roundups, reporting, and opinionated essays, including Oregon and British Columbia.",
+      "description": "Andrew Engelson’s news roundups, reporting, and commentary on Cascadia politics, the environment, and arts, including Oregon and British Columbia.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -916,7 +916,7 @@
       "website": "https://www.rondezvouswa.com",
       "feed": "https://www.rondezvouswa.com/feed",
       "category": "commentary",
-      "description": "Ron Davis's Seattle housing, transportation, and city-government commentary, including advocacy and personal campaign updates.",
+      "description": "Ron Davis’s progressive commentary on Seattle and Washington politics, housing, transportation, and city government.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -927,7 +927,7 @@
       "website": "https://pugetsoundanarchists.org",
       "feed": "https://pugetsoundanarchists.org/feed/",
       "category": "commentary",
-      "description": "Movement reports, anonymous submissions, reposts, and commentary from anarchist contributors across the Northwest.",
+      "description": "Reports, analysis, reposts, and event announcements for Pacific Northwest anarchists and anti-authoritarians, including signed and anonymous submissions.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -938,7 +938,7 @@
       "website": "https://www.officialhacksandwonks.com",
       "feed": "https://www.officialhacksandwonks.com/rss/",
       "category": "commentary",
-      "description": "Washington politics interviews and episode transcripts hosted by political consultant Crystal Fincher; audio-first and published intermittently.",
+      "description": "Washington politics and policy interviews, podcasts, and transcripts hosted by political consultant Crystal Fincher.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -960,7 +960,7 @@
       "website": "https://sabot.media",
       "feed": "https://sabot.media/feeds/projects/the-harbor-rat-report.xml",
       "category": "commentary",
-      "description": "Grays Harbor reporting mixed with movement essays, interviews, podcasts, and national and international organizing coverage.",
+      "description": "Grays Harbor reporting, essays, interviews, podcasts, and wider organizing coverage from the Sabot Media collective.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -993,7 +993,7 @@
       "website": "https://www.thestand.org",
       "feed": "https://www.thestand.org/feed/",
       "category": "commentary",
-      "description": "Washington labor reporting and news roundups published by the Washington State Labor Council, AFL-CIO.",
+      "description": "Washington labor news, opinion, and roundups from a publication of the Washington State Labor Council, AFL-CIO.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -1015,7 +1015,7 @@
       "website": "https://www.westsideseattle.com",
       "feed": "https://www.westsideseattle.com/rss.xml",
       "category": "neighborhoods",
-      "description": "West Seattle and nearby Westside community reporting, businesses, and local events.",
+      "description": "Community news, businesses, and events in West Seattle, Ballard, Burien, White Center, Des Moines, and nearby areas.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -1094,7 +1094,7 @@
       "website": "https://visitseattle.org",
       "feed": "https://visitseattle.org/feed/",
       "category": "culture",
-      "description": "Visitor guides, events, and destination features from the region's tourism organization.",
+      "description": "Visitor guides, events, and destination features from Seattle and King County’s nonprofit tourism marketing organization.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -1118,7 +1118,7 @@
       "website": "https://www.seattletimes.com/business/real-estate",
       "feed": "https://www.seattletimes.com/real-estate/feed/",
       "category": "regional",
-      "description": "Regional housing and development coverage mixed with broader property and home features.",
+      "description": "Regional housing and development reporting, property news, and home features.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []
@@ -1270,7 +1270,7 @@
       "website": "https://bsky.app/profile/kromandavid.bsky.social",
       "feed": "https://bsky.app/profile/did:plc:i2sx4ke5f3gs3zvfn7nm647v/rss",
       "category": "bluesky",
-      "description": "Seattle news and public-affairs commentary from a co-host of KUOW Soundside.",
+      "description": "Seattle news and public affairs from a co-host of KUOW’s Soundside.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -1348,7 +1348,7 @@
       "website": "https://bsky.app/profile/goldsteinstreet.bsky.social",
       "feed": "https://bsky.app/profile/did:plc:d5oaljwsxuvvkmxkhliscya3/rss",
       "category": "bluesky",
-      "description": "Washington government and legal reporting from a Washington State Standard journalist.",
+      "description": "Washington policy and politics reporting from a Washington State Standard journalist.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -1400,7 +1400,7 @@
       "website": "https://bsky.app/profile/seattlebikeblog.com",
       "feed": "https://bsky.app/profile/did:plc:6wamrktolx6e37qid6666cu5/rss",
       "category": "bluesky",
-      "description": "Seattle cycling news, street-safety coverage, and bicycle advocacy.",
+      "description": "Independent Seattle cycling news and opinion, street-safety reporting, and bicycle advocacy.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -1426,7 +1426,7 @@
       "website": "https://bsky.app/profile/soseaemerald.bsky.social",
       "feed": "https://bsky.app/profile/did:plc:f4uz72wxjpztu3o27blzkqas/rss",
       "category": "bluesky",
-      "description": "Community reporting and perspectives from South Seattle.",
+      "description": "Community-led journalism and perspectives from South Seattle.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
@@ -1478,7 +1478,7 @@
       "website": "https://bsky.app/profile/thestranger.com",
       "feed": "https://bsky.app/profile/did:plc:ekf3smdiurl26mmjjzguxq64/rss",
       "category": "bluesky",
-      "description": "Seattle reporting, commentary, arts, food, and culture.",
+      "description": "Seattle reporting, progressive commentary, arts, food, and culture.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": [
