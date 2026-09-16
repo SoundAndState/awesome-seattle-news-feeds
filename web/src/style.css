@@ -237,21 +237,20 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-footer .story-actions {gap:.5rem;margin:0;inline-size:max-content;max-inline-size:100%;min-inline-size:min(100%,14.25rem)}
 .article-footer > :empty {display:none}
 .article-card .publisher-link,.article-preview .publisher-link {max-inline-size:100%;min-block-size:2.75rem;font:500 .875rem/1.4 var(--article-sans);color:var(--article-ink);text-decoration-color:currentColor}
-.article-card :is(.save-button,.read-button),.article-preview .save-button {min-block-size:2.75rem;padding:.375rem .625rem;gap:.5rem;border-color:var(--article-border);border-radius:2px;color:var(--article-ink);font:500 .875rem/1.4 var(--article-sans)}
+.article-card :is(.save-button,.read-button),.article-preview :is(.save-button,.close-button) {min-block-size:2.75rem;padding:.375rem .625rem;gap:.5rem;border-color:var(--article-border);border-radius:2px;color:var(--article-ink);font:500 .875rem/1.4 var(--article-sans)}
 .article-card .save-button,.article-preview .save-button {min-inline-size:5.25rem}
 .article-card .read-button {min-inline-size:min(8.5rem,calc(100cqi - 1.25rem))}
-.article-card :is(.save-button,.read-button):hover,.article-preview .save-button:hover {background:var(--article-wash)}
+.article-card :is(.save-button,.read-button):hover,.article-preview :is(.save-button,.close-button):hover {background:var(--article-wash)}
 .article-card :is(.bookmark-icon,.read-icon),.article-preview .bookmark-icon {flex-shrink:0;width:1.125rem;height:1.125rem}
 .article-card :where(button,a):focus-visible,.article-preview :where(button,a,[tabindex]):focus-visible {outline:3px solid var(--article-ink);outline-offset:3px}
 
-.article-dialog-actions {display:contents}
-.article-preview {--article-paper:#fbfaf7;container:article-preview / inline-size;scroll-padding-block-start:calc(var(--preview-header-height,4.5rem) + .75rem)}
+.article-preview {--article-paper:#fbfaf7;container:article-preview / inline-size;overflow:hidden;scroll-padding:0}
+.article-preview[open] {display:flex;flex-direction:column}
 .article-preview::backdrop {background:#252522c9}
-.article-preview .dialog-top {flex-wrap:wrap;gap:.5rem 1rem;background:var(--article-paper);font:400 .875rem/1.5 var(--article-sans)}
-.article-preview .article-dialog-actions {display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-inline-start:auto;max-inline-size:100%}
+.article-preview .article-dialog-actions {display:flex;flex-wrap:wrap;flex-shrink:0;align-items:center;justify-content:space-between;gap:.5rem;padding:.75rem 1.25rem;border-block-start:1px solid var(--article-rule);background:var(--article-paper)}
 .article-preview #article-save {display:flex;max-inline-size:100%}
-.article-preview .close-button {border-color:var(--article-border);color:var(--article-ink)}
-.article-preview #article-body {max-inline-size:42.5rem;margin-inline:auto;padding:1.5rem 1.25rem 2rem}
+.article-preview .close-button {width:auto;height:auto;min-inline-size:5.25rem;margin-inline-start:auto}
+.article-preview #article-body {flex:1;min-block-size:0;inline-size:100%;max-inline-size:42.5rem;margin-inline:auto;padding:1.5rem 1.25rem 2rem;overflow-y:auto;overscroll-behavior:contain;scroll-padding-block:.75rem}
 .article-preview .article-title {margin:0 0 .5rem;font:600 1.75rem/1.2 var(--article-serif);color:var(--article-ink);hyphens:none}
 .article-preview .article-links {gap:.5rem 1rem;margin:.75rem 0 1.5rem}
 .article-preview .article-links:empty {display:none}
@@ -271,7 +270,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-preview-footer .article-links {margin:0 0 .5rem}
 .article-preview .feed-note {font:400 .875rem/1.5 var(--article-sans);border:0;margin:0;padding:0}
 .article-preview :where(button,a,[tabindex]) {scroll-margin-block:.75rem}
-.article-preview .dialog-top button {scroll-margin-block:0}
+.article-preview .article-dialog-actions button {scroll-margin-block:0;max-inline-size:100%;overflow-wrap:anywhere}
 
 @container article-card (min-width:40rem) {
   .article-card .story-copy {--card-padding-block:1.5rem}

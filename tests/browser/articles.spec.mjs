@@ -120,31 +120,48 @@ test('article rows adapt to their available width and preserve full metadata and
   await expect(page.locator('.article-content')).toContainText('only a headline');
 });
 
-test('preview Save remains reachable and updates both the dialog and the card', async ({page}) => {
+test('preview leads with the full title and keeps Save and Close reachable while reading', async ({page}) => {
   await load(page);
-  await page.locator('.story-title').first().click();
-  const dialog = page.locator('#article-dialog'), save = dialog.locator('.dialog-top .save-button');
+  const headline = page.locator('.story-title').nth(1);
+  await headline.click();
+  const dialog = page.locator('#article-dialog'), body = dialog.locator('#article-body'), save = dialog.locator('.article-dialog-actions .save-button'), close = dialog.getByRole('button', {name:'Close story'});
+  await expect(dialog).toHaveAccessibleName(headlines[1]);
+  await expect(dialog.locator('#article-title')).toBeFocused();
   await expect(dialog.locator('.article-links .save-button')).toHaveCount(0);
   for (const size of [{width:1440,height:900}, {width:390,height:844}, {width:320,height:568}, {width:760,height:360}]) {
     await page.setViewportSize(size);
-    await dialog.evaluate(node => node.scrollTop = node.scrollHeight);
+    await body.evaluate(node => node.scrollTop = 0);
+    await expect.poll(async () => {
+      const frame = await dialog.boundingBox(), title = await dialog.locator('#article-title').boundingBox();
+      return title.y - frame.y < 30 && title.width > Math.min(frame.width - 80, 600);
+    }).toBe(true);
     await expect(save).toBeInViewport();
-    await expect(dialog.locator('.close-button')).toBeInViewport();
+    await expect(close).toBeInViewport();
+    const controls = await dialog.locator('.article-dialog-actions').boundingBox();
+    await body.evaluate(node => node.scrollTop = node.scrollHeight);
+    expect(await dialog.locator('.article-dialog-actions').boundingBox()).toEqual(controls);
+    await expect(save).toBeInViewport();
+    await expect(close).toBeInViewport();
     await noHorizontalOverflow(page, '#article-dialog');
+    await noHorizontalOverflow(page, '#article-body');
   }
   await save.focus();
   await page.keyboard.press('Enter');
   await expect(save).toHaveAttribute('aria-pressed', 'true');
   await expect(save).toBeFocused();
   await page.keyboard.press('Escape');
-  await expect(page.locator('.story-title').first()).toBeFocused();
-  await expect(page.locator('.article-card .save-button').first()).toHaveAttribute('aria-pressed', 'true');
-  await page.locator('.story-title').first().click();
+  await expect(headline).toBeFocused();
+  await expect(page.locator('.article-card .save-button').nth(1)).toHaveAttribute('aria-pressed', 'true');
+  await headline.click();
+  expect(await body.evaluate(node => node.scrollTop)).toBe(0);
   await save.click();
   await expect(save).toHaveAttribute('aria-pressed', 'false');
+  await close.click();
+  await expect(dialog).toBeHidden();
+  await expect(headline).toBeFocused();
 });
 
-test('expanded text and long attribution reflow while preview links remain below its header', async ({page}) => {
+test('expanded text and long attribution reflow while preview links stay clear of its controls', async ({page}) => {
   await load(page);
   await page.setViewportSize({width:320,height:568});
   // Use the real DOM to stress arbitrary publisher names without changing catalog verification.
@@ -157,13 +174,15 @@ test('expanded text and long attribution reflow while preview links remain below
   await expect(page.locator('.story-title').first()).toBeVisible();
   await page.locator('.story-title').first().click();
   await noHorizontalOverflow(page, '#article-dialog');
+  await noHorizontalOverflow(page, '#article-body');
   await expect(page.locator('.article-content')).toContainText(paragraph);
   for (const link of await page.locator('#article-body a').all()) {
     await link.focus();
     await expect(link).toBeInViewport();
     await expect.poll(async () => {
-      const header = await page.locator('#article-dialog .dialog-top').boundingBox(), box = await link.boundingBox();
-      return box.y >= header.y + header.height - 1;
+      const body = await page.locator('#article-body').boundingBox(), controls = await page.locator('.article-dialog-actions').boundingBox(), box = await link.boundingBox();
+      if (box.height > body.height) return box.y >= body.y - 1 && box.y < controls.y;
+      return box.y >= body.y - 1 && box.y + box.height <= controls.y + 1;
     }).toBe(true);
   }
   await expect(page.locator('#article-dialog .close-button')).toBeInViewport();
