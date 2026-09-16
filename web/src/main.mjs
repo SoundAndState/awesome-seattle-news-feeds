@@ -26,11 +26,6 @@ const external = (label, url, className = '') => {
 const articles = new Map(), states = new Map(), health = new Map(), pending = new Map();
 const readingStarted = new Set(), expandedPosts = new Set();
 const scrolling = scrollReader($('#stories'), markScrolledArticles);
-// Keep keyboard targets below the sticky preview header when its text wraps.
-const previewHeaderObserver = new ResizeObserver(() => {
-  $('#article-dialog').style.setProperty('--preview-header-height', `${$('#article-dialog .dialog-top').getBoundingClientRect().height}px`);
-});
-previewHeaderObserver.observe($('#article-dialog .dialog-top'));
 let catalog, feedMap, categoryMap, navigation, shownArticle, renderedSelection, renderTimer, session, retryAgain, loadingRun;
 let mode = 'articles', view = 'all', category = '', source = '', query = '', savedKind = 'all', unavailableOnly = false, limit = 60;
 let searchOpen = false, undoRead = [], dialogReturn, initial = true, catalogFallback = false;
@@ -365,7 +360,7 @@ function syncDialogs() {
   if(current.article && (shownArticle!==current.article || !$('#article-dialog').open)) {
     if(!$('#article-dialog').open) dialogReturn={kind:'story',id:current.article,index:[...$('#stories').children].findIndex(card=>card.dataset.article===current.article)};
     if(item){shownArticle=item.id;openArticle(item);} else {
-      $('#article-dialog').classList.remove('article-preview'); $('#article-save').replaceChildren(); $('#article-save').hidden=true;
+      $('#article-save').replaceChildren(); $('#article-save').hidden=true;
       const heading=el('h2','article-title','The reader cannot find this item in your library'); heading.id='article-title'; heading.tabIndex=-1;
       $('#article-body').replaceChildren(heading,el('p','','It may appear after feeds finish loading. Close this preview to browse available items.'));
       if(!$('#article-dialog').open){$('#article-dialog').showModal();heading.focus();}
@@ -375,8 +370,7 @@ function syncDialogs() {
 function openArticle(item) {
   setState(item.id,{read:true});
   const body=$('#article-body'); body.replaceChildren();
-  $('#article-dialog').classList.add('article-preview');
-  const headerSave=$('#article-save'); headerSave.replaceChildren(saveButton(item)); headerSave.hidden=false;
+  const previewSave=$('#article-save'); previewSave.replaceChildren(saveButton(item)); previewSave.hidden=false;
   const title=el('h2','article-title',item.title||'Untitled article'); title.id='article-title'; title.tabIndex=-1;
   if(safeUrl(item.url))title.replaceChildren(external(item.title||'Untitled article',item.url));
   const metadata=articleMetadata(item,'article-meta',true);
@@ -389,7 +383,7 @@ function openArticle(item) {
   if(cleanText(content.innerHTML).length >= 220)footer.append(links);
   footer.append(el('p','feed-note','The publisher may include only part of the article in its feed. Choose Read at publisher for the full article and any updates.'));
   body.append(footer);
-  $('#article-dialog').showModal();$('#article-dialog').scrollTop=0;title.focus({preventScroll:true});
+  $('#article-dialog').showModal();body.scrollTop=0;title.focus({preventScroll:true});
 }
 
 async function fetchFeed(feed,run) {
