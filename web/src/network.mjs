@@ -35,15 +35,20 @@ export async function loadFeed(feed, proxy, {fetchImpl = fetch, timeout = 22000}
       throw new Error(typeof info.error === 'string' ? info.error : `HTTP ${response.status}.`);
     }
     const text = await feedText(response);
-    try {return normalizeFeed(text, feed);}
+    try {return {
+      items: normalizeFeed(text, feed),
+      transport: direct ? 'direct' : response.headers.get('x-feed-transport') === 'snapshot' ? 'snapshot' : 'proxy',
+      fetchedAt: direct ? 0 : Date.parse(response.headers.get('x-feed-fetched-at')) || 0,
+      stale: !direct && response.headers.get('x-feed-stale') === 'true',
+    };}
     catch (error) {throw new Error(`Invalid feed: ${error.message}`);}
   }
   let proxyFailure;
-  try {return {items: await attempt(`${proxy}/feed/${feed.id}`, false), transport: 'proxy'};}
+  try {return await attempt(`${proxy}/feed/${feed.id}`, false);}
   catch (error) {proxyFailure = failure(error, false);}
   try {
     const url = safeUrl(feed.feed);
     if (!url || new URL(url).protocol !== 'https:') throw new Error('A secure feed URL is required.');
-    return {items: await attempt(url, true), transport: 'direct'};
+    return await attempt(url, true);
   } catch (error) {throw new Error(`Proxy: ${proxyFailure} Direct: ${failure(error, true)}`);}
 }

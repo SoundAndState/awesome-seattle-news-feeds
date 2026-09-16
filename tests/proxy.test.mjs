@@ -53,6 +53,18 @@ test('publisher privacy and freshness directives are respected', () => {
   assert.equal(cachePolicy(new Headers({'Cache-Control':'max-age=3600'})),'public, max-age=900');
 });
 
+test('cache freshness follows header precedence and subtracts age before the 15-minute cap', () => {
+  const now = Date.UTC(2026, 8, 15, 12);
+  const date = new Date(now).toUTCString();
+  const policy = values => cachePolicy(new Headers(values), now);
+  assert.equal(policy({'Cache-Control':'public, max-age=900', Expires:'Sun, 19 Nov 1978 05:00:00 GMT', Date:date}), 'public, max-age=900');
+  assert.equal(policy({'Cache-Control':'max-age=0, s-maxage=300', Date:date}), 'public, max-age=300');
+  assert.equal(policy({'Cache-Control':'max-age=3600', Age:'1200'}), 'public, max-age=900');
+  assert.equal(policy({Date:date, Expires:new Date(now+120000).toUTCString(), Age:'20'}), 'public, max-age=100');
+  assert.equal(policy({'Cache-Control':'max-age=120', Date:new Date(now-30000).toUTCString(), Age:'10'}), 'public, max-age=90');
+  for (const value of ['max-age=-1','max-age=1.5','max-age=60, max-age=120']) assert.equal(policy({'Cache-Control':value}), 'no-store');
+});
+
 test('a stalled publisher times out without holding the request open', async () => {
   const handle = createHandler({feedMap, timeoutMs: 10, fetcher: async (_url, {signal}) => new Promise((_resolve, reject) => {signal.addEventListener('abort', () => reject(new Error('Aborted')));})});
   const response = await handle(request(), env);

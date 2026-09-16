@@ -1,19 +1,12 @@
 import catalog from '../feeds.json' with {type: 'json'};
+import {cachePolicy} from './cache.mjs';
+import {snapshotResponse} from './snapshots.mjs';
+export {cachePolicy} from './cache.mjs';
 
 const feeds = new Map(catalog.feeds.map(feed => [feed.id, feed]));
 const MAX_BYTES = 5 * 1024 * 1024;
 const REDIRECT_CODES = new Set([301, 302, 303, 307, 308]);
 const USER_AGENT = 'Mozilla/5.0 (compatible; SeattleNewsReader/1.0; +https://github.com/sayhiben/awesome-seattle-news-feeds)';
-
-export function cachePolicy(headers, now = Date.now()) {
-  const policy = headers.get('cache-control') || '';
-  if (/\b(private|no-store|no-cache)\b/i.test(policy) || headers.has('set-cookie') || headers.get('vary')?.includes('*')) return 'no-store';
-  const durations = [...policy.matchAll(/(?:s-maxage|max-age)\s*=\s*"?(\d+)/gi)].map(match => Number(match[1]));
-  const expires = Date.parse(headers.get('expires'));
-  if (Number.isFinite(expires)) durations.push(Math.floor((expires - now) / 1000));
-  const ttl = Math.max(0, Math.min(900, ...durations) - Number(headers.get('age') || 0));
-  return ttl ? `public, max-age=${ttl}` : 'no-store';
-}
 
 export async function readLimited(response, maxBytes = MAX_BYTES) {
   if (Number(response.headers.get('content-length')) > maxBytes) {
@@ -55,7 +48,7 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
     const errorResponse = (message, status) => Response.json({error: message}, {status, headers});
     if (origin && !allowed.has(origin)) return errorResponse('Origin is not allowed.', 403);
     if (origin) headers.set('Access-Control-Allow-Origin', origin);
-    headers.set('Access-Control-Expose-Headers', 'Retry-After, X-Feed-Fetched-At, CF-Cache-Status');
+    headers.set('Access-Control-Expose-Headers', 'Retry-After, X-Feed-Fetched-At, X-Feed-Transport, X-Feed-Stale, CF-Cache-Status');
     const url = new URL(request.url);
     const match = /^\/feed\/([a-z0-9-]+)$/.exec(url.pathname);
     const feed = match && feedMap.get(match[1]);
@@ -75,6 +68,13 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
       headers.set('Retry-After', '60');
       return errorResponse('Too many requests. Try again shortly.', 429);
     }
+    const unavailable = async message => {
+      try {
+        const snapshot = await snapshotResponse(feed, match[1], env.FEED_SNAPSHOTS, headers);
+        if (snapshot) return snapshot;
+      } catch { /* A storage outage must not hide the publisher's error or prevent a browser retry. */ }
+      return errorResponse(message, 502);
+    };
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -85,7 +85,8 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
         const parsed = new URL(destination);
         if (parsed.protocol !== 'https:' || parsed.username || parsed.password || !destinations.has(parsed.href)) {
           console.warn('Rejected feed redirect', {feed: match[1], destination: `${parsed.origin}${parsed.pathname}${parsed.search}`});
-          throw new Error(`Publisher redirected this feed to ${parsed.hostname}, outside its approved feed addresses.`);
+          const target = parsed.hostname === 'www.youtube.com' ? `${parsed.origin}${parsed.pathname}` : parsed.hostname;
+          throw new Error(`Publisher redirected this feed to ${target}, outside its approved feed addresses.`);
         }
         upstream = await fetcher(parsed.href, {
           redirect: 'manual', signal: controller.signal,
@@ -99,21 +100,21 @@ export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 150
       }
       if (upstream.headers.get('sg-captcha') === 'challenge' || upstream.headers.get('cf-mitigated') === 'challenge') {
         await upstream.body?.cancel();
-        return errorResponse('Publisher requires a browser challenge instead of returning RSS to the proxy.', 502);
+        return await unavailable('Publisher requires a browser challenge instead of returning RSS to the proxy.');
       }
       if (upstream.status !== 200) {
         await upstream.body?.cancel();
-        return errorResponse(upstream.status === 403 ? 'Publisher denied the proxy request (HTTP 403).' : `Publisher returned HTTP ${upstream.status}.`, 502);
+        return await unavailable(upstream.status === 403 ? 'Publisher denied the proxy request (HTTP 403).' : `Publisher returned HTTP ${upstream.status}.`);
       }
       const bytes = await readLimited(upstream);
       const head = new TextDecoder().decode(bytes.subarray(0, 16384));
-      if (!bytes.length || !/<(?:rss\b|feed\b|(?:[\w-]+:)?RDF\b)/i.test(head) || /<!DOCTYPE|<!ENTITY/i.test(head)) return errorResponse('Publisher did not return a readable feed.', 502);
+      if (!bytes.length || !/<(?:rss\b|feed\b|(?:[\w-]+:)?RDF\b)/i.test(head) || /<!DOCTYPE|<!ENTITY/i.test(head)) return await unavailable('Publisher did not return a readable feed.');
       headers.set('Content-Type', 'application/xml; charset=utf-8');
       headers.set('Cache-Control', cachePolicy(upstream.headers));
       headers.set('X-Feed-Fetched-At', new Date().toISOString());
       return new Response(bytes, {headers});
     } catch (error) {
-      return errorResponse(controller.signal.aborted ? 'Publisher took too long to respond.' : error.message === 'fetch failed' ? 'Publisher could not be reached.' : error.message, 502);
+      return await unavailable(controller.signal.aborted ? 'Publisher took too long to respond.' : error.message === 'fetch failed' ? 'Publisher could not be reached.' : error.message);
     } finally {
       clearTimeout(timer);
     }

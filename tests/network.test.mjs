@@ -13,6 +13,13 @@ test('successful proxy requests never contact the publisher directly', async () 
   assert.deepEqual(urls,[`${proxy}/feed/example`]);
   assert.equal(result.transport,'proxy'); assert.equal(result.items.length,1);
 });
+
+test('a shared fallback reports its original collection time without a redundant browser fetch', async () => {
+  let requests=0;
+  const timestamp='2026-09-15T12:00:00.000Z';
+  const result=await loadFeed(feed,proxy,{fetchImpl:async()=>{requests++;return new Response(xml,{headers:{'X-Feed-Transport':'snapshot','X-Feed-Fetched-At':timestamp,'X-Feed-Stale':'true'}});}});
+  assert.equal(requests,1); assert.equal(result.transport,'snapshot'); assert.equal(result.stale,true); assert.equal(result.fetchedAt,Date.parse(timestamp));
+});
 test('proxy refusals, invalid feed bodies, and timeouts retry directly without credentials or referrer', async () => {
   for (const response of [() => new Response(JSON.stringify({error:'Publisher denied proxy request.'}),{status:502}), () => new Response('<html>Challenge</html>'), () => {throw new DOMException('Timed out','TimeoutError');}]) {
     const requests=[];

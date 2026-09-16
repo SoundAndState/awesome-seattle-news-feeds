@@ -29,6 +29,71 @@ test('catalog loads automatically; search, source and section filters work', asy
   await page.locator('#clear-section').click(); await page.locator('[data-category="satire"]').click();
   await expect(page.locator('.story')).toHaveCount(1); await expect(page.locator('.category-satire')).toBeVisible();
 });
+
+test('Back and Forward restore sections, source filters, searches and reloads', async ({page}) => {
+  await load(page);
+  await page.locator('[data-category="transport"]').click();
+  await expect(page).toHaveURL(/#section=transport$/);
+  await page.locator('#source-filter').selectOption('seattle-transit-blog');
+  await page.getByRole('searchbox').pressSequentially('Seattle parks');
+  await page.getByRole('searchbox').blur();
+  await page.locator('[data-view="sources"]').click();
+  await page.goBack();
+  await expect(page.locator('#source-filter')).toHaveValue('seattle-transit-blog');
+  await expect(page.getByRole('searchbox')).toHaveValue('Seattle parks');
+  await expect(page.locator('.story')).toHaveCount(1);
+  await page.goBack();
+  await expect(page.getByRole('searchbox')).toHaveValue('');
+  await expect(page.locator('#source-filter')).toHaveValue('seattle-transit-blog');
+  await page.goBack();
+  await expect(page.locator('[data-category="transport"]')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('#source-filter')).toHaveValue('');
+  await page.goForward(); await page.goForward();
+  await expect(page.getByRole('searchbox')).toHaveValue('Seattle parks');
+  await page.reload();
+  await expect(page.getByRole('searchbox')).toHaveValue('Seattle parks');
+  await expect(page.locator('#source-filter')).toHaveValue('seattle-transit-blog');
+  await expect(page.locator('.story')).toHaveCount(1);
+});
+
+test('Back closes previews and About, Forward reopens them, and closing avoids history traps', async ({page}) => {
+  await load(page);
+  const story=page.locator('.story-title').nth(8);
+  await story.scrollIntoViewIfNeeded();
+  const y=await page.evaluate(()=>scrollY);
+  const id=await story.getAttribute('data-story');
+  await story.click(); await expect(page.locator('#article-dialog')).toBeVisible();
+  await page.goBack(); await expect(page.locator('#article-dialog')).toBeHidden();
+  expect(Math.abs(await page.evaluate(()=>scrollY)-y)).toBeLessThan(5);
+  await page.goForward(); await expect(page.locator('#article-dialog')).toBeVisible();
+  await page.keyboard.press('Escape'); await expect(page.locator('#article-dialog')).toBeHidden();
+  await expect(page).not.toHaveURL(/article=/);
+  await page.getByRole('button',{name:'About this reader'}).click();
+  await page.goBack(); await expect(page.locator('#about-dialog')).toBeHidden();
+  await page.goForward(); await expect(page.locator('#about-dialog')).toBeVisible();
+  await page.getByRole('button',{name:'Close about'}).click();
+  await expect(page.locator('#about-dialog')).toBeHidden();
+  // A directly opened article URL closes locally rather than leaving the reader.
+  await page.goto(`./#article=${encodeURIComponent(id)}`);
+  await expect(page.locator('#article-dialog')).toBeVisible();
+  await page.getByRole('button',{name:'Close story'}).click();
+  await expect(page.locator('#article-dialog')).toBeHidden();
+  await expect(page.locator('.story')).toHaveCount(60);
+});
+
+test('Back restores unavailable feeds after visiting Bluesky', async ({page}) => {
+  await load(page,true);
+  await page.getByRole('button',{name:`${newsCount} feeds unavailable · View sources`}).click();
+  await page.unroute('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*');
+  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',route=>route.fulfill({contentType:'application/xml',body:fixture(route.request().url().split('/').pop())}));
+  await page.locator('[data-category="bluesky"]').click();
+  await expect(page.locator('.story')).toHaveCount(socialCount);
+  await page.goBack();
+  await expect(page.locator('h1')).toHaveText('Unavailable feeds');
+  await expect(page.locator('.source-card')).toHaveCount(newsCount);
+  await page.goForward();
+  await expect(page.locator('.story')).toHaveCount(socialCount);
+});
 test('read and saved state persist; feed HTML cannot execute or load trackers', async ({page}) => {
   const trackers = []; page.on('request', req => {if(req.url().includes('tracker.example')) trackers.push(req.url());});
   await load(page);
@@ -118,6 +183,9 @@ test('Bluesky loads on selection and stays out of the default news timeline afte
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.reload();
   await expect(page.locator('#all-count')).toHaveText(String(newsCount));
+  await expect(page.locator('[data-view="saved"]')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('.category-bluesky')).toHaveCount(1);
+  await page.locator('.wordmark').click();
   await expect(page.locator('.category-bluesky')).toHaveCount(0);
   expect(socialRequests).toHaveLength(socialCount);
 });

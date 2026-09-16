@@ -5,6 +5,7 @@ import {openLibrary, save, removeArticles} from './storage.mjs';
 import {loadFeed} from './network.mjs';
 import {articlesCsv} from './export.mjs';
 import {scrollReader} from './scroll-read.mjs';
+import {readerNavigation} from './navigation.mjs';
 
 const $ = selector => document.querySelector(selector);
 const el = (tag, className, text) => {
@@ -24,6 +25,8 @@ const health = new Map();
 const scrolling = scrollReader($('#stories'), markScrolledArticles);
 let catalog, feedMap, categoryMap, renderedSelection;
 let view = 'all', category = '', source = '', query = '', unavailableOnly = false, limit = 60, refreshing = false, refreshAgain = false, done = 0, total = 0, renderTimer;
+let navigation, shownArticle;
+function navigate(changes, options) {navigation?.go(changes, options);}
 const shortNames = {'regional': 'Seattle & regional', 'neighborhoods': 'Seattle neighborhoods', 'eastside': 'Eastside', 'north-sound': 'North Sound', 'south-sound': 'South Sound', 'statewide': 'Washington state', 'transport': 'Transit & urbanism', 'culture': 'Food, culture & history', 'commentary': 'Commentary & advocacy', 'official': 'Government & services', 'community': 'Community organizations', 'satire': 'Satire', 'bluesky': 'Bluesky'};
 
 function notice(message) {$('#notice').textContent = message; $('#notice').hidden = !message;}
@@ -112,7 +115,7 @@ function renderProgress() {
   node.replaceChildren();
   if (refreshing) node.append(el('span', 'refresh-status', `Checking feeds · ${done} of ${total}`));
   else node.append(el('span', '', 'Healthy feeds are checked at most every 15 minutes. Refresh retries unavailable feeds.'));
-  if (failures) node.append(button(`${failures} feed${failures === 1 ? '' : 's'} unavailable · View sources`, 'text-button status-link', () => {view = 'sources'; unavailableOnly = true; query = ''; $('#search').value = ''; render();}));
+  if (failures) node.append(button(`${failures} feed${failures === 1 ? '' : 's'} unavailable · View sources`, 'text-button status-link', () => navigate({view: 'sources', unavailableOnly: true, query: ''})));
 }
 
 function storyCard(article, index) {
@@ -129,7 +132,7 @@ function storyCard(article, index) {
   metadata.append(time);
   if (!state.read) metadata.append(el('span', 'unread-dot', 'Unread'));
   const title = el('h2');
-  const open = button(article.title || 'Untitled story', 'story-title', () => openArticle(article));
+  const open = button(article.title || 'Untitled story', 'story-title', () => navigate({article: article.id, limit}, {keepScroll: true}));
   open.dataset.story = article.id; title.append(open);
   const categoryId = feedMap.get(article.feedIds[0])?.category;
   const footer = el('div', 'story-foot');
@@ -151,8 +154,9 @@ function sourceCard(feed) {
   card.append(top, title, el('p', '', feed.description));
   const detail = status?.error ? `${status.error} ${status.lastSuccess ? `Last loaded ${dateLabel(status.lastSuccess, true)}.` : 'Visit the publisher while its feed is unavailable.'}` : status?.lastSuccess ? `Last loaded ${dateLabel(status.lastSuccess, true)} · ${status.items} stories in feed${status.transport === 'direct' ? ' · Direct from publisher' : ''}` : 'Refresh to check this feed.';
   card.append(el('p', 'source-detail', detail));
+  if (!status?.error && status?.transport === 'snapshot') card.append(el('p', 'source-detail', `Cached fallback collected ${dateLabel(status.fetchedAt || status.lastSuccess, true)}. Live publisher requests from Cloudflare failed. Updates are scheduled every 15 minutes; cached copies expire within 6 hours.`));
   const links = el('div', 'source-links');
-  links.append(button('View stories →', 'text-button', () => {source = feed.id; category = ''; view = 'all'; unavailableOnly = false; query = ''; $('#search').value = ''; limit = 60; render(); refreshFeeds();}), external('Website ↗', feed.website), external('RSS ↗', feed.feed));
+  links.append(button('View stories →', 'text-button', () => {navigate({source: feed.id, category: '', view: 'all', unavailableOnly: false, query: ''}); refreshFeeds();}), external('Website ↗', feed.website), external('RSS ↗', feed.feed));
   card.append(links); return card;
 }
 
@@ -200,6 +204,7 @@ function render() {
   }
   renderedSelection = selection;
   scrolling.sync();
+  syncDialogs();
 }
 
 function showEmpty(title, description) {
@@ -224,6 +229,23 @@ async function markScrolledArticles(ids) {
   await save('state', updates);
 }
 
+function syncDialogs() {
+  const route = navigation?.current;
+  if (!route) return;
+  if (!route.about && $('#about-dialog').open) $('#about-dialog').close();
+  if (!route.article && $('#article-dialog').open) {$('#article-dialog').close(); shownArticle = null;}
+  if (route.about && !$('#about-dialog').open) $('#about-dialog').showModal();
+  if (route.article && (shownArticle !== route.article || (!$('#article-dialog').open))) {
+    const article = articles.get(route.article);
+    if (article) {shownArticle = article.id; openArticle(article);}
+    else {
+      $('#article-body').replaceChildren(el('h2', 'article-title', 'Story not in this browser’s library'), el('p', '', 'It may appear after feeds finish loading. Close this preview to browse available stories.'));
+      $('#article-body h2').id = 'article-title';
+      if (!$('#article-dialog').open) $('#article-dialog').showModal();
+    }
+  }
+}
+
 function openArticle(article) {
   setState(article.id, {read: true});
   const body = $('#article-body'); body.replaceChildren();
@@ -243,7 +265,7 @@ function openArticle(article) {
 async function fetchFeed(feed) {
   const previous = health.get(feed.id) || {id: feed.id};
   try {
-    const {items: fresh, transport} = await loadFeed(feed, __PROXY_URL__);
+    const {items: fresh, transport, fetchedAt, stale} = await loadFeed(feed, __PROXY_URL__);
     const merged = fresh.map(item => {
       const existing = articles.get(item.id);
       const title = cleanText(item.title);
@@ -253,7 +275,7 @@ async function fetchFeed(feed) {
       articles.set(article.id, article); return article;
     });
     await save('articles', merged);
-    const current = {id: feed.id, lastSuccess: Date.now(), nextCheck: nextRefresh(), failures: 0, items: fresh.length, transport};
+    const current = {id: feed.id, lastSuccess: Date.now(), nextCheck: nextRefresh(), failures: 0, items: fresh.length, transport, fetchedAt, stale};
     health.set(feed.id, current); await save('feeds', [current]);
   } catch (error) {
     const failures = (previous.failures || 0) + 1;
@@ -306,19 +328,20 @@ async function refreshFeeds(retryFailed = false) {
 function setupNavigation() {
   $('#sources-count').textContent = catalog.feeds.length;
   for (const section of catalog.categories) {
-    const node = button('', '', () => {category = category === section.id ? '' : section.id; source = ''; unavailableOnly = false; if (view === 'sources') view = 'all'; limit = 60; render(); if (category === 'bluesky') refreshFeeds();});
+    const node = button('', '', () => navigate({category: category === section.id ? '' : section.id, source: '', unavailableOnly: false, view: view === 'sources' ? 'all' : view}));
     node.dataset.category = section.id;
     node.append(el('span', '', shortNames[section.id] || section.title), el('span', 'count', catalog.feeds.filter(feed => feed.category === section.id).length));
     $('#categories').append(node);
   }
   for (const feed of [...catalog.feeds].sort((a, b) => a.name.localeCompare(b.name))) {const option = el('option', '', feed.name); option.value = feed.id; $('#source-filter').append(option);}
-  for (const node of document.querySelectorAll('[data-view]')) node.addEventListener('click', () => {view = node.dataset.view; unavailableOnly = false; limit = 60; render(); if (view !== 'sources' && view !== 'saved' && (category === 'bluesky' || feedMap.get(source)?.category === 'bluesky')) refreshFeeds();});
-  $('#show-all-sources').addEventListener('click', () => {unavailableOnly = false; category = ''; source = ''; query = ''; $('#search').value = ''; render();});
-  $('#clear-section').addEventListener('click', () => {category = ''; source = ''; limit = 60; render();});
-  $('#source-filter').addEventListener('change', event => {source = event.target.value; category = ''; unavailableOnly = false; if (view === 'sources') view = 'all'; limit = 60; render(); if (feedMap.get(source)?.category === 'bluesky') refreshFeeds();});
-  $('#search').addEventListener('input', event => {query = event.target.value.toLocaleLowerCase().trim(); limit = 60; render();});
+  for (const node of document.querySelectorAll('[data-view]')) node.addEventListener('click', () => navigate({view: node.dataset.view, unavailableOnly: false}));
+  $('#show-all-sources').addEventListener('click', () => navigate({unavailableOnly: false, category: '', source: '', query: ''}));
+  $('#clear-section').addEventListener('click', () => navigate({category: '', source: ''}));
+  $('#source-filter').addEventListener('change', event => navigate({source: event.target.value, category: '', unavailableOnly: false, view: view === 'sources' ? 'all' : view}));
+  $('#search').addEventListener('input', event => navigate({query: event.target.value}, {search: true}));
+  $('#search').addEventListener('blur', () => navigation.endSearch());
   $('#refresh').addEventListener('click', () => refreshFeeds(true));
-  $('#load-more').addEventListener('click', () => {limit += 60; render();});
+  $('#load-more').addEventListener('click', () => navigate({limit: limit + 60}, {replace: true, keepScroll: true}));
   $('#scroll-read').addEventListener('change', async event => {
     scrolling.setEnabled(event.target.checked);
     await save('settings', [{id: 'markReadOnScroll', enabled: event.target.checked}]);
@@ -331,9 +354,17 @@ function setupNavigation() {
 }
 
 $('#refresh').setAttribute('aria-label', 'Refresh');
-$('#about-button').addEventListener('click', () => $('#about-dialog').showModal());
-for (const node of document.querySelectorAll('[data-close]')) node.addEventListener('click', () => document.getElementById(node.dataset.close).close());
-for (const dialog of document.querySelectorAll('dialog')) dialog.addEventListener('click', event => {if (event.target === dialog) {const rect = dialog.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();}});
+$('#about-button').addEventListener('click', () => navigate({about: true, limit}, {keepScroll: true}));
+for (const node of document.querySelectorAll('[data-close]')) node.addEventListener('click', () => navigation?.close());
+for (const dialog of document.querySelectorAll('dialog')) {
+  dialog.addEventListener('cancel', event => {event.preventDefault(); navigation?.close();});
+  dialog.addEventListener('click', event => {if (event.target === dialog) {const rect = dialog.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) navigation?.close();}});
+}
+$('.wordmark').addEventListener('click', event => {
+  if (event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  event.preventDefault(); navigate({view: 'all', category: '', source: '', query: '', unavailableOnly: false});
+});
+$('.skip-link').addEventListener('click', event => {event.preventDefault(); $('#main').focus();});
 $('#mobile-filter').addEventListener('click', () => {const open = $('#mobile-filter').getAttribute('aria-expanded') !== 'true'; $('#mobile-filter').setAttribute('aria-expanded', String(open)); $('.sidebar').classList.toggle('expanded', open);});
 window.addEventListener('offline', () => notice('You’re offline. Previously loaded stories are still available.'));
 window.addEventListener('online', () => {notice('Connection restored. Choose Refresh to check for new stories.');});
@@ -388,7 +419,17 @@ async function start() {
     for (const item of library.feeds) health.set(item.id, item);
     $('#scroll-read').checked = library.settings.find(item => item.id === 'markReadOnScroll')?.enabled === true;
     scrolling.setEnabled($('#scroll-read').checked);
-    setupNavigation(); await prune(); render(); await refreshFeeds();
+    setupNavigation(); await prune();
+    navigation = readerNavigation({
+      normalize: route => ({...route, view: ['all', 'unread', 'saved', 'sources'].includes(route.view) ? route.view : 'all', category: categoryMap.has(route.category) ? route.category : '', source: feedMap.has(route.source) ? route.source : '', query: String(route.query).slice(0, 500), limit: Math.max(60, Math.min(20000, Number(route.limit) || 60)), article: String(route.article).slice(0, 4096), about: Boolean(route.about) && !route.article, unavailableOnly: route.view === 'sources' && Boolean(route.unavailableOnly)}),
+      apply: (route, y) => {
+        ({view, category, source, unavailableOnly, limit} = route); query = route.query.toLocaleLowerCase().trim();
+        $('#search').value = route.query;
+        render(); window.scrollTo({top: y, behavior: 'instant'}); scrolling.sync();
+        if (view !== 'sources' && view !== 'saved' && (category === 'bluesky' || feedMap.get(source)?.category === 'bluesky')) refreshFeeds();
+      },
+    });
+    navigation.start(); await refreshFeeds();
   } catch (error) {notice(error.message); $('#result-label').textContent = 'Collection unavailable'; showEmpty('Unable to load the feed list.', 'Try reloading, or use “Download feed list” to open it in another reader.');}
 }
 start();
