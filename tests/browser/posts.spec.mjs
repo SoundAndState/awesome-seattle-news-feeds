@@ -115,3 +115,50 @@ test('old post preview URLs return to Posts or Saved without opening a preview',
   await expect(page.locator('.post')).toHaveCount(1);
   await expect(card.locator('.post-text')).toHaveAttribute('href', postUrl('short'));
 });
+
+test('read posts dim and show an inset bar without shifting text, including scroll marking and Saved', async ({page}, testInfo) => {
+  await load(page);
+  const card = page.locator('.post').filter({hasText:shortText}), text = card.locator('.post-text');
+  const marker = () => card.locator('.story-copy').evaluate(node => {
+    const style = getComputedStyle(node, '::before');
+    return {content:style.content, width:style.borderInlineStartWidth, color:style.borderInlineStartColor, pointerEvents:style.pointerEvents};
+  });
+  const geometry = () => text.evaluate(node => {
+    const text = node.getBoundingClientRect(), card = node.closest('.story').getBoundingClientRect();
+    return {x:text.x - card.x, y:text.y - card.y, width:text.width, height:text.height, cardHeight:card.height};
+  });
+  const unreadColor = await text.evaluate(node => getComputedStyle(node).color);
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({width, height:900});
+    const before = await geometry();
+    await card.locator('.read-button').click();
+    await expect(card).toHaveClass(/is-read/);
+    await expect(text).toHaveCSS('color', 'rgb(98, 98, 92)');
+    expect(await marker()).toEqual({content:'""', width:'4px', color:'rgb(208, 208, 204)', pointerEvents:'none'});
+    expect(await geometry()).toEqual(before);
+    await expect(text).toHaveCSS('text-decoration-line', 'none');
+    await expect(text).toHaveCSS('cursor', 'pointer');
+    if (testInfo.project.name === 'chromium') await card.screenshot({path:testInfo.outputPath(`read-post-${width}.png`)});
+    await card.locator('.read-button').click();
+    await expect(card).not.toHaveClass(/is-read/);
+    await expect(text).toHaveCSS('color', unreadColor);
+    expect((await marker()).content).toBe('none');
+    expect(await geometry()).toEqual(before);
+  }
+  await card.locator('.save-button').click();
+  await page.setViewportSize({width:390, height:568});
+  await page.locator('#reading-options summary').click();
+  await page.locator('#scroll-read').check();
+  await page.locator('#reading-options summary').click();
+  await card.evaluate(node => scrollTo(0, scrollY + node.getBoundingClientRect().bottom + 2));
+  await expect(card).toHaveClass(/is-read/);
+  expect((await marker()).width).toBe('4px');
+  await page.locator('#saved-button').click();
+  await page.reload();
+  await expect(card).toHaveClass(/is-read/);
+  await expect(text).toHaveCSS('color', 'rgb(98, 98, 92)');
+  expect((await marker()).width).toBe('4px');
+  await page.emulateMedia({forcedColors:'active'});
+  expect((await marker()).content).toBe('""');
+  expect((await marker()).width).toBe('4px');
+});
