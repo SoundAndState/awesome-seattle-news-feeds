@@ -1,7 +1,7 @@
 import {readFile} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
 import {execFile} from 'node:child_process';
-import catalog from '../feeds.json' with {type: 'json'};
+import catalog from '../data/feeds.json' with {type: 'json'};
 import {createHandler} from '../proxy/worker.mjs';
 import {SNAPSHOT_FEEDS, snapshotLifetime} from '../proxy/snapshots.mjs';
 import {normalizeFeed} from '../web/src/feeds.mjs';
@@ -45,7 +45,7 @@ export async function collectSnapshot(feed, {fetcher = fetch, now = Date.now} = 
 
 async function main() {
   const {CLOUDFLARE_API_TOKEN: token, CLOUDFLARE_ACCOUNT_ID: account} = process.env;
-  const config = JSON.parse(await readFile('wrangler.jsonc', 'utf8'));
+  const config = JSON.parse(await readFile(new URL('../config/wrangler.jsonc', import.meta.url), 'utf8'));
   const namespace = config.kv_namespaces?.find(binding => binding.binding === 'FEED_SNAPSHOTS')?.id;
   if (!token || !account || !namespace) throw new Error('Cloudflare credentials and FEED_SNAPSHOTS binding are required.');
   let failures = 0;

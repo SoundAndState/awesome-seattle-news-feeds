@@ -4,7 +4,7 @@ import addFormats from 'ajv-formats';
 
 export const root = new URL('../', import.meta.url);
 export const read = path => fs.readFile(new URL(path, root), 'utf8');
-export const loadCatalog = async () => JSON.parse(await read('feeds.json'));
+export const loadCatalog = async () => JSON.parse(await read('data/feeds.json'));
 
 // Deliberately conservative: query values and path case can identify distinct feeds.
 export function canonicalUrl(value) {
@@ -20,7 +20,7 @@ export function canonicalUrl(value) {
 export async function validateCatalog(catalog) {
   const ajv = new Ajv({allErrors: true});
   addFormats(ajv);
-  const schema = JSON.parse(await read('feeds.schema.json'));
+  const schema = JSON.parse(await read('data/feeds.schema.json'));
   if (!ajv.validate(schema, catalog)) throw new Error(ajv.errorsText(ajv.errors, {separator: '\n'}));
   const seen = new Map();
   const unique = (kind, value, owner = value) => {

@@ -1,7 +1,7 @@
 import {defineConfig} from 'vite';
 import fs from 'node:fs/promises';
-import {loadCatalog, validateCatalog} from './scripts/catalog.mjs';
-import {renderOpml} from './scripts/render.mjs';
+import {loadCatalog, validateCatalog} from '../scripts/catalog.mjs';
+import {renderOpml} from '../scripts/render.mjs';
 import config from './site.config.json' with {type: 'json'};
 
 export default defineConfig({
