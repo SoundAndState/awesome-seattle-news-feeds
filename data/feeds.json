@@ -3,7 +3,7 @@
   "schemaVersion": 1,
   "title": "Awesome Seattle News Feeds",
   "description": "Curated RSS and Atom feeds for the Seattle region.",
-  "repository": "sayhiben/awesome-seattle-news-feeds",
+  "repository": "SoundAndState/awesome-seattle-news-feeds",
   "categories": [
     {
       "id": "regional",
