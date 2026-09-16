@@ -25,4 +25,6 @@ For guidance validation or Python tests, install the checker dependency with `py
 
 Deployment uses the repository's `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` Actions secrets. Local deployment reads the same variables from the environment or ignored `.env`; run `npm run deploy:proxy`. Never commit credentials.
 
+Keep optional feed-service logging disabled. Follow the [Cloudflare privacy guide](../docs/cloudflare-privacy.md) to check deployment, account, and domain settings and understand which records the hosting providers may still retain.
+
 Contributions use [CC0 1.0](../license). Publisher content retains its original copyright.
