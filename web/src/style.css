@@ -1,5 +1,5 @@
 @import url('./typography.css');
-:root {font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#233b34;background:#f6f4ef;font-synthesis:none;font-size:16px;line-height:1.6;--paper:#f6f4ef;--ink:#173f36;--muted:#52645b;--line:#ccd4c9;--accent:#974222;--wash:#e6ece3;--serif:Georgia,'Times New Roman',serif}
+:root {font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#233b34;background:#f6f4ef;font-synthesis:none;font-size:16px;line-height:1.6;--paper:#f6f4ef;--ink:#173f36;--muted:#52645b;--line:#ccd4c9;--accent:#974222;--wash:#e6ece3;--serif:'Noto Serif',Georgia,'Times New Roman',serif}
 * {box-sizing:border-box}
 body {margin:0}
 button,input,select {font:inherit}
@@ -112,9 +112,10 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-meta {font-size:15px;color:var(--muted);line-height:1.6;margin:0}
 .article-title,.about-content h2 {font:normal 32px/1.3 var(--serif);margin:0 0 14px;text-wrap:pretty;overflow-wrap:anywhere}
 .article-links {display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin:16px 0 20px}
-.article-content {font:18px/1.75 var(--serif);color:#2f443a;overflow-wrap:anywhere}
+/* Keep Georgia's familiar reading measure for long article text. */
+.article-content {font:18px/1.75 Georgia,'Times New Roman',serif;color:#2f443a;overflow-wrap:anywhere}
 .post-content {font-family:system-ui,sans-serif}
-.article-content h2,.article-content h3 {line-height:1.35}
+.article-content :is(h1,h2,h3,h4,h5,h6) {font-family:var(--serif);line-height:1.35}
 .article-content blockquote {margin-left:0;border-left:3px solid var(--line);padding-left:20px}
 .article-content table {display:block;overflow:auto;border-collapse:collapse}
 .article-content th,.article-content td {border:1px solid var(--line);padding:8px}
