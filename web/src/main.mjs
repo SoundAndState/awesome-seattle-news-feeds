@@ -31,7 +31,7 @@ const previewHeaderObserver = new ResizeObserver(() => {
   $('#article-dialog').style.setProperty('--preview-header-height', `${$('#article-dialog .dialog-top').getBoundingClientRect().height}px`);
 });
 previewHeaderObserver.observe($('#article-dialog .dialog-top'));
-let catalog, feedMap, categoryMap, navigation, shownArticle, renderedSelection, renderTimer, session, retryAgain;
+let catalog, feedMap, categoryMap, navigation, shownArticle, renderedSelection, renderTimer, session, retryAgain, loadingRun;
 let mode = 'articles', view = 'all', category = '', source = '', query = '', savedKind = 'all', unavailableOnly = false, limit = 60;
 let searchOpen = false, undoRead = [], dialogReturn, initial = true, catalogFallback = false;
 const shortNames = {regional:'Seattle & regional', neighborhoods:'Seattle neighborhoods', eastside:'Eastside', 'north-sound':'North Sound', 'south-sound':'South Sound', statewide:'Washington state', transport:'Transit & urbanism', culture:'Food, culture & history', commentary:'Commentary & advocacy', official:'Government & services', community:'Community organizations', satire:'Satire'};
@@ -145,30 +145,42 @@ function updateNavigation() {
   if (category || source || query) chips.append(button('Clear all', 'text-button', () => navigate({category:'',source:'',query:''})));
   chips.hidden = !chips.childElementCount;
 }
-function renderLoading(run = null, preparing = false) {
-  const active = Boolean(run || preparing), panel = $('#feed-loading'), bar = $('#loading-bar');
+function renderLoading() {
+  const run = loadingRun, panel = $('#feed-loading'), bar = $('#loading-bar');
+  const visible = Boolean(run && run.mode === mode && view !== 'saved');
+  const active = visible && !run.finished && !run.controller.signal.aborted;
   const starting = active && panel.hidden;
-  panel.hidden = !active;
+  panel.hidden = !visible;
   $('#stories').setAttribute('aria-busy', String(active));
-  if (!active) {$('#stories').removeAttribute('aria-describedby'); return;}
-  $('#stories').setAttribute('aria-describedby', 'loading-guidance');
-  $('#loading-label').textContent = preparing ? 'Preparing your reader' : view === 'sources' ? 'Checking sources' : `Loading ${mode}`;
-  $('#loading-guidance').textContent = preparing ? 'Wait to start reading. The reader is opening your library and feed list.' : view === 'sources' ? 'The reader is checking these sources. Their availability can still change.' : 'Wait to start reading. The reader is still updating this list.';
-  $('#loading-count').textContent = run ? `${run.done} of ${run.total} feeds checked` : '';
-  if (run) {bar.max = run.total; bar.value = run.done;}
-  else bar.removeAttribute('value');
-  if (starting) announce(`${$('#loading-label').textContent}. ${$('#loading-guidance').textContent}`);
+  if (active) $('#stories').setAttribute('aria-describedby', 'loading-guidance');
+  else $('#stories').removeAttribute('aria-describedby');
+  if (!visible) return;
+  panel.dataset.state = active ? 'loading' : 'finished';
+  $('#loading-label').textContent = view === 'sources' ? 'Sources' : mode === 'posts' ? 'Posts' : 'Articles';
+  $('#loading-guidance').textContent = view === 'sources' ? 'Checking availability.' : 'Wait to start reading.';
+  $('#loading-result').textContent = run.completed ? view === 'sources' ? 'Sources checked.' : 'Ready to read.' : 'Check paused.';
+  $('#loading-guidance').setAttribute('aria-hidden', String(!active));
+  $('#loading-result').setAttribute('aria-hidden', String(active));
+  $('#loading-count-value').textContent = `${String(run.done).padStart(String(run.total).length, '\u2007')} / ${run.total}`;
+  $('#dismiss-loading').disabled = active;
+  $('.loading-mark').textContent = run.completed ? '✓' : 'Ⅱ';
+  bar.max = run.total; bar.value = run.done;
+  bar.setAttribute('aria-label', active ? view === 'sources' ? 'Checking sources' : `Loading ${mode}` : run.completed ? 'Feed check complete' : 'Feed check paused');
+  bar.setAttribute('aria-valuetext', `${run.done} of ${run.total} feeds checked`);
+  bar.setAttribute('aria-describedby', active ? 'loading-guidance' : 'loading-result');
+  if (starting) announce(`${bar.getAttribute('aria-label')}. ${$('#loading-guidance').textContent}`);
 }
 function renderProgress() {
   if (!catalog) return;
   const active = session && session.mode === mode && !session.controller.signal.aborted && view !== 'saved';
-  renderLoading(active ? session : null);
+  renderLoading();
   const node = $('#feed-progress'); node.replaceChildren();
   if (view === 'saved') {node.append(el('span', '', 'Your saved articles and posts')); return;}
   const feeds = selectedFeeds(true), failures = feeds.filter(feed => health.get(feed.id)?.error);
   const attempts = feeds.map(feed => health.get(feed.id)?.lastAttempt || health.get(feed.id)?.lastSuccess || 0).filter(Boolean);
   if (!active) {
     const checked = el('span', '', attempts.length ? `The reader last checked feeds ${dateLabel(Math.max(...attempts))}` : 'The reader has not checked feeds yet.');
+    checked.hidden = !$('#feed-loading').hidden;
     if (attempts.length) checked.title = `The reader last checked feeds ${dateLabel(Math.max(...attempts), true)}`;
     node.append(checked);
   }
@@ -394,7 +406,7 @@ async function fetchFeed(feed,run) {
     if(run.controller.signal.aborted)return;
     const failures=(previous.failures||0)+1;
     const current={...previous,id:feed.id,lastAttempt:Date.now(),failures,nextCheck:nextRefresh(failures),error:error.message.slice(0,420)};health.set(feed.id,current);await save('feeds',[current]);
-  } finally {run.done++;scheduleRender();}
+  } finally {if(!run.controller.signal.aborted)run.done++;scheduleRender();}
 }
 async function prune() {
   if(catalogFallback)return;
@@ -420,11 +432,16 @@ async function refreshFeeds({retryFailed=false,only=''}={}) {
     for(const item of library.state)states.set(item.id,item);
     for(const item of library.articles)if(!articles.has(item.id)&&!pending.has(item.id)){if(run.buffer)pending.set(item.id,item);else articles.set(item.id,item);}
     for(const item of library.feeds)if((item.nextCheck||0)>(health.get(item.id)?.nextCheck||0))health.set(item.id,item);
-    await inBatches(queue,async feed=>{if(run.controller.signal.aborted)return;if(due(feed))await fetchFeed(feed,run);else run.done++;});
+    if(run.controller.signal.aborted)return;
+    // Another tab may have refreshed these feeds while this tab waited for the lock.
+    const remaining=queue.filter(due);
+    if(!remaining.length)return;
+    run.total=remaining.length;loadingRun=run;render();
+    await inBatches(remaining,async feed=>{if(run.controller.signal.aborted)return;await fetchFeed(feed,run);});
   };
   try {if(navigator.locks)await navigator.locks.request('sound-and-state-refresh',{signal:run.controller.signal},work);else await work();await prune();}
   catch(error){if(!run.controller.signal.aborted)notice('The reader could not finish checking for new items. You can still read your library. Choose Refresh to try again.');}
-  finally {session=null;render();if(!run.controller.signal.aborted && run.mode===mode && view!=='saved')announce(`${run.done===run.total?'Feed check complete. ':''}${$('#result-label').textContent}`);if(retryAgain){const next=retryAgain;retryAgain=null;refreshFeeds(next);}}
+  finally {run.finished=true;run.completed=!run.controller.signal.aborted&&run.done===run.total;session=null;render();if(!run.controller.signal.aborted && run.mode===mode && view!=='saved')announce(`${run.completed?'Feed check complete. ':''}${$('#result-label').textContent}`);if(retryAgain){const next=retryAgain;retryAgain=null;refreshFeeds(next);}}
 }
 function rememberReading() {if(view!=='saved'&&view!=='sources')readingStarted.add(mode);}
 function setupNavigation() {
@@ -439,6 +456,7 @@ function setupNavigation() {
   $('#search').addEventListener('input',event=>{navigate({query:event.target.value},{search:true});announce($('#result-label').textContent);});
   $('#search').addEventListener('blur',()=>navigation.endSearch());
   $('#refresh').addEventListener('click',()=>refreshFeeds({retryFailed:true}));
+  $('#dismiss-loading').addEventListener('click',()=>{loadingRun=null;renderProgress();$('#refresh').focus({preventScroll:true});});
   $('#load-more').addEventListener('click',()=>navigate({limit:limit+60},{replace:true,keepScroll:true}));
   $('#scroll-read').addEventListener('change',async event=>{scrolling.setEnabled(event.target.checked);await save('settings',[{id:'markReadOnScroll',enabled:event.target.checked}]);});
   $('#mark-read').addEventListener('click',async()=>{
@@ -512,7 +530,6 @@ $('#backup-file').addEventListener('change', async event => {
 
 
 async function start() {
-  renderLoading(null, true);
   try {
     const libraryPromise=openLibrary(notice);
     const remotePromise=Promise.all([fetch(`${import.meta.env.BASE_URL}catalog.json`,{signal:AbortSignal.timeout(10000)}),fetch(`${import.meta.env.BASE_URL}feeds.opml`,{signal:AbortSignal.timeout(10000)})]).then(async([json,xml])=>{
@@ -538,7 +555,7 @@ async function start() {
     navigation=readerNavigation({normalize:next=>normalizeRoute(next,feedMap,categoryMap),apply:(next,y)=>{
       const changed=mode!==next.mode||view!==next.view||category!==next.category||source!==next.source;
       const needsRender=JSON.stringify([next.mode,next.view,next.category,next.source,next.query.toLocaleLowerCase().trim(),next.savedKind,next.unavailableOnly])!==renderedSelection || next.limit!==limit;
-      if(changed){session?.controller.abort();searchOpen=Boolean(next.query);$('#reading-options').open=false;}
+      if(changed){session?.controller.abort();loadingRun=null;searchOpen=Boolean(next.query);$('#reading-options').open=false;}
       ({mode,view,category,source,savedKind,unavailableOnly,limit}=next);query=next.query.toLocaleLowerCase().trim();$('#search').value=next.query;
       if(needsRender)render();else{updateNavigation();syncDialogs();}
       window.scrollTo({top:y,behavior:'instant'});scrolling.sync();
