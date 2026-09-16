@@ -42,7 +42,7 @@ test('preview history restores scroll and keyboard focus; direct links close loc
   await page.goBack();await expect(page.locator('#article-dialog')).toBeHidden();expect(Math.abs(await page.evaluate(()=>scrollY)-y)).toBeLessThan(5);await expect(page.locator(`[data-story="${id}"]`)).toBeFocused();
   await page.goForward();await expect(page.locator('#article-dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#article-dialog')).toBeHidden();
   await page.getByRole('button',{name:'About this reader'}).click();await page.goBack();await expect(page.locator('#about-dialog')).toBeHidden();await expect(page.locator('#about-button')).toBeFocused();
-  await page.goto(`./#article=${encodeURIComponent(id)}`);await expect(page.locator('#article-dialog')).toBeVisible();await page.getByRole('button',{name:'Close story',exact:true}).click();await expect(page.locator('#article-dialog')).toBeHidden();await expect(page.locator('.story')).toHaveCount(60);
+  await page.goto(`./#article=${encodeURIComponent(id)}`);await expect(page.locator('#article-dialog')).toBeVisible();await page.getByRole('button',{name:'Close story',exact:true}).click();await expect(page.locator('#article-dialog')).toBeHidden();await expect(page.locator('.story')).toHaveCount(newsCount);
 });
 
 test('unavailable sources stay separate from Posts and history restores them',async({page})=>{
@@ -172,7 +172,7 @@ test('scroll marking is opt-in, persistent and does not move the Unread list',as
   await load(page);await page.locator('[data-view="unread"]').click();const first=page.locator('.story').first();const past=()=>page.evaluate(()=>scrollBy(0,document.querySelector('.story').getBoundingClientRect().bottom+2));
   await expect(page.locator('#scroll-read')).not.toBeChecked();await past();await page.evaluate(()=>new Promise(requestAnimationFrame));await expect(first).not.toHaveClass(/is-read/);
   await page.evaluate(()=>scrollTo(0,0));await page.locator('#reading-options summary').click();await page.locator('#scroll-read').check();await page.locator('#reading-options summary').click();
-  const y=await first.evaluate(n=>scrollY+n.getBoundingClientRect().bottom+2);await past();await expect(first).toHaveClass(/is-read/);expect(Math.abs(await page.evaluate(()=>scrollY)-y)).toBeLessThan(1);await expect(page.locator('.story')).toHaveCount(60);await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));
+  const y=await first.evaluate(n=>scrollY+n.getBoundingClientRect().bottom+2);await past();await expect(first).toHaveClass(/is-read/);expect(Math.abs(await page.evaluate(()=>scrollY)-y)).toBeLessThan(1);await expect(page.locator('.story')).toHaveCount(newsCount);await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));
   await page.reload();await expect(page.locator('#scroll-read')).toBeChecked();await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));
 });
 
