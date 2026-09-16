@@ -350,7 +350,12 @@ function openArticle(item) {
   const content=el('div',`article-content ${social?'post-content':''}`); content.append(articleContent(item.html,item.url||feedMap.get(item.feedIds[0])?.website));
   if(!content.textContent.trim())content.append(el('p','','The publisher includes only a headline in this feed. Visit the publisher to read the story.'));
   body.append(title,metadata,actions,content);
-  if(!social)body.append(el('p','feed-note','The publisher may include only part of the article in its feed. Choose Read at publisher for the full article and any updates.'));
+  if(!social) {
+    const footer=el('footer','article-preview-footer'), links=el('div','article-links');
+    links.append(...articleLinks(item));
+    footer.append(links,el('p','feed-note','The publisher may include only part of the article in its feed. Choose Read at publisher for the full article and any updates.'));
+    body.append(footer);
+  }
   $('#article-dialog').showModal();$('#article-dialog').scrollTop=0;title.focus({preventScroll:true});
 }
 
