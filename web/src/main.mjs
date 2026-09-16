@@ -306,6 +306,7 @@ function openArticle(item) {
   setState(item.id,{read:true});
   const social=itemMode(item,feedMap)==='posts', body=$('#article-body'); body.replaceChildren();
   const title=el('h2','article-title',social?'Post preview':item.title); title.id='article-title'; title.tabIndex=-1;
+  if(!social && safeUrl(item.url))title.replaceChildren(external(item.title,item.url));
   const metadata=el('p','article-meta'); metadata.append(sourceLink(item),itemDates(item));
   const actions=el('div','article-links'); actions.append(...articleLinks(item),saveButton(item));
   const content=el('div',`article-content ${social?'post-content':''}`); content.append(articleContent(item.html,item.url||feedMap.get(item.feedIds[0])?.website));
