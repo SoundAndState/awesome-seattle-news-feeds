@@ -19,7 +19,9 @@ For reader changes, run `npx playwright install chromium webkit` and `npm run te
 
 Catalog sources live in `data/`; build, browser-test, site, and feed-service configuration lives in `config/`. Run the npm commands from the repository root so they load the correct configuration. For feed-service changes, run `npm test` and `npm run check:proxy` to check the Worker bundle before deployment.
 
-Follow the [writing guidelines](../AGENTS.md#writing-for-readers) when changing reader text. [AGENTS.md](../AGENTS.md) also contains the project map and instructions for coding agents; [CLAUDE.md](../CLAUDE.md) imports those same instructions for Claude Code.
+Follow the [writing guidelines](../AGENTS.md#writing-for-readers) when changing reader text. [AGENTS.md](../AGENTS.md) contains shared agent instructions; [CLAUDE.md](../CLAUDE.md) imports them. The [agent guidance design note](../docs/agent-guidance.md) explains the repository skills, supporting research, and how to maintain them.
+
+For guidance validation or Python tests, install the checker dependency with `python -m pip install -r scripts/requirements-agent-guidance.txt`. Run `npm run check:agents` for instruction changes; the [validation guide](../docs/agent-guidance-validation.md) defines additional checks by change type.
 
 Deployment uses the repository's `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` Actions secrets. Local deployment reads the same variables from the environment or ignored `.env`; run `npm run deploy:proxy`. Never commit credentials.
 
