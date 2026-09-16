@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
   <title id="title">Sound &amp; State</title>
-  <desc id="description">A Greater Seattle area news reader. Articles, local posts, and saved items.</desc>
+  <desc id="description">A Greater Seattle-area news reader. Articles, local posts, and saved items.</desc>
   <rect width="1200" height="630" fill="#f6f4ef"/>
   <rect x="0" y="0" width="1200" height="12" fill="#173f36"/>
   <rect x="72" y="80" width="126" height="126" rx="12" fill="#173f36"/>
   <text x="86" y="165" font-family="Georgia,serif" font-size="55" fill="#f6f4ef">S<tspan fill="#d38054">&amp;</tspan>S</text>
   <text x="232" y="169" font-family="Georgia,serif" font-size="78" fill="#173f36">Sound <tspan font-style="italic" fill="#9c4321">&amp;</tspan> State</text>
-  <text x="72" y="308" font-family="Arial,sans-serif" font-size="42" fill="#173f36">A Greater Seattle area news reader.</text>
+  <text x="72" y="308" font-family="Arial,sans-serif" font-size="42" fill="#173f36">A Greater Seattle-area news reader.</text>
   <text x="72" y="393" font-family="Arial,sans-serif" font-size="30" fill="#52645b">Articles · Local posts · Saved items</text>
   <path d="M72 495H1128" stroke="#cbd1c6" stroke-width="2"/>
   <text x="72" y="561" font-family="Arial,sans-serif" font-size="29" fill="#173f36">soundandstate.com</text>
