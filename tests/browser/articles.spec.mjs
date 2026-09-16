@@ -90,8 +90,9 @@ test('article rows adapt to their available width and preserve full metadata and
       expect(await card.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
       for (const target of await card.locator('button,a').all()) {
         const box = await target.boundingBox();
-        expect(box.height).toBeGreaterThanOrEqual(44);
-        expect(box.width).toBeGreaterThanOrEqual(44);
+        // Browser geometry can report a 44px target a fraction of a pixel short.
+        expect(box.height).toBeGreaterThanOrEqual(44 - 0.001);
+        expect(box.width).toBeGreaterThanOrEqual(44 - 0.001);
       }
     }
     const card = page.locator('.article-card').first();
