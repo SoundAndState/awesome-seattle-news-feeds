@@ -44,7 +44,6 @@ Citywide reporting and community journalism.
 - [PubliCola](https://publicola.com) - Independent reporting and analysis on city government, housing, transportation, and public policy. [RSS](https://publicola.com/feed/).
 - [Real Change](https://www.realchangenews.org) - Local reporting and commentary on homelessness, poverty, housing, and social justice. [RSS](https://www.realchangenews.org/rss.xml).
 - [Seattle Daily Journal of Commerce](https://www.djc.com) - Regional construction, development, real estate, and business news; full articles may require a subscription. [RSS](https://www.djc.com/cust/rss/rss2.php).
-- [Seattle Weekly](https://www.seattleweekly.com) - Local and regional reporting, community stories, and entertainment. [RSS](https://www.seattleweekly.com/feed/).
 - [The Bulletin](https://thebulletinsea.org) - Independent reporting and analysis on Seattle Public Schools and education. [RSS](https://thebulletinsea.org/rss/).
 - [The Burner](https://www.theburnerseattle.com) - Independent Seattle-area reporting and commentary on government and public accountability. [RSS](https://www.theburnerseattle.com/blog-feed.xml).
 - [The Seattle Medium](https://seattlemedium.com/category/local-news) - Local reporting on Seattle-area Black communities, using the local-news section feed. [RSS](https://seattlemedium.com/category/local-news/feed/).
@@ -68,9 +67,7 @@ Neighborhood reporting, local businesses, and community events.
 
 Bellevue, Kirkland, Redmond, and surrounding communities.
 
-- [Bellevue Reporter](https://www.bellevuereporter.com) - Local reporting and regional news for Bellevue readers. [RSS](https://www.bellevuereporter.com/feed/).
 - [Downtown Bellevue Network](https://downtownbellevue.com) - Downtown development, businesses, restaurants, and neighborhood news. [RSS](https://downtownbellevue.com/feed/).
-- [Kirkland Reporter](https://www.kirklandreporter.com) - Local reporting and regional news for Kirkland readers. [RSS](https://www.kirklandreporter.com/feed/).
 - [Redmond Reporter](https://www.redmond-reporter.com) - Local reporting and regional news for Redmond readers. [RSS](https://www.redmond-reporter.com/feed/).
 - [The Seattle Times Eastside](https://www.seattletimes.com/eastside) - Reporting on communities east of Lake Washington; overlaps with other local sections. [RSS](https://www.seattletimes.com/eastside/feed/).
 

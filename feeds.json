@@ -109,17 +109,6 @@
       "aliases": []
     },
     {
-      "id": "seattle-weekly",
-      "name": "Seattle Weekly",
-      "website": "https://www.seattleweekly.com",
-      "feed": "https://www.seattleweekly.com/feed/",
-      "category": "regional",
-      "description": "Local and regional reporting, community stories, and entertainment.",
-      "format": "RSS",
-      "checkedOn": "2026-09-15",
-      "aliases": []
-    },
-    {
       "id": "seattle-parks-parkways",
       "name": "Seattle Parks Parkways",
       "website": "https://parkways.seattle.gov",
@@ -240,34 +229,12 @@
       "aliases": []
     },
     {
-      "id": "kirkland-reporter",
-      "name": "Kirkland Reporter",
-      "website": "https://www.kirklandreporter.com",
-      "feed": "https://www.kirklandreporter.com/feed/",
-      "category": "eastside",
-      "description": "Local reporting and regional news for Kirkland readers.",
-      "format": "RSS",
-      "checkedOn": "2026-09-15",
-      "aliases": []
-    },
-    {
       "id": "the-bulletin",
       "name": "The Bulletin",
       "website": "https://thebulletinsea.org",
       "feed": "https://thebulletinsea.org/rss/",
       "category": "regional",
       "description": "Independent reporting and analysis on Seattle Public Schools and education.",
-      "format": "RSS",
-      "checkedOn": "2026-09-15",
-      "aliases": []
-    },
-    {
-      "id": "bellevue-reporter",
-      "name": "Bellevue Reporter",
-      "website": "https://www.bellevuereporter.com",
-      "feed": "https://www.bellevuereporter.com/feed/",
-      "category": "eastside",
-      "description": "Local reporting and regional news for Bellevue readers.",
       "format": "RSS",
       "checkedOn": "2026-09-15",
       "aliases": []

@@ -18,7 +18,6 @@
       <outline type="rss" text="PubliCola" title="PubliCola" description="Independent reporting and analysis on city government, housing, transportation, and public policy." xmlUrl="https://publicola.com/feed/" htmlUrl="https://publicola.com"/>
       <outline type="rss" text="Real Change" title="Real Change" description="Local reporting and commentary on homelessness, poverty, housing, and social justice." xmlUrl="https://www.realchangenews.org/rss.xml" htmlUrl="https://www.realchangenews.org"/>
       <outline type="rss" text="Seattle Daily Journal of Commerce" title="Seattle Daily Journal of Commerce" description="Regional construction, development, real estate, and business news; full articles may require a subscription." xmlUrl="https://www.djc.com/cust/rss/rss2.php" htmlUrl="https://www.djc.com"/>
-      <outline type="rss" text="Seattle Weekly" title="Seattle Weekly" description="Local and regional reporting, community stories, and entertainment." xmlUrl="https://www.seattleweekly.com/feed/" htmlUrl="https://www.seattleweekly.com"/>
       <outline type="rss" text="The Bulletin" title="The Bulletin" description="Independent reporting and analysis on Seattle Public Schools and education." xmlUrl="https://thebulletinsea.org/rss/" htmlUrl="https://thebulletinsea.org"/>
       <outline type="rss" text="The Burner" title="The Burner" description="Independent Seattle-area reporting and commentary on government and public accountability." xmlUrl="https://www.theburnerseattle.com/blog-feed.xml" htmlUrl="https://www.theburnerseattle.com"/>
       <outline type="rss" text="The Seattle Medium" title="The Seattle Medium" description="Local reporting on Seattle-area Black communities, using the local-news section feed." xmlUrl="https://seattlemedium.com/category/local-news/feed/" htmlUrl="https://seattlemedium.com/category/local-news"/>
@@ -36,9 +35,7 @@
       <outline type="rss" text="Westside Seattle" title="Westside Seattle" description="West Seattle and nearby Westside community reporting, businesses, and local events." xmlUrl="https://www.westsideseattle.com/rss.xml" htmlUrl="https://www.westsideseattle.com"/>
     </outline>
     <outline text="Eastside" title="Eastside">
-      <outline type="rss" text="Bellevue Reporter" title="Bellevue Reporter" description="Local reporting and regional news for Bellevue readers." xmlUrl="https://www.bellevuereporter.com/feed/" htmlUrl="https://www.bellevuereporter.com"/>
       <outline type="rss" text="Downtown Bellevue Network" title="Downtown Bellevue Network" description="Downtown development, businesses, restaurants, and neighborhood news." xmlUrl="https://downtownbellevue.com/feed/" htmlUrl="https://downtownbellevue.com"/>
-      <outline type="rss" text="Kirkland Reporter" title="Kirkland Reporter" description="Local reporting and regional news for Kirkland readers." xmlUrl="https://www.kirklandreporter.com/feed/" htmlUrl="https://www.kirklandreporter.com"/>
       <outline type="rss" text="Redmond Reporter" title="Redmond Reporter" description="Local reporting and regional news for Redmond readers." xmlUrl="https://www.redmond-reporter.com/feed/" htmlUrl="https://www.redmond-reporter.com"/>
       <outline type="rss" text="The Seattle Times Eastside" title="The Seattle Times Eastside" description="Reporting on communities east of Lake Washington; overlaps with other local sections." xmlUrl="https://www.seattletimes.com/eastside/feed/" htmlUrl="https://www.seattletimes.com/eastside"/>
     </outline>
