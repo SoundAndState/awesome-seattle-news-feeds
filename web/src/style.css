@@ -16,7 +16,7 @@ a:hover,button:hover {color:var(--accent)}
 .story,button,a,input,summary {scroll-margin-top:92px}
 .mode-bar button,.dialog-top button {scroll-margin-top:0}
 /* The masthead, reading modes, and stories share one editorial measure. */
-.masthead {max-width:1000px;margin:auto;padding:8px 28px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:0 calc(20px * 4 / 3);color:var(--ink)}
+.masthead {max-width:1000px;margin:auto;padding:24px 28px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:0 calc(20px * 4 / 3);color:var(--ink)}
 .wordmark {display:inline-flex;align-items:center;gap:calc(4px * 4 / 3);text-decoration:none;min-width:0;min-height:52.67px;max-width:100%;color:var(--ink)}
 .wordmark:hover {color:var(--ink)}
 /* Spread the two text lines equally to preserve their center on the artwork. */
@@ -153,7 +153,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .source-choices {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px;gap:4px}
 .source-choice {text-align:left;font-size:15px;line-height:1.5;padding:10px;background:none;border-bottom:1px solid var(--line)}
 @media(max-width:760px) {
-  .masthead {padding:6px 16px 0;gap:6.25px 0;align-items:flex-start}
+  .masthead {padding:20px 16px 12px;gap:8px 0;align-items:flex-start}
   .wordmark {min-height:49.5px}
   .brand-copy {top:3.3506px}
   .brand-name {font-size:31px;top:calc(-1.486px - 5px / 6)}

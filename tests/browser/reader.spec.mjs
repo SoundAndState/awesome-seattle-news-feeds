@@ -108,7 +108,7 @@ test('unreadable backups explain recovery without changing the library',async({p
 
 test('mobile navigation reaches content quickly and filters close after selection',async({page})=>{
   await page.setViewportSize({width:390,height:844});await load(page);
-  expect(await page.locator('.story h2').first().evaluate(n=>n.getBoundingClientRect().top)).toBeLessThanOrEqual(340);
+  expect(await page.locator('.story h2').first().evaluate(n=>n.getBoundingClientRect().top)).toBeLessThanOrEqual(374);
   expect(await page.locator('.story h2').nth(1).evaluate(n=>n.getBoundingClientRect().top)).toBeLessThan(844);
   await chooseSection(page,'transport');await expect(page.locator('#filter-chips')).toContainText('Transit & urbanism');
   await page.locator('#filter-button').click();await page.locator('#source-search').fill('transit blog');await expect(page.locator('.source-choice')).toHaveCount(1);await page.locator('.source-choice').click();await expect(page.locator('.story')).toHaveCount(1);
