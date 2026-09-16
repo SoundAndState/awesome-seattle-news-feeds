@@ -19,6 +19,7 @@ async function load(page, fail = false) {
   });
   await page.goto('./'); await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds',{timeout:30000});await expect(page.getByRole('button', {name:'Refresh',exact:true})).toBeEnabled();
   await expect(page.locator('#all-count')).toHaveText(fail ? '0' : String(newsCount));
+  await page.getByRole('button', {name:'Dismiss feed status'}).click();
 }
 
 
