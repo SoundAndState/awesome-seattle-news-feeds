@@ -122,7 +122,7 @@ h1 {font: normal 30px/1.25 var(--serif); margin: 0; color: var(--ink)}
 .source-links {display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-top: auto; padding-top: 8px; font-size: 13px}
 .source-links > button {font-size: 13px; margin-right: auto}
 
-dialog {width: min(800px,calc(100% - 32px)); max-height: 90dvh; padding: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; color: var(--ink); box-shadow: 0 20px 80px #122b3340}
+dialog {width: min(800px,calc(100% - 32px)); height: calc(100dvh - 32px); max-height: calc(100dvh - 32px); margin: 16px auto; padding: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; color: var(--ink); box-shadow: 0 20px 80px #122b3340}
 dialog::backdrop {background: #132e2ad1; backdrop-filter: blur(3px)}
 .dialog-top {display: flex; justify-content: space-between; align-items: center; padding: 14px 28px; border-bottom: 1px solid var(--line); background: var(--paper); position: sticky; top: 0; z-index: 1; font-size: 14px}
 .close-button {width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 50%; background: none; font-size: 26px; line-height: 1}
@@ -196,6 +196,7 @@ dialog::backdrop {background: #132e2ad1; backdrop-filter: blur(3px)}
   .source-card {padding: 20px}
   #article-body, .about-content {padding: 24px}
   .article-title, .about-content h2 {font-size: 28px}
+  dialog {width: calc(100% - 16px); height: calc(100dvh - 16px); max-height: calc(100dvh - 16px); margin: 8px auto}
   .dialog-top {padding: 12px 20px}
   .article-content {font-size: 18px}
   .empty-state {padding: 32px 10px}

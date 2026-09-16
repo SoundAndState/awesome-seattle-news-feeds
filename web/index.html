@@ -58,9 +58,10 @@
       <p id="backup-status" role="status"></p>
       <h3>Privacy and security</h3>
       <ul>
+        <li><strong>Cookies:</strong> The reader does not set or read cookies. Saved stories, reading state, and preferences use IndexedDB in your browser. Feed requests omit cookies; cookies returned by publishers are not stored in your browser. Publisher and archive sites you open through links may use their own cookies.</li>
         <li>GitHub serves the site; Cloudflare proxies feed requests. Both receive your IP address and request metadata. Scheduled fallback fetches run on GitHub and send no visitor data to publishers. If the proxy and its fallback fail, your browser retries the feed directly. That publisher then receives your IP address and request metadata. Feed requests send no cookies, credentials, or referrer. Direct retries work only when the publisher permits cross-site access (CORS). Reading state is not uploaded. Searches and reader navigation stay in the URL fragment (after <code>#</code>), which is not sent to the site host.</li>
         <li>No analytics or third-party fonts. Feed HTML is sanitized with DOMPurify; scripts, frames, forms, and remote images are removed. A content security policy restricts scripts and connections.</li>
-        <li>Article pages and archive searches open only when you follow their links. Those sites receive your IP address and may use cookies; links send no referrer. Ghostarchive searches receive the article URL with <code>utm_*</code> parameters removed. Archived copies may not exist.</li>
+        <li>Article pages and archive searches open only when you follow their links. Those sites receive your IP address; links send no referrer. Ghostarchive searches receive the article URL with <code>utm_*</code> parameters removed. Archived copies may not exist.</li>
       </ul>
       <p><a href="./third-party-notices.txt">Software credits</a></p>
     </div>
