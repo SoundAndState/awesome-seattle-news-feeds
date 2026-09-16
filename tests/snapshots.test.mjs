@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import {snapshotResponse, snapshotLifetime, MAX_SNAPSHOT_AGE} from '../proxy/snapshots.mjs';
 import {collectSnapshot} from '../scripts/refresh-snapshots.mjs';
 import {createHandler} from '../proxy/worker.mjs';
+import {makeSource} from './fixtures/catalog.mjs';
+import {rss as xml, NOW} from './fixtures/feeds.mjs';
 
-const feed = {id: 'king-5-local', feed: 'https://publisher.example/rss', website: 'https://publisher.example'};
-const xml = '<rss version="2.0"><channel><title>Local news</title><item><title>News</title><link>https://publisher.example/story</link></item></channel></rss>';
-const now = Date.UTC(2026, 8, 15, 12);
+// This policy ID must be real to exercise the snapshot allowlist; its data is fictional.
+const feed = makeSource({id: 'king-5-local'});
+const now = Date.parse(NOW);
 const value = {url: feed.feed, xml, fetchedAt: now - 1000000, freshUntil: now - 900000, expiresAt: now + 3600000};
 const headers = new Headers({'Access-Control-Allow-Origin': 'https://soundandstate.com', Vary: 'Origin'});
 const store = object => ({get: async () => object});
@@ -39,8 +41,9 @@ test('collector checks exact redirects, parses XML, and will not store private o
   for (const fetcher of [async()=>new Response(xml,{headers:{'Cache-Control':'private'}}), async()=>new Response('<html>challenge</html>'), async()=>new Response(null,{status:301,headers:{Location:'https://www.youtube.com/@KING5Seattle'}})]) await assert.rejects(collectSnapshot(feed,{fetcher}));
 });
 
-test('proxy uses approved snapshots only after an upstream failure and tolerates storage outages', async () => {
-  const freshValue = {...value, fetchedAt:Date.now()-1000, freshUntil:Date.now()+60000, expiresAt:Date.now()+3600000};
+test('proxy uses approved snapshots only after an upstream failure and tolerates storage outages', async t => {
+  t.mock.timers.enable({apis: ['Date'], now});
+  const freshValue = {...value, fetchedAt:now-1000, freshUntil:now+60000, expiresAt:now+3600000};
   const request = new Request(`https://proxy.example/feed/${feed.id}`);
   const options = {feedMap:new Map([[feed.id,feed]])};
   const denied = createHandler({...options,fetcher:async()=>new Response('',{status:403})});

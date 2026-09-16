@@ -1,0 +1,1 @@
+<feed xmlns="http://www.w3.org/2005/Atom"><id>fixture-news</id><title>News</title><updated>2026-09-15T12:45:00Z</updated><entry><id>story</id><title>Local story</title><link href="https://publisher.example/story?utm_source=rss"/><updated>2026-09-15T12:45:00Z</updated><content type="html">&lt;p&gt;Local reporting.&lt;/p&gt;</content></entry></feed>

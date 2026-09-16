@@ -2,15 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {loadFeed} from '../web/src/network.mjs';
 import {articlesCsv} from '../web/src/export.mjs';
+import {makeSource} from './fixtures/catalog.mjs';
+import {rss as xml} from './fixtures/feeds.mjs';
 
-const feed = {id:'example', feed:'https://example.com/rss', website:'https://example.com'};
+const feed = makeSource();
 const proxy = 'https://proxy.example';
-const xml = '<rss version="2.0"><channel><title>News</title><description>Local news</description><item><title>Local story</title><link>https://example.com/story</link></item></channel></rss>';
 
 test('successful proxy requests never contact the publisher directly', async () => {
   const urls=[];
   const result=await loadFeed(feed,proxy,{fetchImpl:async url=>{urls.push(url);return new Response(xml);}});
-  assert.deepEqual(urls,[`${proxy}/feed/example`]);
+  assert.deepEqual(urls,[`${proxy}/feed/${feed.id}`]);
   assert.equal(result.transport,'proxy'); assert.equal(result.items.length,1);
 });
 
@@ -28,7 +29,7 @@ test('proxy refusals, invalid feed bodies, and timeouts retry directly without c
       assert.equal(options.credentials,'omit'); assert.equal(options.referrerPolicy,'no-referrer'); assert.equal(options.mode,'cors'); assert.ok(options.signal instanceof AbortSignal);
       return requests.length === 1 ? response() : new Response(xml);
     }});
-    assert.deepEqual(requests,[`${proxy}/feed/example`,feed.feed]);
+    assert.deepEqual(requests,[`${proxy}/feed/${feed.id}`,feed.feed]);
     assert.equal(result.transport,'direct'); assert.equal(result.items[0].title,'Local story');
   }
 });

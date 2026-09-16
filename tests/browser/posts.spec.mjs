@@ -1,24 +1,18 @@
-import {test, expect} from '@playwright/test';
-import catalog from '../../data/feeds.json' with {type:'json'};
-import site from '../../config/site.config.json' with {type:'json'};
-import {renderOpml} from '../../scripts/render.mjs';
+import {test, expect, catalog, browserCatalog, proxyRoute} from './fixtures.mjs';
+import {rssFeed, postItem, postUrl, postId} from '../fixtures/feeds.mjs';
 
 const source = catalog.feeds.find(feed => feed.category === 'bluesky');
-const smallCatalog = {...catalog, feeds:[source]};
+test.use({readerCatalog:browserCatalog({feeds:[source]})});
 const shortText = 'A new trail connects two neighborhoods. Parks & trails <3';
 const longText = `${'Neighbors are exploring the new waterfront paths and sharing ideas for safer crossings. '.repeat(7)}https://example.com/${'a-long-path-'.repeat(20)}`;
-const postUrl = id => `https://bsky.app/profile/example.bsky.social/post/${id}`;
-const postId = id => `at://did:plc:example/app.bsky.feed.post/${id}`;
-const fixture = `<rss version="2.0"><channel><title>Local voice</title><description>Local posts</description>${[
-  ['short', shortText, postUrl('short')],
-  ['long', longText, postUrl('long')],
-  ['unsafe', 'A post without a usable source link.', 'javascript:alert(1)'],
-].map(([id, text, url], index) => `<item><description><![CDATA[${text}]]></description><link>${url}</link><guid isPermaLink="false">${postId(id)}</guid><pubDate>Tue, 15 Sep 2026 ${10 - index}:00:00 GMT</pubDate></item>`).join('')}</channel></rss>`;
+const fixture = rssFeed([
+  postItem('short', {text:shortText}),
+  postItem('long', {text:longText, published:'Tue, 15 Sep 2026 09:00:00 GMT'}),
+  postItem('unsafe', {text:'A post without a usable source link.', url:'javascript:alert(1)', published:'Tue, 15 Sep 2026 08:00:00 GMT'}),
+]);
 
 async function load(page, hash = '#mode=posts') {
-  await page.route('**/catalog.json', route => route.fulfill({json:smallCatalog}));
-  await page.route('**/feeds.opml', route => route.fulfill({contentType:'application/xml', body:renderOpml(smallCatalog)}));
-  await page.route(`${site.proxy}/feed/*`, route => route.fulfill({contentType:'application/xml', body:fixture}));
+  await page.route(proxyRoute, route => route.fulfill({contentType:'application/xml', body:fixture}));
   await page.goto(`./${hash}`);
   await expect(page.locator('.post')).toHaveCount(3);
   await expect(page.locator('#refresh')).toBeEnabled();

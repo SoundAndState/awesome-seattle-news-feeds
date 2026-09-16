@@ -1,17 +1,22 @@
-import {test, expect} from '@playwright/test';
-import catalog from '../../data/feeds.json' with {type: 'json'};
+import {test, expect, catalog, proxyRoute} from './fixtures.mjs';
+import {rssFeed, UPDATED} from '../fixtures/feeds.mjs';
 
-const source = 'seattle-transit-blog';
+const source = 'transit-news';
 const headlines = [
   'A new chapter for Seattle’s waterfront',
   'As costs rise, transit leaders weigh what comes next for the region’s long-awaited light rail expansion',
   'Café culture brings neighbors together',
 ];
 const paragraph = 'A network of walkways and public spaces reconnects downtown with the shore. Residents and small businesses are beginning to see what the changes mean for daily life.';
-const xml = `<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Publisher</title><description>Local reporting</description>${headlines.map((title, index) => `<item><title>${title}</title><link>https://publisher.example/article-${index}</link>${index === 2 ? '' : `<pubDate>Tue, 15 Sep 2026 ${10 - index}:00:00 GMT</pubDate><atom:updated>2026-09-15T12:45:00Z</atom:updated>`}<content:encoded><![CDATA[${index === 2 ? '' : `<p>${paragraph}</p><p><em>Café déjà vu — local reporting.</em> ${paragraph}</p><h3>What happens next</h3><p>${paragraph}</p><p><a href="https://publisher.example/more">More reporting</a></p>`}]]></content:encoded></item>`).join('')}</channel></rss>`;
+const xml = rssFeed(headlines.map((title, index) => ({
+  title, url: 'https://publisher.example/article-' + index,
+  published: index === 2 ? null : 'Tue, 15 Sep 2026 ' + (10 - index) + ':00:00 GMT',
+  updated: index === 2 ? null : UPDATED,
+  html: index === 2 ? '' : '<p>' + paragraph + '</p><p><em>Café déjà vu — local reporting.</em> ' + paragraph + '</p><h3>What happens next</h3><p>' + paragraph + '</p><p><a href="https://publisher.example/more">More reporting</a></p>',
+})));
 
 async function load(page, id = source) {
-  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*', route => route.fulfill({contentType:'application/xml', body:xml.replaceAll('publisher.example/', `publisher.example/${route.request().url().split('/').pop()}/`)}));
+  await page.route(proxyRoute, route => route.fulfill({contentType:'application/xml', body:xml.replaceAll('publisher.example/', `publisher.example/${route.request().url().split('/').pop()}/`)}));
   await page.goto(`./#source=${id}`);
   await expect(page.locator('.article-card')).toHaveCount(3);
   await expect(page.locator('#refresh')).toBeEnabled();
@@ -236,6 +241,8 @@ test('switching from articles to posts offers source links without previews', as
   await load(page);
   await page.locator('.story-title').first().click();
   await page.keyboard.press('Escape');
+  await expect(page.locator('#article-dialog')).toBeHidden();
+  await expect(page).not.toHaveURL(/article=/);
   const feed = catalog.feeds.find(item => item.category === 'bluesky');
   await page.goto(`./#source=${feed.id}`);
   await expect(page.locator('.post')).toHaveCount(3);

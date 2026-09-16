@@ -29,7 +29,15 @@ Keep this repository public in the SoundAndState organization on GitHub Free. [M
 
 Use Node.js 24 or newer. `npm ci && npm run ci` builds and validates the catalog, lints the README and OPML, runs unit tests, and builds the reader. `npm run preview` serves the reader locally.
 
-For reader changes, run `npx playwright install chromium firefox webkit` and `npm run test:browser`. Tests cover desktop Chromium, Firefox, and WebKit, plus Android-sized Chromium and iPhone-sized WebKit. For live feed checks, use Python 3.12 or newer and `npm run check:feeds`.
+For reader changes, run `npm run test:browser:install`, `npm run build:web`, and `npm run test:browser`. Tests cover desktop Chromium, Firefox, and WebKit, plus Android-sized Chromium and iPhone-sized WebKit. The install and test commands use the same project-local browser cache under `.work/playwright-browsers`; they also honor an explicit `PLAYWRIGHT_BROWSERS_PATH`. On Linux, add `-- --with-deps` to the install command when system dependencies are missing.
+
+For a focused run, use `npm run test:browser -- --project=firefox` or pass a test filename. Local runs use up to four workers; add `-- --workers=2` to the test command to reduce concurrency. To record a failure trace locally, run `npm run test:browser -- --project=firefox --trace=retain-on-failure`. CI runs the five browser projects in parallel jobs with two workers each, records traces on one diagnostic retry, and fails if a test needs that retry to pass. Failed jobs upload reports, screenshots, and available traces.
+
+If Firefox fails to launch on Windows with `spawn UNKNOWN` or a side-by-side configuration error, use the project-local install and test commands above. Reinstalling the shared browser cache did not resolve this failure on the affected machine; the same browser build worked from a fresh directory. If you explicitly set `PLAYWRIGHT_BROWSERS_PATH`, install into a fresh directory and use that same setting when running tests. Do not modify the Firefox binaries or skip Firefox coverage.
+
+For live feed checks, use Python 3.12 or newer and `npm run check:feeds`.
+
+Use the [shared test fixtures](../tests/fixtures/README.md) for application tests. The browser harness supplies a fictional catalog, feed responses, and a fixed reference time; it blocks unexpected external requests. Keep production data in the few checks that verify the published catalog and build artifacts. Extend the shared builders for common scenarios, and keep specialized malformed inputs beside the tests that explain them.
 
 Catalog sources live in `data/`; build, browser-test, site, and feed-service configuration lives in `config/`. Run the npm commands from the repository root so they load the correct configuration. For feed-service changes, run `npm test` and `npm run check:proxy` to check the Worker bundle before deployment.
 

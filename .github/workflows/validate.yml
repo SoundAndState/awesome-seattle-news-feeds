@@ -18,9 +18,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name != 'merge_group' }}
 
 jobs:
-  validate:
+  checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -59,10 +59,6 @@ jobs:
         run: npm run check:proxy
         env:
           WRANGLER_SEND_METRICS: 'false'
-      - name: Install desktop and mobile test browsers
-        run: npx playwright install --with-deps chromium firefox webkit
-      - name: Test reader in a browser
-        run: npm run test:browser
       - name: Upload generated files for review
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -72,3 +68,54 @@ jobs:
             feeds.opml
           retention-days: 7
           if-no-files-found: error
+
+  browser:
+    name: Browser (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {project: chromium, browser: chromium}
+          - {project: firefox, browser: firefox}
+          - {project: webkit, browser: webkit}
+          - {project: chromium-mobile, browser: chromium}
+          - {project: webkit-mobile, browser: webkit}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Build catalog and public reader
+        run: |
+          npm run build
+          npm run build:web
+      - name: Install this job's browser
+        run: node scripts/browser-tests.mjs install --with-deps ${{ matrix.browser }}
+      - name: Test reader
+        run: npm run test:browser -- --project=${{ matrix.project }}
+      - name: Upload browser failure report and traces
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-${{ matrix.project }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # Keep the existing required check green only when every browser also passes.
+  validate:
+    if: always()
+    needs: [checks, browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Require every validation job to pass
+        env:
+          CHECKS_RESULT: ${{ needs.checks.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+        run: test "$CHECKS_RESULT" = success && test "$BROWSER_RESULT" = success

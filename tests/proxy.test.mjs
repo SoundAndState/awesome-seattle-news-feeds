@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHandler, cachePolicy, readLimited} from '../proxy/worker.mjs';
+import {makeSource} from './fixtures/catalog.mjs';
+import {rss as xml, NOW} from './fixtures/feeds.mjs';
 
-const xml = '<rss version="2.0"><channel><title>News</title></channel></rss>';
 const env = {ALLOWED_ORIGINS: 'https://example.github.io', FEED_LIMITER: {limit: async () => ({success: true})}};
-const feedMap = new Map([['news', {feed: 'https://publisher.example/rss', redirects: ['https://cdn.example/rss']}]]);
+const source = makeSource({id: 'news', redirects: ['https://cdn.example/rss']});
+const feedMap = new Map([[source.id, source]]);
 const request = (path = '/feed/news', options = {}) => new Request(`https://proxy.example${path}`, {headers: {Origin: 'https://example.github.io'}, ...options});
 
 test('proxy rejects arbitrary targets, queries, writes, and disallowed origins before fetching', async () => {
@@ -60,7 +62,7 @@ test('publisher privacy and freshness directives are respected', () => {
 });
 
 test('cache freshness follows header precedence and subtracts age before the 15-minute cap', () => {
-  const now = Date.UTC(2026, 8, 15, 12);
+  const now = Date.parse(NOW);
   const date = new Date(now).toUTCString();
   const policy = values => cachePolicy(new Headers(values), now);
   assert.equal(policy({'Cache-Control':'public, max-age=900', Expires:'Sun, 19 Nov 1978 05:00:00 GMT', Date:date}), 'public, max-age=900');
