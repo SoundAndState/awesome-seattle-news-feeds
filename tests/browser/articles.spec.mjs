@@ -241,6 +241,8 @@ test('switching from articles to posts offers source links without previews', as
   await load(page);
   await page.locator('.story-title').first().click();
   await page.keyboard.press('Escape');
+  await expect(page.locator('#article-dialog')).toBeHidden();
+  await expect(page).not.toHaveURL(/article=/);
   const feed = catalog.feeds.find(item => item.category === 'bluesky');
   await page.goto(`./#source=${feed.id}`);
   await expect(page.locator('.post')).toHaveCount(3);

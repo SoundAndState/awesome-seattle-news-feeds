@@ -57,7 +57,8 @@ test('read and saved state persist and feed HTML cannot execute or load trackers
   await page.locator('.save-button').click();await page.locator('.story-title').click();await expect(page.locator('.article-content')).toContainText('A new trail');
   await expect(page.locator('.article-content script,.article-content img')).toHaveCount(0);await expect(page.locator('.article-content a').filter({hasText:'Unsafe link'})).not.toHaveAttribute('href');await expect(page.locator('.article-content a').filter({hasText:'More reporting'})).toHaveAttribute('href','https://publisher.example/more');
   expect(await page.evaluate(()=>window.compromised)).toBeUndefined();expect(trackers).toHaveLength(0);
-  await page.getByRole('button',{name:'Close story',exact:true}).click();await page.reload();await page.locator('#saved-button').click();await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('.story')).toHaveClass(/is-read/);
+  await page.getByRole('button',{name:'Close story',exact:true}).click();await expect(page.locator('#article-dialog')).toBeHidden();await expect(page).not.toHaveURL(/article=/);
+  await page.reload();await page.locator('#saved-button').click();await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('.story')).toHaveClass(/is-read/);
 });
 
 test('failed refresh preserves cached content, explains failures and retries only failed feeds',async({page})=>{
