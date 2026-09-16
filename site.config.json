@@ -1,4 +1,5 @@
 {
-  "base": "/awesome-seattle-news-feeds/",
+  "base": "/",
+  "url": "https://soundandstate.com/",
   "proxy": "https://awesome-seattle-feed-proxy.bmenesini.workers.dev"
 }

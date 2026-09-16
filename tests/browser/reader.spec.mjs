@@ -75,7 +75,7 @@ test('reading backup restores saved stories after local data is cleared', async 
   const downloadPromise=page.waitForEvent('download'); await page.getByRole('button',{name:'Export reading backup'}).click();
   const download=await downloadPromise; const backupPath=await download.path();
   // A fresh browser context has an independent local library.
-  const context=await page.context().browser().newContext({baseURL:'http://127.0.0.1:4173/awesome-seattle-news-feeds/'}); const fresh=await context.newPage(); await load(fresh);
+  const context=await page.context().browser().newContext({baseURL:test.info().project.use.baseURL}); const fresh=await context.newPage(); await load(fresh);
   await fresh.getByRole('button',{name:'About this reader'}).click(); await fresh.locator('#backup-file').setInputFiles(backupPath);
   await expect(fresh.locator('#backup-status')).toContainText('Restored 1 saved stories');
   await fresh.getByRole('button',{name:'Close about'}).click(); await fresh.locator('[data-view="saved"]').click(); await expect(fresh.locator('.story')).toHaveCount(1); await context.close();

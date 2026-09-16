@@ -7,12 +7,15 @@ import config from './site.config.json' with {type: 'json'};
 export default defineConfig({
   root: 'web',
   base: config.base,
-  // Never load the repository's private Cloudflare .env into the frontend build.
+  // Never load the repository's private .env into the frontend build.
   envDir: false,
   define: {__PROXY_URL__: JSON.stringify(config.proxy)},
   build: {outDir: '../dist', emptyOutDir: true},
   plugins: [{
     name: 'curated-catalog',
+    transformIndexHtml() {
+      return [{tag: 'link', attrs: {rel: 'canonical', href: config.url}, injectTo: 'head'}];
+    },
     async buildStart() {
       const catalog = await loadCatalog();
       await validateCatalog(catalog);

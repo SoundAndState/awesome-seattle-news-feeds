@@ -7,7 +7,7 @@
   "preview_urls": false,
   "cache": {"enabled": true},
   "vars": {
-    "ALLOWED_ORIGINS": "https://sayhiben.github.io,http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173"
+    "ALLOWED_ORIGINS": "https://soundandstate.com,https://sayhiben.github.io,http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173"
   },
   "ratelimits": [{
     "name": "FEED_LIMITER",
