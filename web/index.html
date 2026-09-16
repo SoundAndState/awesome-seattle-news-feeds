@@ -14,7 +14,7 @@
   <img class="brand-icon" src="./favicon.svg" width="48" height="48" alt="">
   <span class="brand-copy"><span class="brand-name">Sound <i>&amp;</i> State</span><small>Greater Seattle news reader</small></span>
 </a>
-<nav aria-label="Resources"><button id="about-button" class="text-button">About this reader</button><a href="./feeds.opml" download>Download feed list <svg class="resource-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v10m-4-4 4 4 4-4M3 14h10"/></svg></a><a id="github-link" href="https://github.com/sayhiben/awesome-seattle-news-feeds">GitHub <svg class="resource-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a></nav>
+<nav aria-label="Resources"><button id="about-button" class="text-button">About this reader</button><button id="feed-list-button" class="text-button" aria-haspopup="dialog" aria-controls="feed-list-dialog">Download feed list <svg class="resource-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v10m-4-4 4 4 4-4M3 14h10"/></svg></button><a id="github-link" href="https://github.com/sayhiben/awesome-seattle-news-feeds">GitHub <svg class="resource-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a></nav>
 </header>
 <div class="mode-bar"><nav aria-label="Reading mode" class="mode-switch"><button data-mode="articles" aria-pressed="true">Articles</button><button data-mode="posts" aria-pressed="false">Posts</button></nav><button id="saved-button" data-view="saved" aria-pressed="false">Saved <span id="saved-count" class="count">0</span></button></div>
 <main id="main" tabindex="-1">
@@ -41,6 +41,20 @@
 <h3 id="source-picker-title">Publications</h3><label class="search"><span class="sr-only" id="source-search-label">Find a publication</span><input id="source-search" type="search" placeholder="Find a publication…" aria-labelledby="source-search-label"></label><div id="source-choices" class="source-choices"></div><p id="source-choice-status" class="hint" role="status"></p>
 </div></dialog>
 <dialog id="article-dialog" aria-labelledby="article-title"><div class="dialog-top"><span class="eyebrow">Feed preview</span><button class="close-button" data-close="article-dialog" aria-label="Close story">×</button></div><div id="article-body"></div></dialog>
+<dialog id="feed-list-dialog" aria-labelledby="feed-list-title"><div class="dialog-top"><span>Download feed list</span><button class="close-button" data-close="feed-list-dialog" aria-label="Close feed list guide">×</button></div><div class="feed-list-content">
+<h2 id="feed-list-title" tabindex="-1">Use these feeds in another reader</h2>
+<p>Download the complete feed list, then import it into your RSS reader to follow these sources. The file uses OPML, a format for sharing lists of feeds.</p>
+<h3>Follow your reader’s import guide</h3><p class="hint">These links open the reader’s own instructions in a new tab.</p>
+<ul class="import-guides">
+<li><a href="https://docs.feedly.com/article/51-how-to-import-opml-into-feedly" target="_blank" rel="noopener noreferrer">Feedly</a></li>
+<li><a href="https://www.inoreader.com/help/basic/feeds-sources/can-i-import-feeds-from-another-rss-reader" target="_blank" rel="noopener noreferrer">Inoreader</a></li>
+<li><a href="https://feedbin.com/help/how-to-subscribe/#opml-import" target="_blank" rel="noopener noreferrer">Feedbin</a></li>
+<li><a href="https://docs.readwise.io/reader/docs/faqs/feed" target="_blank" rel="noopener noreferrer">Readwise Reader</a></li>
+<li><a href="https://netnewswire.com/help/mac/6.1/en/import-opml.html" target="_blank" rel="noopener noreferrer">NetNewsWire (Mac)</a></li>
+<li><a href="https://netnewswire.com/help/ios/6.0/en/import-opml.html" target="_blank" rel="noopener noreferrer">NetNewsWire (iPhone &amp; iPad)</a></li>
+</ul>
+<p class="hint">Use another reader? Look for “Import OPML” in its help and choose the downloaded <strong>feeds.opml</strong> file.</p>
+</div><div class="feed-list-actions"><a class="primary-button" href="./feeds.opml" download="feeds.opml">Download feed list (.opml) <svg class="resource-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v10m-4-4 4 4 4-4M3 14h10"/></svg></a></div></dialog>
 <dialog id="about-dialog" aria-labelledby="about-title"><div class="dialog-top"><span>About this reader</span><button class="close-button" data-close="about-dialog" aria-label="Close about">×</button></div><div class="about-content">
 <h2 id="about-title" tabindex="-1">Sound &amp; State</h2>
 <h3>Why this reader exists</h3><p>Sound &amp; State was made for testing changes to the <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds</a> list. It is not a commercial service. The maintainer, (<a href="https://github.com/sayhiben">sayhiben</a>), runs it without a profit motive and collects no user data.</p>

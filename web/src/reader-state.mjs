@@ -15,7 +15,8 @@ export function normalizeRoute(route, feedMap, categoryMap) {
   return {...route, mode, view, source, category, query: String(route.query || '').slice(0, 500),
     savedKind: ['articles', 'posts'].includes(route.savedKind) ? route.savedKind : 'all',
     limit: Math.max(60, Math.min(20000, Number(route.limit) || 60)), article,
-    about: Boolean(route.about) && !article, filters: Boolean(route.filters) && !article && !route.about && view !== 'saved',
+    about: Boolean(route.about) && !article, feedList: Boolean(route.feedList) && !article && !route.about,
+    filters: Boolean(route.filters) && !article && !route.about && !route.feedList && view !== 'saved',
     unavailableOnly: view === 'sources' && Boolean(route.unavailableOnly)};
 }
 
