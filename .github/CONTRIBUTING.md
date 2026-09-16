@@ -15,7 +15,7 @@ Submit feed additions and corrections as pull requests editing only [`data/feeds
 
 Use Node.js 24 or newer. `npm ci && npm run ci` builds and validates the catalog, lints the README and OPML, runs unit tests, and builds the reader. `npm run preview` serves the reader locally.
 
-For reader changes, run `npx playwright install chromium webkit` and `npm run test:browser`. Tests cover desktop Chromium and mobile WebKit. For live feed checks, use Python 3.12 or newer and `npm run check:feeds`.
+For reader changes, run `npx playwright install chromium firefox webkit` and `npm run test:browser`. Tests cover desktop Chromium, Firefox, and WebKit, plus Android-sized Chromium and iPhone-sized WebKit. For live feed checks, use Python 3.12 or newer and `npm run check:feeds`.
 
 Catalog sources live in `data/`; build, browser-test, site, and feed-service configuration lives in `config/`. Run the npm commands from the repository root so they load the correct configuration. For feed-service changes, run `npm test` and `npm run check:proxy` to check the Worker bundle before deployment.
 

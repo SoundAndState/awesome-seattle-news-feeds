@@ -75,7 +75,7 @@ test('failed refresh preserves cached content, explains failures and retries onl
   await load(page);await expireFeeds(page);await page.unroute('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*');
   const failed=catalog.feeds.filter(f=>f.category!=='bluesky').slice(0,2),ids=failed.map(f=>f.id);
   await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>{const id=r.request().url().split('/').pop();return r.fulfill({status:ids.includes(id)?502:200,contentType:ids.includes(id)?'application/json':'application/xml',body:ids.includes(id)?'{"error":"Publisher returned HTTP 403."}':fixture(id)});});
-  await page.reload();await expect(page.getByRole('button',{name:'2 unavailable',exact:true})).toBeVisible();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));
+  await page.reload();await expect(page.getByRole('button',{name:'2 unavailable',exact:true})).toBeVisible();await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds',{timeout:30000});await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));
   await search(page,'nothing matches');await page.getByRole('button',{name:'2 unavailable',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(2);
   for(const card of await page.locator('.source-card').all()){await expect(card).toContainText('Using an earlier copy');await expect(card).toContainText('A server refused the feed request');await card.locator('summary').click();await expect(card.locator('details')).toContainText('HTTP 403');}
   const requests=[];page.on('request',r=>{if(r.url().startsWith('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/'))requests.push(r.url().split('/').pop());});await page.locator('#refresh').click();await expect(page.locator('#refresh')).toBeEnabled();expect(requests.sort()).toEqual(ids.sort());
@@ -111,7 +111,20 @@ test('mobile navigation reaches content quickly and filters close after selectio
   expect(await page.locator('.story h2').nth(1).evaluate(n=>n.getBoundingClientRect().top)).toBeLessThan(844);
   await chooseSection(page,'transport');await expect(page.locator('#filter-chips')).toContainText('Transit & urbanism');
   await page.locator('#filter-button').click();await page.locator('#source-search').fill('transit blog');await expect(page.locator('.source-choice')).toHaveCount(1);await page.locator('.source-choice').click();await expect(page.locator('.story')).toHaveCount(1);
-  for(const width of [320,390,760,900,1440]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);const a=await page.locator('.read-button').boundingBox(),b=await page.locator('.save-button').boundingBox();expect(a.height).toBeGreaterThanOrEqual(44);expect(a.y).toBeCloseTo(b.y,0);const logo=await page.locator('.brand-icon').boundingBox();expect(Math.abs(logo.width-logo.height)).toBeLessThan(.01);}
+  for(const width of [320,390,760,900,1440]){
+    await page.setViewportSize({width,height:900});
+    await expect.poll(()=>page.evaluate(width=>{
+      const read=document.querySelector('.read-button').getBoundingClientRect(),save=document.querySelector('.save-button').getBoundingClientRect(),logo=document.querySelector('.brand-icon').getBoundingClientRect();
+      return {
+        viewportMatches: innerWidth===width,
+        fitsViewport: document.documentElement.scrollWidth<=innerWidth,
+        touchTargetFits: read.height>=44,
+        actionsAlign: Math.abs(read.y-save.y)<.5,
+        // Browser layout rounds fractional SVG dimensions independently.
+        logoIsSquare: Math.abs(logo.width-logo.height)<.01,
+      };
+    },width)).toEqual({viewportMatches:true,fitsViewport:true,touchTargetFits:true,actionsAlign:true,logoIsSquare:true});
+  }
 });
 
 test('mode switches restore independent filters, searches and reading positions',async({page})=>{
@@ -213,8 +226,8 @@ test('catalog outage preserves access to the cached saved library',async({page})
 
 test('automatic due refresh buffers new items until accepted and never fetches the inactive mode',async({page})=>{
   let revision=0;const requests=[];await page.clock.install();await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>{const id=r.request().url().split('/').pop();requests.push(id);return r.fulfill({contentType:'application/xml',body:revision?fixture(id).replaceAll(`https://publisher.example/${id}?`,`https://publisher.example/${id}-new?`):fixture(id)});});
-  await page.goto('./');await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('#refresh')).toBeEnabled();const firstId=await page.locator('.story').first().getAttribute('data-article');revision=1;
-  await page.clock.fastForward(16*60*1000);await expect(page.locator('#new-items')).toContainText(`${newsCount} new articles`);await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('.story').first()).toHaveAttribute('data-article',firstId);
+  await page.goto('./');await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds',{timeout:30000});await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('#refresh')).toBeEnabled();const firstId=await page.locator('.story').first().getAttribute('data-article');revision=1;
+  await page.clock.fastForward(16*60*1000);await expect(page.locator('#new-items')).toContainText(`${newsCount} new articles`,{timeout:30000});await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('.story').first()).toHaveAttribute('data-article',firstId);
   expect(requests).toHaveLength(newsCount*2);expect(requests.some(id=>id.startsWith('bluesky-'))).toBe(false);await page.locator('#new-items').click();await expect(page.locator('#all-count')).toHaveText(String(newsCount*2));await expect(page.locator('#new-items')).toBeHidden();
 });
 
@@ -237,8 +250,9 @@ test('older libraries remain readable if no catalog has been cached yet',async({
 });
 
 test('switching modes cancels the previous fetch queue without marking sources unavailable',async({page})=>{
-  const requests=[];await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',async r=>{const id=r.request().url().split('/').pop();requests.push(id);if(!id.startsWith('bluesky-'))await new Promise(res=>setTimeout(res,500));await r.fulfill({contentType:'application/xml',body:fixture(id)}).catch(()=>{});});
-  await page.goto('./');await expect.poll(()=>requests.length).toBeGreaterThan(0);await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);expect(requests.filter(id=>!id.startsWith('bluesky-')).length).toBeLessThanOrEqual(4);await expect(page.locator('.status-link')).toHaveCount(0);
+  let releaseNews;const waiting=new Promise(resolve=>{releaseNews=resolve;});
+  const requests=[];await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',async r=>{const id=r.request().url().split('/').pop();requests.push(id);if(!id.startsWith('bluesky-'))await waiting;await r.fulfill({contentType:'application/xml',body:fixture(id)}).catch(()=>{});});
+  await page.goto('./');await expect.poll(()=>requests.length).toBeGreaterThan(0);await page.locator('[data-mode="posts"]').click();releaseNews();await expect(page.locator('.post')).toHaveCount(socialCount);expect(requests.filter(id=>!id.startsWith('bluesky-')).length).toBeLessThanOrEqual(4);await expect(page.locator('.status-link')).toHaveCount(0);
 });
 
 test('feed list guide requires an explicit download and keeps import help available',async({page,context})=>{
@@ -282,7 +296,7 @@ test('feed list guide stays open when the catalog finishes loading',async({page}
   await page.route('**/catalog.json',async route=>{await ready;await route.continue();});
   await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',route=>route.fulfill({contentType:'application/xml',body:fixture(route.request().url().split('/').pop())}));
   await page.goto('./',{waitUntil:'domcontentloaded'});await page.locator('#feed-list-button').click();await expect(page.locator('#feed-list-dialog')).toBeVisible();
-  releaseCatalog();await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('#feed-list-dialog')).toBeVisible();
+  releaseCatalog();await expect(page.locator('#all-count')).toHaveText(String(newsCount),{timeout:30000});await expect(page.locator('#feed-list-dialog')).toBeVisible();
   await page.goBack();await expect(page.locator('#feed-list-dialog')).toBeHidden();await expect(page.locator('#feed-list-button')).toBeFocused();
 });
 
