@@ -19,10 +19,11 @@ test('redirects are checked exactly and no visitor credentials reach publishers'
   const handle = createHandler({feedMap, fetcher: async (url, options) => {
     assert.equal(options.redirect,'manual'); assert.equal(new Headers(options.headers).has('authorization'),false); assert.equal(new Headers(options.headers).has('cookie'),false);
     assert.match(new Headers(options.headers).get('user-agent'), /^Mozilla\/5\.0 \(compatible; SeattleNewsReader\//);
-    calls++; return calls === 1 ? new Response(null,{status:302,headers:{Location:'https://cdn.example/rss'}}) : new Response(xml,{headers:{'Cache-Control':'max-age=120'}});
+    calls++; return calls === 1 ? new Response(null,{status:302,headers:{Location:'https://cdn.example/rss'}}) : new Response(xml,{headers:{'Cache-Control':'public, max-age=120','Set-Cookie':'incidental=1'}});
   }});
   const response = await handle(request('/feed/news',{headers:{Origin:'https://example.github.io',Authorization:'private',Cookie:'private'}}),env);
   assert.equal(calls,2); assert.equal(response.status,200); assert.equal(response.headers.get('cache-control'),'public, max-age=120'); assert.equal(response.headers.get('vary'),'Origin');
+  assert.equal(response.headers.has('set-cookie'), false);
   for (const target of ['http://localhost/internal','https://cdn.example/other','https://evil.example/rss','https://www.youtube.com/@KING5Seattle']) {
     let attempts=0; const blocked=createHandler({feedMap,fetcher:async()=>{attempts++;return new Response(null,{status:302,headers:{Location:target}});}});
     const rejected=await blocked(request(),env);
@@ -49,6 +50,8 @@ test('upstream refusals, challenge pages, oversized bodies, and rate limits stay
 test('publisher privacy and freshness directives are respected', () => {
   for (const policy of ['private, max-age=1000','no-cache','no-store','max-age=0']) assert.equal(cachePolicy(new Headers({'Cache-Control':policy})),'no-store');
   assert.equal(cachePolicy(new Headers({'Set-Cookie':'session=1'})),'no-store');
+  assert.equal(cachePolicy(new Headers({'Set-Cookie':'incidental=1', 'Cache-Control':'public, max-age=120'})), 'public, max-age=120');
+  assert.equal(cachePolicy(new Headers({'Set-Cookie':'incidental=1', 'Cache-Control':'max-age=0, s-maxage=3600'})), 'public, max-age=900');
   assert.equal(cachePolicy(new Headers({'Cache-Control':'max-age=60','Age':'20'})),'public, max-age=40');
   assert.equal(cachePolicy(new Headers({'Cache-Control':'max-age=3600'})),'public, max-age=900');
 });

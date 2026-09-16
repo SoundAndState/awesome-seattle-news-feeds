@@ -22,6 +22,8 @@ test('fallback snapshots carry collection time and expire, with publisher revali
   assert.deepEqual(snapshotLifetime(new Headers({'Cache-Control': 'max-age=300'}), now), {freshUntil: now+300000, expiresAt: now+MAX_SNAPSHOT_AGE});
   for (const restriction of ['must-revalidate', 'proxy-revalidate', 's-maxage=300']) assert.equal(snapshotLifetime(new Headers({'Cache-Control': `max-age=300, ${restriction}`}), now).expiresAt, now+300000);
   for (const directive of ['no-store', 'private', 'no-cache', 'max-age=0']) assert.equal(snapshotLifetime(new Headers({'Cache-Control': directive}), now), null);
+  assert.equal(snapshotLifetime(new Headers({'Cache-Control':'max-age=300, stale-if-error=60'}), now).expiresAt, now+360000);
+  assert.equal(snapshotLifetime(new Headers({'Cache-Control':'public, max-age=0, s-maxage=3600','Set-Cookie':'incidental=1'}), now).expiresAt, now+3600000);
 });
 
 test('expired, mismatched, invalid or unapproved snapshots never reach the reader', async () => {

@@ -4,12 +4,15 @@ export const SNAPSHOT_FEEDS = new Set(['king-5-local', 'krem-2-local', 'mynorthw
 export const MAX_SNAPSHOT_AGE = 6 * 60 * 60 * 1000;
 
 export function snapshotLifetime(headers, now = Date.now()) {
-  const freshSeconds = cacheSeconds(headers, now);
+  const freshSeconds = cacheSeconds(headers, now, MAX_SNAPSHOT_AGE / 1000);
   if (!freshSeconds) return null;
   const policy = headers.get('cache-control') || '';
   // Restrictive responses cannot be reused after their freshness window.
   const revalidate = /\b(must-revalidate|proxy-revalidate|s-maxage)\b/i.test(policy);
-  return {freshUntil: now + freshSeconds * 1000, expiresAt: now + (revalidate ? freshSeconds * 1000 : MAX_SNAPSHOT_AGE)};
+  const freshUntil = now + freshSeconds * 1000;
+  const staleDirective = /(?:^|,)\s*stale-if-error\s*=\s*"?(\d+)"?\s*(?:,|$)/i.exec(policy);
+  const staleUntil = staleDirective ? freshUntil + Number(staleDirective[1]) * 1000 : now + MAX_SNAPSHOT_AGE;
+  return {freshUntil, expiresAt: revalidate ? freshUntil : Math.min(now + MAX_SNAPSHOT_AGE, staleUntil)};
 }
 
 export async function snapshotResponse(feed, id, store, headers, now = Date.now()) {
@@ -25,6 +28,8 @@ export async function snapshotResponse(feed, id, store, headers, now = Date.now(
   responseHeaders.set('X-Feed-Fetched-At', new Date(value.fetchedAt).toISOString());
   // Once stale, keep a short shared TTL; every response identifies the original fetch time.
   responseHeaders.set('X-Feed-Stale', String(now >= value.freshUntil));
-  responseHeaders.set('Cache-Control', `public, max-age=${Math.min(60, remaining, now < value.freshUntil ? Math.max(1, Math.floor((value.freshUntil - now) / 1000)) : remaining)}`);
+  const freshRemaining = Math.floor((value.freshUntil - now) / 1000);
+  const ttl = freshRemaining > 0 ? Math.min(900, freshRemaining, remaining) : Math.min(60, remaining);
+  responseHeaders.set('Cache-Control', `public, max-age=${ttl}`);
   return new Response(value.xml, {headers: responseHeaders});
 }
