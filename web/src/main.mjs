@@ -1,7 +1,10 @@
 import './style.css';
-import {normalizeFeed, verifyOpml, inBatches, nextRefresh, safeUrl, selectedSources, archiveUrl} from './feeds.mjs';
+import {verifyOpml, inBatches, nextRefresh, safeUrl, selectedSources, archiveUrl} from './feeds.mjs';
 import {cleanText, articleContent} from './content.mjs';
 import {openLibrary, save, removeArticles} from './storage.mjs';
+import {loadFeed} from './network.mjs';
+import {articlesCsv} from './export.mjs';
+import {scrollReader} from './scroll-read.mjs';
 
 const $ = selector => document.querySelector(selector);
 const el = (tag, className, text) => {
@@ -18,7 +21,8 @@ const external = (label, url, className = '') => {
 const articles = new Map();
 const states = new Map();
 const health = new Map();
-let catalog, feedMap, categoryMap;
+const scrolling = scrollReader($('#stories'), markScrolledArticles);
+let catalog, feedMap, categoryMap, renderedSelection;
 let view = 'all', category = '', source = '', query = '', unavailableOnly = false, limit = 60, refreshing = false, refreshAgain = false, done = 0, total = 0, renderTimer;
 const shortNames = {'regional': 'Seattle & regional', 'neighborhoods': 'Seattle neighborhoods', 'eastside': 'Eastside', 'north-sound': 'North Sound', 'south-sound': 'South Sound', 'statewide': 'Washington state', 'transport': 'Transit & urbanism', 'culture': 'Food, culture & history', 'commentary': 'Commentary & advocacy', 'official': 'Government & services', 'community': 'Community organizations', 'satire': 'Satire', 'bluesky': 'Bluesky'};
 
@@ -46,6 +50,19 @@ function saveButton(article, className = 'save-button') {
     node.setAttribute('aria-label', `${saved ? 'Unsave' : 'Save'} ${article.title}`);
   }
   node.dataset.save = article.id; update(); return node;
+}
+function updateReadButton(node, article) {
+  const read = Boolean(states.get(article.id)?.read);
+  node.querySelector('span').textContent = read ? 'Mark Unread' : 'Mark Read';
+  node.classList.toggle('is-read', read); node.setAttribute('aria-pressed', String(read));
+  node.setAttribute('aria-label', `${read ? 'Mark Unread' : 'Mark Read'}: ${article.title}`);
+}
+function readButton(article) {
+  const node = button('', 'read-button', () => setState(article.id, {read: !states.get(article.id)?.read}));
+  const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  icon.setAttribute('viewBox', '0 0 24 24'); icon.setAttribute('aria-hidden', 'true'); icon.classList.add('read-icon');
+  const path = document.createElementNS(icon.namespaceURI, 'path'); path.setAttribute('d', 'm5 12 4 4L19 6'); icon.append(path);
+  node.append(icon, el('span')); node.dataset.read = article.id; updateReadButton(node, article); return node;
 }
 function articleLinks(article, className = 'publisher-link') {
   if (!article.url) return [];
@@ -85,6 +102,8 @@ function updateNavigation() {
   $('#source-filter').value = source;
   $('#mark-read').hidden = view === 'sources' || view === 'saved';
   $('#show-all-sources').hidden = view !== 'sources' || !unavailableOnly;
+  $('#scroll-read').closest('label').hidden = view === 'sources';
+  $('#export-saved').disabled = ![...articles.keys()].some(id => states.get(id)?.saved);
 }
 
 function renderProgress() {
@@ -99,6 +118,7 @@ function renderProgress() {
 function storyCard(article, index) {
   const state = states.get(article.id) || {};
   const card = el('article', `story ${state.read ? 'is-read' : ''}`);
+  card.dataset.article = article.id;
   const number = el('span', 'story-number', String(index + 1).padStart(2, '0'));
   number.setAttribute('aria-hidden', 'true');
   const body = el('div', 'story-copy');
@@ -119,12 +139,7 @@ function storyCard(article, index) {
   if (article.excerpt || categoryId !== 'bluesky') body.append(el('p', 'excerpt', article.excerpt || 'Open the story for the publisher’s feed preview.'));
   body.append(footer);
   const actions = el('div', 'story-actions');
-  const readLabel = el('label', 'read-control');
-  const read = el('input'); read.type = 'checkbox'; read.checked = Boolean(state.read); read.dataset.read = article.id;
-  read.setAttribute('aria-label', `Read: ${article.title}`);
-  read.addEventListener('change', () => setState(article.id, {read: read.checked}));
-  readLabel.append(read, el('span', '', 'Read'));
-  actions.append(saveButton(article), readLabel); body.append(actions); card.append(number, body); return card;
+  actions.append(saveButton(article), readButton(article)); body.append(actions); card.append(number, body); return card;
 }
 
 function sourceCard(feed) {
@@ -134,15 +149,18 @@ function sourceCard(feed) {
   top.append(el('span', 'category-tag', shortNames[feed.category]), el('span', `source-status ${status?.error ? 'error' : ''}`, status?.error ? 'Unavailable' : status?.lastSuccess ? 'Connected' : 'Not checked yet'));
   const title = el('h2'); title.append(external(feed.name, feed.website));
   card.append(top, title, el('p', '', feed.description));
-  const detail = status?.error ? `${status.error} ${status.lastSuccess ? `Last loaded ${dateLabel(status.lastSuccess, true)}.` : 'Visit the publisher while its feed is unavailable.'}` : status?.lastSuccess ? `Last loaded ${dateLabel(status.lastSuccess, true)} · ${status.items} stories in feed` : 'Refresh to check this feed.';
+  const detail = status?.error ? `${status.error} ${status.lastSuccess ? `Last loaded ${dateLabel(status.lastSuccess, true)}.` : 'Visit the publisher while its feed is unavailable.'}` : status?.lastSuccess ? `Last loaded ${dateLabel(status.lastSuccess, true)} · ${status.items} stories in feed${status.transport === 'direct' ? ' · Direct from publisher' : ''}` : 'Refresh to check this feed.';
   card.append(el('p', 'source-detail', detail));
   const links = el('div', 'source-links');
-  links.append(button('View stories →', 'text-button', () => {source = feed.id; category = ''; view = 'all'; query = ''; $('#search').value = ''; limit = 60; render(); refreshFeeds();}), external('Website ↗', feed.website), external('RSS ↗', feed.feed));
+  links.append(button('View stories →', 'text-button', () => {source = feed.id; category = ''; view = 'all'; unavailableOnly = false; query = ''; $('#search').value = ''; limit = 60; render(); refreshFeeds();}), external('Website ↗', feed.website), external('RSS ↗', feed.feed));
   card.append(links); return card;
 }
 
 function render() {
   if (!catalog) return;
+  clearTimeout(renderTimer); renderTimer = null;
+  const selection = JSON.stringify([view, category, source, query, unavailableOnly]);
+  const anchor = selection === renderedSelection && window.scrollY > 0 ? [...$('#stories').querySelectorAll('.story')].map(card => ({id: card.dataset.article, top: card.getBoundingClientRect().top, bottom: card.getBoundingClientRect().bottom})).find(card => card.bottom > 0 && card.top < innerHeight && (view !== 'unread' || !states.get(card.id)?.read)) : null;
   const focus = document.activeElement;
   const focusKey = focus?.dataset.save || focus?.dataset.story || focus?.dataset.read;
   const focusKind = focus?.dataset.save ? 'save' : focus?.dataset.read ? 'read' : 'story';
@@ -176,6 +194,12 @@ function render() {
     $('#mark-read').disabled = !list.some(article => !states.get(article.id)?.read);
   }
   if (focusKey) [...container.querySelectorAll(`[data-${focusKind}]`)].find(node => node.dataset[focusKind] === focusKey)?.focus({preventScroll: true});
+  if (anchor) {
+    const card = [...container.querySelectorAll('.story')].find(card => card.dataset.article === anchor.id);
+    if (card) window.scrollBy(0, card.getBoundingClientRect().top - anchor.top);
+  }
+  renderedSelection = selection;
+  scrolling.sync();
 }
 
 function showEmpty(title, description) {
@@ -186,6 +210,18 @@ function showEmpty(title, description) {
 function scheduleRender() {if (!renderTimer) renderTimer = setTimeout(() => {renderTimer = null; render();}, 350);}
 async function setState(id, changes) {
   const state = {...states.get(id), id, ...changes}; states.set(id, state); await save('state', [state]); render();
+}
+async function markScrolledArticles(ids) {
+  const updates = ids.map(id => ({...states.get(id), id, read: true}));
+  for (const state of updates) states.set(state.id, state);
+  // Keep passed cards in place, including in Unread, so automatic marking never moves the page.
+  for (const card of $('#stories').querySelectorAll('.story')) {
+    if (!ids.includes(card.dataset.article)) continue;
+    card.classList.add('is-read');
+    updateReadButton(card.querySelector('[data-read]'), articles.get(card.dataset.article));
+  }
+  updateNavigation();
+  await save('state', updates);
 }
 
 function openArticle(article) {
@@ -207,12 +243,7 @@ function openArticle(article) {
 async function fetchFeed(feed) {
   const previous = health.get(feed.id) || {id: feed.id};
   try {
-    const response = await fetch(`${__PROXY_URL__}/feed/${feed.id}`, {signal: AbortSignal.timeout(22000), credentials: 'omit', referrerPolicy: 'no-referrer'});
-    if (!response.ok) {
-      const info = await response.json().catch(() => ({}));
-      throw new Error(info.error || `Feed relay returned HTTP ${response.status}.`);
-    }
-    const fresh = normalizeFeed(await response.text(), feed);
+    const {items: fresh, transport} = await loadFeed(feed, __PROXY_URL__);
     const merged = fresh.map(item => {
       const existing = articles.get(item.id);
       const title = cleanText(item.title);
@@ -222,12 +253,11 @@ async function fetchFeed(feed) {
       articles.set(article.id, article); return article;
     });
     await save('articles', merged);
-    const current = {id: feed.id, lastSuccess: Date.now(), nextCheck: nextRefresh(), failures: 0, items: fresh.length};
+    const current = {id: feed.id, lastSuccess: Date.now(), nextCheck: nextRefresh(), failures: 0, items: fresh.length, transport};
     health.set(feed.id, current); await save('feeds', [current]);
   } catch (error) {
     const failures = (previous.failures || 0) + 1;
-    const message = error.name === 'TimeoutError' ? 'The feed took too long to respond.' : error instanceof TypeError ? 'The feed relay could not be reached.' : error.message;
-    const current = {...previous, id: feed.id, failures, nextCheck: nextRefresh(failures), error: message.slice(0, 200)};
+    const current = {...previous, id: feed.id, failures, nextCheck: nextRefresh(failures), error: error.message.slice(0, 420)};
     health.set(feed.id, current); await save('feeds', [current]);
   } finally {done++; scheduleRender();}
 }
@@ -276,7 +306,7 @@ async function refreshFeeds(retryFailed = false) {
 function setupNavigation() {
   $('#sources-count').textContent = catalog.feeds.length;
   for (const section of catalog.categories) {
-    const node = button('', '', () => {category = category === section.id ? '' : section.id; source = ''; limit = 60; render(); if (category === 'bluesky' && view !== 'sources') refreshFeeds();});
+    const node = button('', '', () => {category = category === section.id ? '' : section.id; source = ''; unavailableOnly = false; if (view === 'sources') view = 'all'; limit = 60; render(); if (category === 'bluesky') refreshFeeds();});
     node.dataset.category = section.id;
     node.append(el('span', '', shortNames[section.id] || section.title), el('span', 'count', catalog.feeds.filter(feed => feed.category === section.id).length));
     $('#categories').append(node);
@@ -285,10 +315,14 @@ function setupNavigation() {
   for (const node of document.querySelectorAll('[data-view]')) node.addEventListener('click', () => {view = node.dataset.view; unavailableOnly = false; limit = 60; render(); if (view !== 'sources' && view !== 'saved' && (category === 'bluesky' || feedMap.get(source)?.category === 'bluesky')) refreshFeeds();});
   $('#show-all-sources').addEventListener('click', () => {unavailableOnly = false; category = ''; source = ''; query = ''; $('#search').value = ''; render();});
   $('#clear-section').addEventListener('click', () => {category = ''; source = ''; limit = 60; render();});
-  $('#source-filter').addEventListener('change', event => {source = event.target.value; category = ''; limit = 60; render(); if (feedMap.get(source)?.category === 'bluesky' && view !== 'sources') refreshFeeds();});
+  $('#source-filter').addEventListener('change', event => {source = event.target.value; category = ''; unavailableOnly = false; if (view === 'sources') view = 'all'; limit = 60; render(); if (feedMap.get(source)?.category === 'bluesky') refreshFeeds();});
   $('#search').addEventListener('input', event => {query = event.target.value.toLocaleLowerCase().trim(); limit = 60; render();});
   $('#refresh').addEventListener('click', () => refreshFeeds(true));
   $('#load-more').addEventListener('click', () => {limit += 60; render();});
+  $('#scroll-read').addEventListener('change', async event => {
+    scrolling.setEnabled(event.target.checked);
+    await save('settings', [{id: 'markReadOnScroll', enabled: event.target.checked}]);
+  });
   $('#mark-read').addEventListener('click', async () => {
     const updates = filteredArticles().map(article => ({...states.get(article.id), id: article.id, read: true}));
     for (const state of updates) states.set(state.id, state);
@@ -304,10 +338,19 @@ $('#mobile-filter').addEventListener('click', () => {const open = $('#mobile-fil
 window.addEventListener('offline', () => notice('You’re offline. Previously loaded stories are still available.'));
 window.addEventListener('online', () => {notice('Connection restored. Choose Refresh to check for new stories.');});
 
+function downloadFile(content, type, filename) {
+  const url = URL.createObjectURL(new Blob([content], {type}));
+  const link = el('a'); link.href = url; link.download = filename; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+$('#export-saved').addEventListener('click', () => {
+  const rows = [...articles.values()].filter(article => states.get(article.id)?.saved).sort((a, b) => b.published - a.published || a.id.localeCompare(b.id)).map(article => ({
+    title: article.title, source: sourceName(article), published: article.published, url: article.url, content: cleanText(article.html), read: states.get(article.id)?.read,
+  }));
+  downloadFile(articlesCsv(rows), 'text/csv;charset=utf-8', `sound-and-state-saved-${new Date().toISOString().slice(0, 10)}.csv`);
+});
 $('#export-state').addEventListener('click', () => {
   const backup = {format: 'sound-and-state', version: 1, exportedAt: new Date().toISOString(), state: [...states.values()], savedArticles: [...articles.values()].filter(article => states.get(article.id)?.saved)};
-  const url = URL.createObjectURL(new Blob([JSON.stringify(backup)], {type: 'application/json'}));
-  const link = el('a'); link.href = url; link.download = `sound-and-state-${new Date().toISOString().slice(0, 10)}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  downloadFile(JSON.stringify(backup), 'application/json', `sound-and-state-${new Date().toISOString().slice(0, 10)}.json`);
   $('#backup-status').textContent = 'Backup exported: read status and saved stories.';
 });
 $('#import-state').addEventListener('click', () => $('#backup-file').click());
@@ -343,6 +386,8 @@ async function start() {
     for (const item of library.articles) articles.set(item.id, item);
     for (const item of library.state) states.set(item.id, item);
     for (const item of library.feeds) health.set(item.id, item);
+    $('#scroll-read').checked = library.settings.find(item => item.id === 'markReadOnScroll')?.enabled === true;
+    scrolling.setEnabled($('#scroll-read').checked);
     setupNavigation(); await prune(); render(); await refreshFeeds();
   } catch (error) {notice(error.message); $('#result-label').textContent = 'Collection unavailable'; showEmpty('Unable to load the feed list.', 'Try reloading, or use “Download feed list” to open it in another reader.');}
 }

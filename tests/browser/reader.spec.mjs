@@ -1,9 +1,12 @@
 import {test, expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
 import catalog from '../../feeds.json' with {type: 'json'};
 
 const newsCount = catalog.feeds.filter(feed => feed.category !== 'bluesky').length;
 const socialCount = catalog.feeds.filter(feed => feed.category === 'bluesky').length;
 const totalCount = catalog.feeds.length;
+const feedUrls = new Set(catalog.feeds.map(feed => new URL(feed.feed).href));
+test.beforeEach(async ({page}) => {await page.route(url => feedUrls.has(url.href), route => route.abort('failed'));});
 
 const fixture = id => id.startsWith('bluesky-')
   ? `<rss version="2.0"><channel><title>Local voice</title><link>https://bsky.app/profile/example.bsky.social</link><description>Bluesky posts</description><item><description>A new trail connects two neighborhoods.\nParks &amp; trails &lt;3 — ${id} https://example.com/${'a-long-article-link-'.repeat(12)}</description><link>https://bsky.app/profile/example.bsky.social/post/${id}</link><guid isPermaLink="false">at://did:plc:example/app.bsky.feed.post/${id}</guid><pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate></item></channel></rss>`
@@ -62,11 +65,16 @@ test('failed refresh preserves cached stories and shows source errors', async ({
     await expect(card.locator('.source-detail')).toContainText('Last loaded');
   }
   const retries=[];
-  page.on('request',request=>{if(request.url().includes('/feed/'))retries.push(request.url().split('/').pop());});
+  page.on('request',request=>{if(request.url().startsWith('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/'))retries.push(request.url().split('/').pop());});
   await page.getByRole('button',{name:'Refresh',exact:true}).click();
   await expect(page.getByRole('button',{name:'Refresh',exact:true})).toBeEnabled();
   expect(retries.sort()).toEqual(failedFeeds.map(feed=>feed.id).sort());
   await expect(page.getByRole('button',{name:'2 feeds unavailable · View sources'})).toBeVisible();
+  await page.locator('[data-category="bluesky"]').click();
+  await expect(page.locator('.story')).toHaveCount(socialCount);
+  await expect(page.locator('#show-all-sources')).toBeHidden();
+  await page.locator('#clear-section').click();
+  await page.getByRole('button',{name:'2 feeds unavailable · View sources'}).click();
   await page.getByRole('button',{name:'Show all sources',exact:true}).click();
   await expect(page.locator('.source-card')).toHaveCount(totalCount);
 });
@@ -121,7 +129,7 @@ test('article metadata follows titles, source names are links, and archive links
   await load(page);
   await expect(page.locator('#page-heading')).toHaveClass(/sr-only/);
   await expect(page.getByRole('link',{name:/Download feed list/})).toBeVisible();
-  await expect(page.locator('.wordmark small')).toHaveText('Seattle area');
+  await expect(page.locator('.wordmark small')).toHaveText('A Greater Seattle area News Reader');
   await expect(page.locator('.reader-footer a')).toHaveAttribute('href',`https://github.com/${catalog.repository}`);
   await page.locator('#source-filter').selectOption('seattle-transit-blog');
   const story=page.locator('.story');
@@ -140,22 +148,88 @@ test('article metadata follows titles, source names are links, and archive links
   expect(archiveRequests).toHaveLength(0);
 });
 
-test('bookmark and native read controls remain aligned and usable at narrow widths', async ({page}) => {
+test('save and mark-read buttons remain aligned and usable at narrow widths', async ({page}) => {
   await load(page);
   await page.locator('#source-filter').selectOption('seattle-transit-blog');
-  const read=page.locator('.story .read-control input');
+  const read=page.locator('.story .read-button');
   for(const width of [320,390,760,900,1440]) {
     await page.setViewportSize({width,height:900});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-    const inputBox=await read.boundingBox();
-    const labelBox=await page.locator('.read-control span').boundingBox();
-    expect(Math.abs(inputBox.y+inputBox.height/2-labelBox.y-labelBox.height/2)).toBeLessThan(2);
+    const readBox=await read.boundingBox();
+    const saveBox=await page.locator('.save-button').boundingBox();
+    expect(Math.abs(readBox.y-saveBox.y)).toBeLessThan(2); expect(readBox.height).toBe(saveBox.height);
+    const logo=await page.locator('.brand-icon').boundingBox(); expect(logo.width).toBe(logo.height);
     await expect(page.locator('.save-button')).toHaveText('Save');
     await expect(page.locator('.bookmark-icon').last()).toBeVisible();
   }
-  await read.check(); await expect(page.locator('.story')).toHaveClass(/is-read/);
-  await read.uncheck(); await expect(page.locator('.story')).not.toHaveClass(/is-read/);
+  await expect(read).toHaveText('Mark Read');
+  await read.click(); await expect(page.locator('.story')).toHaveClass(/is-read/); await expect(read).toHaveText('Mark Unread');
+  await read.click(); await expect(page.locator('.story')).not.toHaveClass(/is-read/);
   await page.locator('.save-button').click(); await expect(page.locator('.save-button')).toHaveText('Saved');
   await page.reload(); await page.locator('#source-filter').selectOption('seattle-transit-blog');
-  await expect(page.locator('.save-button')).toHaveText('Saved'); await expect(read).not.toBeChecked();
+  await expect(page.locator('.save-button')).toHaveText('Saved'); await expect(read).toHaveAttribute('aria-pressed','false');
+});
+
+test('direct fallback loads CORS-enabled feeds and reports both failures for blocked feeds', async ({page}) => {
+  const [allowed, blocked]=catalog.feeds.filter(feed=>feed.category!=='bluesky');
+  const directRequests=[];
+  await page.context().addCookies([{name:'private-session',value:'not-for-feeds',url:allowed.feed}]);
+  await page.route(allowed.feed, route=>{directRequests.push(route.request());return route.fulfill({contentType:'application/xml',headers:{'access-control-allow-origin':'*'},body:fixture(allowed.id)});});
+  await page.route(blocked.feed, route=>route.fulfill({contentType:'application/xml',headers:{'access-control-allow-origin':'https://another-reader.example'},body:fixture(blocked.id)}));
+  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',route=>{
+    const id=route.request().url().split('/').pop(), fails=[allowed.id,blocked.id].includes(id);
+    return route.fulfill({status:fails?502:200,contentType:fails?'application/json':'application/xml',body:fails?'{"error":"Publisher denied proxy request."}':fixture(id)});
+  });
+  await page.goto('./'); await expect(page.locator('#all-count')).toHaveText(String(newsCount-1));
+  await expect(page.getByRole('button',{name:'Refresh',exact:true})).toBeEnabled();
+  expect(directRequests).toHaveLength(1);
+  expect(directRequests[0].headers()).not.toHaveProperty('cookie'); expect(directRequests[0].headers()).not.toHaveProperty('referer');
+  await page.getByRole('button',{name:'1 feed unavailable · View sources'}).click();
+  await expect(page.locator('.source-card')).toHaveCount(1);
+  await expect(page.locator('.source-detail')).toContainText('Proxy: Publisher denied proxy request. Direct: Browser request failed (CORS or network error).');
+  await page.getByRole('button',{name:'Show all sources',exact:true}).click();
+  await expect(page.locator('.source-card').filter({has:page.getByRole('heading',{name:allowed.name,exact:true})})).toContainText('Direct from publisher');
+});
+
+test('scroll marking is optional, persists, and keeps the unread list stationary', async ({page}) => {
+  await load(page); await page.locator('[data-view="unread"]').click();
+  const first=page.locator('.story').first();
+  const pastFirst=()=>page.evaluate(()=>window.scrollBy(0,document.querySelector('.story').getBoundingClientRect().bottom+2));
+  await expect(page.locator('#scroll-read')).not.toBeChecked();
+  await pastFirst(); await page.evaluate(()=>new Promise(requestAnimationFrame));
+  await expect(first).not.toHaveClass(/is-read/);
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await page.locator('#scroll-read').check();
+  await expect(first).not.toHaveClass(/is-read/);
+  const expectedY=await first.evaluate(node=>scrollY+node.getBoundingClientRect().bottom+2);
+  await pastFirst(); await expect(first).toHaveClass(/is-read/);
+  expect(await page.evaluate(()=>scrollY)).toBeCloseTo(expectedY,0);
+  await expect(page.locator('.story')).toHaveCount(60);
+  await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));
+  await expect(page.locator('.story').nth(1)).not.toHaveClass(/is-read/);
+  const next=page.locator('.story').nth(1), nextId=await next.getAttribute('data-article'), nextTop=(await next.boundingBox()).y;
+  await next.locator('.save-button').evaluate(node=>node.click());
+  await expect(page.locator('.story').first()).toHaveAttribute('data-article',nextId);
+  expect((await page.locator('.story').first().boundingBox()).y).toBeCloseTo(nextTop,0);
+  await page.reload(); await expect(page.locator('#scroll-read')).toBeChecked();
+  await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));
+  await page.locator('#scroll-read').uncheck();
+  await page.reload(); await expect(page.locator('#scroll-read')).not.toBeChecked();
+});
+
+test('CSV exports all saved stories across sections and filters', async ({page}) => {
+  await load(page); await expect(page.locator('#export-saved')).toBeDisabled();
+  await page.locator('.save-button').first().click();
+  await page.locator('[data-category="bluesky"]').click(); await expect(page.locator('.story')).toHaveCount(socialCount);
+  await page.locator('.save-button').first().click();
+  await page.getByRole('searchbox').fill('nothing matches');
+  const downloadPromise=page.waitForEvent('download'); await page.locator('#export-saved').click();
+  const download=await downloadPromise, csv=await readFile(await download.path(),'utf8');
+  expect(download.suggestedFilename()).toMatch(/^sound-and-state-saved-\d{4}-\d{2}-\d{2}\.csv$/);
+  expect(csv).toContain('"Title","Source","Published","URL","Content","Read"');
+  expect(csv).toContain('https://publisher.example/'); expect(csv).toContain('https://bsky.app/profile/');
+  expect(csv.split('\r\n').filter(Boolean)).toHaveLength(3);
+  await page.getByRole('button',{name:'About this reader'}).click();
+  await expect(page.getByRole('heading',{name:'What is this and why?'})).toBeVisible();
+  await expect(page.locator('.about-content')).toContainText('The maintainer collects no user data.');
 });

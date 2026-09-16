@@ -13,8 +13,10 @@ export default defineConfig({
   build: {outDir: '../dist', emptyOutDir: true},
   plugins: [{
     name: 'curated-catalog',
-    transformIndexHtml() {
-      return [{tag: 'link', attrs: {rel: 'canonical', href: config.url}, injectTo: 'head'}];
+    async transformIndexHtml(html) {
+      const catalog = await loadCatalog();
+      const origins = [...new Set([config.proxy, ...catalog.feeds.flatMap(feed => [feed.feed, ...(feed.redirects || [])])].map(url => new URL(url).origin))].sort();
+      return {html: html.replace('__FEED_CONNECT_ORIGINS__', origins.join(' ')), tags: [{tag: 'link', attrs: {rel: 'canonical', href: config.url}, injectTo: 'head'}]};
     },
     async buildStart() {
       const catalog = await loadCatalog();

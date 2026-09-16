@@ -2,8 +2,9 @@ import Dexie from 'dexie';
 
 const db = new Dexie('sound-and-state');
 db.version(1).stores({articles: '&id, published, firstSeen, *feedIds', state: '&id', feeds: '&id'});
+db.version(2).stores({settings: '&id'});
 let persistent = true;
-const memory = {articles: new Map(), state: new Map(), feeds: new Map()};
+const memory = {articles: new Map(), state: new Map(), feeds: new Map(), settings: new Map()};
 let warning = () => {};
 
 async function operation(store, method, args) {

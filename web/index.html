@@ -6,15 +6,15 @@
   <meta name="description" content="A browser-based reader for the Awesome Seattle News Feeds list.">
   <meta name="theme-color" content="#173f36">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://awesome-seattle-feed-proxy.bmenesini.workers.dev; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' __FEED_CONNECT_ORIGINS__; object-src 'none'; base-uri 'none'; form-action 'none'">
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <title>Sound &amp; State — Seattle News Reader</title>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to stories</a>
   <header class="masthead">
-    <a class="wordmark" href="./" aria-label="Sound and State home"><span class="brand-icon" aria-hidden="true">S<span>&amp;</span>S</span><span>Sound <i>&amp;</i> State<small>Seattle area</small></span></a>
-    <nav aria-label="Resources"><a href="./feeds.opml" download>Download feed list <span aria-hidden="true">↗&#xfe0e;</span></a><button id="about-button" class="text-button">About this reader</button><a id="github-link" href="https://github.com/sayhiben/awesome-seattle-news-feeds">GitHub <span aria-hidden="true">↗&#xfe0e;</span></a></nav>
+    <a class="wordmark" href="./" aria-label="Sound and State home"><span class="brand-icon" aria-hidden="true">S<span>&amp;</span>S</span><span>Sound <i>&amp;</i> State<small>A Greater Seattle area News Reader</small></span></a>
+    <nav aria-label="Resources"><button id="about-button" class="text-button">About this reader</button><a href="./feeds.opml" download>Download feed list <span aria-hidden="true">↗&#xfe0e;</span></a><a id="github-link" href="https://github.com/sayhiben/awesome-seattle-news-feeds">GitHub <span aria-hidden="true">↗&#xfe0e;</span></a></nav>
   </header>
   <div class="app-layout">
     <aside class="sidebar" aria-label="Reading filters">
@@ -34,6 +34,7 @@
       <section id="page-heading" class="page-heading sr-only"><h1 id="heading">Latest stories</h1><p id="description" hidden></p></section>
       <div class="toolbar"><label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Search stories or sources…" aria-label="Search stories or sources"></label><label class="source-select"><span class="sr-only">Filter by source</span><select id="source-filter"><option value="">All sources</option></select></label><button id="refresh" class="primary-button"><span aria-hidden="true">↻</span> Refresh</button></div>
       <div class="reading-bar"><div><span class="live-dot" aria-hidden="true"></span><span id="result-label">Opening the collection…</span></div><div class="reading-actions"><button id="show-all-sources" class="text-button" hidden>Show all sources</button><button id="mark-read" class="text-button">Mark these read</button></div></div>
+      <div class="reading-options"><label class="scroll-read-control"><input id="scroll-read" type="checkbox">Mark articles read as I scroll past them</label><button id="export-saved" class="text-button download-link" disabled>Download saved articles (CSV)</button></div>
       <div id="notice" class="notice" role="status" hidden></div>
       <div id="feed-progress" class="feed-progress" role="status" aria-live="polite"></div>
       <section id="stories" aria-label="Stories"></section>
@@ -46,17 +47,19 @@
     <div class="dialog-top"><span>About this reader</span><button class="close-button" data-close="about-dialog" aria-label="Close about">×</button></div>
     <div class="about-content">
       <h2 id="about-title">Sound &amp; State</h2>
-      <p>A browser-based RSS and Atom reader for <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds</a>. Bluesky posts load in their own section.</p>
+      <h3>What is this and why?</h3>
+      <p>A browser-based RSS and Atom reader, made for fun and mainly used to preview content from <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds</a>. It is not for profit. The maintainer collects no user data.</p>
       <h3>Storage and refresh</h3>
-      <p>Reading state and cached articles are stored locally in IndexedDB, with no account or server sync. Clearing browser data removes them. Backups are local JSON files.</p>
+      <p>Reading state, preferences, and cached articles are stored locally in IndexedDB, with no account or server sync. Clearing browser data removes them. Backups are local JSON files; saved articles can also be downloaded as CSV.</p>
+      <p>“Mark articles read as I scroll past them” is off by default. When enabled, an article is marked read after you scroll it above the top of the page.</p>
       <p>Healthy feeds refresh at most every 15 minutes. Failed feeds retry less often automatically; Refresh retries them immediately. Unsaved content is kept for 30 days, up to 150 items per feed. Saved items remain until removed.</p>
       <div class="backup-actions"><button id="export-state" class="secondary-button">Export reading backup</button><button id="import-state" class="secondary-button">Restore backup</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div>
       <p id="backup-status" role="status"></p>
       <h3>Privacy and security</h3>
       <ul>
-        <li>GitHub serves the site; Cloudflare proxies feed requests. Both receive your IP address and request metadata. Cloudflare sees requested feeds; publishers see proxy requests, without your cookies or credentials. Reading state is not uploaded.</li>
+        <li>GitHub serves the site; Cloudflare proxies feed requests. Both receive your IP address and request metadata. If the proxy fails, your browser retries the feed directly. That publisher then receives your IP address and request metadata. Feed requests send no cookies, credentials, or referrer. Direct retries work only when the publisher permits cross-site access (CORS). Reading state is not uploaded.</li>
         <li>No analytics or third-party fonts. Feed HTML is sanitized with DOMPurify; scripts, frames, forms, and remote images are removed. A content security policy restricts scripts and connections.</li>
-        <li>Publisher and archive sites are contacted only when you follow their links. They receive your IP address and may use cookies; links send no referrer. Ghostarchive searches receive the article URL with <code>utm_*</code> parameters removed. Archived copies may not exist.</li>
+        <li>Article pages and archive searches open only when you follow their links. Those sites receive your IP address and may use cookies; links send no referrer. Ghostarchive searches receive the article URL with <code>utm_*</code> parameters removed. Archived copies may not exist.</li>
       </ul>
       <p><a href="./third-party-notices.txt">Software credits</a></p>
     </div>
