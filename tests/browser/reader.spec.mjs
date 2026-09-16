@@ -144,18 +144,29 @@ test('metadata follows article titles and archives remain private until clicked'
   expect(requests).toHaveLength(0);
 });
 
-test('cards and previews label full dates, including update-only and date-only entries',async({page})=>{
-  const id='transit-news';let xml=fixture(id);
-  await page.route(proxyRoute,r=>r.fulfill({contentType:'application/xml',body:xml}));
+test('cards and previews label full dates, including update-only and date-only entries',async({page,newReaderPage})=>{
+  const id='transit-news';
   await page.goto(`./#source=${id}`);await expect(page.locator('.story')).toHaveCount(1);
   await expect(page.locator('.story-published time')).toHaveAttribute('datetime','2026-09-15T10:00:00.000Z');
   await expect(page.locator('.story-updated time')).toHaveAttribute('datetime','2026-09-15T12:45:00.000Z');
   for(const field of ['published','updated'])await expect(page.locator(`.story-${field}`)).toHaveText(new RegExp(`^${field==='published'?'Published':'Updated'} Sep 15, 2026, .*[0-9]:[0-9]{2} .*`));
   await page.locator('.story-title').click();await expect(page.locator('#article-dialog .story-updated time')).toHaveAttribute('datetime','2026-09-15T12:45:00.000Z');await page.keyboard.press('Escape');await expect(page.locator('#article-dialog')).toBeHidden();
   await page.locator('.story .save-button').click();const download=page.waitForEvent('download');await page.locator('#export-saved').click();const csv=await readFile(await(await download).path(),'utf8');expect(csv).toContain('"Read","Updated"');expect(csv).toContain('2026-09-15T12:45:00.000Z');
-  xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-published')).toHaveCount(0);await expect(page.locator('.story-updated')).toContainText('2026');
-  xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'<pubDate>2026-09-14</pubDate>').replace(/<atom:updated>.*?<\/atom:updated>/,'<atom:updated>2026-09-15</atom:updated>');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-published')).toHaveText('Published Sep 14, 2026');await expect(page.locator('.story-updated')).toHaveText('Updated Sep 15, 2026');await expect(page.locator('.story-published time')).toHaveAttribute('datetime','2026-09-14');
-  xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'').replace(/<atom:updated>.*?<\/atom:updated>/,'');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-dates')).toHaveText('No date in feed');await expect(page.locator('.story time')).toHaveCount(0);
+  // Each date format starts with an empty library, so an in-flight refresh cannot
+  // overwrite the next case's cached data or make an absent-date assertion pass early.
+  for(const overrides of [{published:null},{published:'2026-09-14',updated:'2026-09-15'},{published:null,updated:null}]) {
+    const fresh=await newReaderPage();
+    await fresh.route(proxyFeedUrl(id),route=>route.fulfill({contentType:'application/xml',body:rssFeed([articleItem(id,overrides)])}));
+    await fresh.goto('./#source='+id);await expect(fresh.locator('.story')).toHaveCount(1);await expect(fresh.locator('#refresh')).toBeEnabled();
+    if(overrides.updated===null) {
+      await expect(fresh.locator('.story-dates')).toHaveText('No date in feed');await expect(fresh.locator('.story time')).toHaveCount(0);
+    } else if(overrides.published===null) {
+      await expect(fresh.locator('.story-published')).toHaveCount(0);await expect(fresh.locator('.story-updated')).toContainText('2026');
+    } else {
+      await expect(fresh.locator('.story-published')).toHaveText('Published Sep 14, 2026');await expect(fresh.locator('.story-updated')).toHaveText('Updated Sep 15, 2026');await expect(fresh.locator('.story-published time')).toHaveAttribute('datetime','2026-09-14');
+    }
+    await fresh.context().close();
+  }
 });
 
 test('direct fallback omits credentials and source errors explain both attempts',async({page})=>{
