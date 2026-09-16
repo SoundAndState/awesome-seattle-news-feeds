@@ -87,7 +87,8 @@ summary {cursor:pointer;min-height:44px;padding:10px 0;font-size:14px;font-weigh
 .bookmark-icon,.read-icon {width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
 .save-button.is-saved,.read-button.is-read {background:var(--wash)}
 .save-button.is-saved .bookmark-icon {fill:currentColor}
-.is-read .story-title {color:#586c5e}
+.story.is-read {--ink:#656b67;--muted:#6b716d;color:var(--muted)}
+.story.is-read .category-tag {background:#e9eae5;color:var(--ink)}
 .post-text {font-size:18px;line-height:1.6;margin:0 0 8px;white-space:pre-line}
 .post-text.collapsed {display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
 .embed-note,.feed-note {font-size:14px;color:var(--muted);line-height:1.6}
