@@ -108,7 +108,7 @@ test('unreadable backups explain recovery without changing the library',async({p
 
 test('mobile navigation reaches content quickly and filters close after selection',async({page})=>{
   await page.setViewportSize({width:390,height:844});await load(page);
-  expect(await page.locator('.story h2').first().evaluate(n=>n.getBoundingClientRect().top)).toBeLessThanOrEqual(320);
+  expect(await page.locator('.story h2').first().evaluate(n=>n.getBoundingClientRect().top)).toBeLessThanOrEqual(340);
   expect(await page.locator('.story h2').nth(1).evaluate(n=>n.getBoundingClientRect().top)).toBeLessThan(844);
   await chooseSection(page,'transport');await expect(page.locator('#filter-chips')).toContainText('Transit & urbanism');
   await page.locator('#filter-button').click();await page.locator('#source-search').fill('transit blog');await expect(page.locator('.source-choice')).toHaveCount(1);await page.locator('.source-choice').click();await expect(page.locator('.story')).toHaveCount(1);
@@ -240,7 +240,7 @@ test('legacy Bluesky links resolve to Posts with a scoped account picker',async(
 test('CSV includes all saved types regardless of filters; About explains cookies and storage',async({page})=>{
   await load(page);await expect(page.locator('#export-saved')).toBeDisabled();await page.locator('.save-button').first().click();await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);await page.locator('.save-button').first().click();await search(page,'nothing matches');
   const promise=page.waitForEvent('download');await page.locator('#export-saved').click();const download=await promise,csv=await readFile(await download.path(),'utf8');expect(csv).toContain('"Title","Source","Published","URL","Content","Read"');expect(csv).toContain('https://publisher.example/');expect(csv).toContain('https://bsky.app/profile/');expect(csv.split('\r\n').filter(Boolean)).toHaveLength(3);
-  await page.locator('#about-button').click();await expect(page.locator('.about-content')).toContainText('does not set or read cookies');await expect(page.locator('.about-content')).toContainText('It does not send that information to a server or sync it to other browsers or devices.');
+  await page.locator('#about-button').click();await expect(page.locator('.about-content')).toContainText('does not set or read cookies');await expect(page.locator('.about-content')).toContainText('It does not upload or sync them.');
 });
 
 

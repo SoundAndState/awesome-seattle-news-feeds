@@ -105,13 +105,13 @@ function itemDates(item) {
   if (!node.childElementCount) node.textContent = 'No date in feed';
   return node;
 }
-function articleMetadata(item, className) {
+function articleMetadata(item, className, showReadStatus = false) {
   const metadata = el('div', `${className} article-metadata`), attribution = el('div', 'article-attribution');
   attribution.append(sourceLink(item));
   const categoryId = item.feedIds.map(id => feedMap.get(id)?.category).find(Boolean);
   const classification = {satire:'Satire', commentary:'Commentary & advocacy', official:'Official information'}[categoryId];
   if (classification) attribution.append(el('span', `category-tag category-${categoryId}`, classification));
-  attribution.append(el('span', 'article-read-status', states.get(item.id)?.read ? 'Read' : 'Unread'));
+  if (showReadStatus) attribution.append(el('span', 'article-read-status', states.get(item.id)?.read ? 'Read' : 'Unread'));
   metadata.append(attribution, itemDates(item));
   return metadata;
 }
@@ -217,8 +217,7 @@ function storyCard(item) {
   } else {
     const headline = item.title || 'Untitled article';
     const title = el('h2'), open = button('', 'story-title', () => navigate({article:item.id,limit},{keepScroll:true}));
-    const cue = el('span', 'preview-cue', 'Preview →'); cue.setAttribute('aria-hidden', 'true');
-    open.append(el('span', 'headline-text', headline), ' ', cue);
+    open.append(el('span', 'headline-text', headline));
     open.setAttribute('aria-label', `Preview article: ${headline}`);
     open.setAttribute('aria-haspopup', 'dialog'); open.setAttribute('aria-controls', 'article-dialog');
     open.dataset.story = item.id; title.append(open); body.append(title,metadata);
@@ -312,7 +311,6 @@ async function markScrolledArticles(ids) {
   for (const state of updates) states.set(state.id,state);
   for (const card of $('#stories').querySelectorAll('.story')) if(ids.includes(card.dataset.article)) {
     card.classList.add('is-read'); card.querySelector('.unread-dot')?.remove();
-    const status = card.querySelector('.article-read-status'); if (status) status.textContent = 'Read';
     updateReadButton(card.querySelector('[data-read]'), articles.get(card.dataset.article));
   }
   updateNavigation(); await save('state',updates);
@@ -373,7 +371,7 @@ function openArticle(item) {
   const headerSave=$('#article-save'); headerSave.replaceChildren(); headerSave.hidden=social;
   const title=el('h2','article-title',social?'Post preview':item.title||'Untitled article'); title.id='article-title'; title.tabIndex=-1;
   if(!social && safeUrl(item.url))title.replaceChildren(external(item.title||'Untitled article',item.url));
-  const metadata=social?el('p','article-meta'):articleMetadata(item,'article-meta');
+  const metadata=social?el('p','article-meta'):articleMetadata(item,'article-meta',true);
   if(social)metadata.append(sourceLink(item),itemDates(item));
   const actions=el('div','article-links'); actions.append(...articleLinks(item));
   if(social)actions.append(saveButton(item)); else headerSave.append(saveButton(item));

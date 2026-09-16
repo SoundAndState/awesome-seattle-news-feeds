@@ -13,7 +13,7 @@ a:hover,button:hover {color:var(--accent)}
 .sr-only {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .skip-link {position:fixed;top:-100px;left:16px;padding:12px;background:var(--ink);color:white;z-index:20}
 .skip-link:focus {top:12px}
-.story,button,a,input,summary {scroll-margin-top:76px}
+.story,button,a,input,summary {scroll-margin-top:92px}
 .mode-bar button,.dialog-top button {scroll-margin-top:0}
 /* The masthead, reading modes, and stories share one editorial measure. */
 .masthead {max-width:1000px;margin:auto;padding:8px 28px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:0 calc(20px * 4 / 3);color:var(--ink)}
@@ -30,7 +30,7 @@ a:hover,button:hover {color:var(--accent)}
 .masthead nav a:hover,.masthead nav .text-button:hover {text-decoration:underline}
 .resource-icon {width:13px;height:13px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
 .text-button {background:none;padding:6px 0;font-size:14px;text-align:left;line-height:1.5}
-.mode-bar {position:sticky;top:0;z-index:5;max-width:1000px;margin:auto;padding:4px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--paper);border-block:1px solid var(--line)}
+.mode-bar {position:sticky;top:0;z-index:5;max-width:1000px;margin:auto;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--paper);border-block:1px solid var(--line)}
 .mode-switch {display:flex;gap:4px;padding:3px;background:var(--wash);border-radius:6px}
 .mode-switch button {padding:6px 24px;background:transparent;border-radius:4px;font-size:16px}
 .mode-switch [aria-pressed=true] {background:var(--ink);color:white}
@@ -160,7 +160,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
   .wordmark small {top:calc(-5.616px + 5px / 6);line-height:1.48;letter-spacing:.015em}
   .masthead nav {width:100%;justify-content:flex-start;gap:0 calc(18px * 4 / 3)}
   #github-link {display:none}
-  .mode-bar {padding:3px 16px;gap:12px}
+  .mode-bar {padding:12px 16px;gap:12px}
   .mode-switch {padding:0;gap:0}
   .mode-switch button {padding:6px 16px;font-size:15px}
   #saved-button {padding:6px 8px;font-size:14px}
@@ -217,13 +217,13 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
   letter-spacing:normal;
   text-align:left;
 }
-.article-card {container:article-card / inline-size;padding:0}
-.article-card .story-copy {max-width:none;padding-block:1.25rem}
+.article-card {container:article-card / inline-size;padding:0;--card-padding-block:1.25rem;--read-marker:#d0d0cc}
+.article-card.is-read .story-copy::before {content:"";position:absolute;inset-block:var(--card-padding-block);inset-inline-start:.25rem;border-inline-start:.25rem solid var(--read-marker);pointer-events:none}
+.article-card .story-copy {position:relative;max-width:none;padding-block:var(--card-padding-block);padding-inline-start:1.25rem}
 .article-card h2 {max-inline-size:44rem;margin:0 0 .5rem;font:600 1.5rem/1.25 var(--article-serif);hyphens:none}
 .article-card .story-title {max-inline-size:100%;min-block-size:2.75rem;color:var(--article-ink);font:inherit;letter-spacing:normal}
 .article-card.is-read .story-title {color:var(--article-muted)}
 .article-card .story-title:is(:hover,:focus-visible) .headline-text {text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.15em;text-decoration-skip-ink:auto}
-.article-card .preview-cue {display:inline-block;white-space:nowrap;margin-inline-start:.375rem;font:400 .875rem/1.4 var(--article-sans);color:var(--article-ink);vertical-align:baseline}
 .article-metadata {display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:0;margin:0;font:400 .875rem/1.5 var(--article-sans);color:var(--article-muted)}
 .article-attribution {display:flex;flex-wrap:wrap;align-items:center;gap:0 .75rem;min-inline-size:0}
 .article-attribution .publisher {max-inline-size:100%;min-block-size:2.75rem;color:var(--article-ink);font-weight:600;text-decoration-color:currentColor}
@@ -238,7 +238,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-card .publisher-link,.article-preview .publisher-link {max-inline-size:100%;min-block-size:2.75rem;font:500 .875rem/1.4 var(--article-sans);color:var(--article-ink);text-decoration-color:currentColor}
 .article-card :is(.save-button,.read-button),.article-preview .save-button {min-block-size:2.75rem;padding:.375rem .625rem;gap:.5rem;border-color:var(--article-border);border-radius:2px;color:var(--article-ink);font:500 .875rem/1.4 var(--article-sans)}
 .article-card .save-button,.article-preview .save-button {min-inline-size:5.25rem}
-.article-card .read-button {min-inline-size:8.5rem}
+.article-card .read-button {min-inline-size:min(8.5rem,calc(100cqi - 1.25rem))}
 .article-card :is(.save-button,.read-button):hover,.article-preview .save-button:hover {background:var(--article-wash)}
 .article-card :is(.bookmark-icon,.read-icon),.article-preview .bookmark-icon {flex-shrink:0;width:1.125rem;height:1.125rem}
 .article-card :where(button,a):focus-visible,.article-preview :where(button,a,[tabindex]):focus-visible {outline:3px solid var(--article-ink);outline-offset:3px}
@@ -273,9 +273,8 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-preview .dialog-top button {scroll-margin-block:0}
 
 @container article-card (min-width:40rem) {
-  .article-card .story-copy {padding-block:1.5rem}
+  .article-card .story-copy {--card-padding-block:1.5rem}
   .article-card h2 {font-size:1.75rem;line-height:1.2}
-  .article-card .article-metadata {grid-template-columns:minmax(0,1fr) fit-content(50%);column-gap:1.5rem}
   .article-footer {flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;column-gap:1.5rem;margin-block-start:1rem}
   .article-footer .story-actions {margin-inline-start:auto}
 }
@@ -285,6 +284,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
   .article-preview .article-content {font-size:1.1875rem;line-height:1.65}
 }
 @media(forced-colors:active) {
+  .article-card {--read-marker:GrayText}
   .story.article-card,.article-preview {--article-paper:Canvas;--article-ink:CanvasText;--article-text:CanvasText;--article-muted:CanvasText;--article-rule:CanvasText;--article-wash:Canvas;--article-border:ButtonText}
   .article-card :where(button,a):focus-visible,.article-preview :where(button,a,[tabindex]):focus-visible {outline-color:Highlight}
   .article-card .save-button.is-saved,.article-preview .save-button.is-saved {border-width:2px}
