@@ -48,11 +48,11 @@ test('both failure reasons survive, and oversized direct feeds are rejected', as
 });
 test('CSV preserves Unicode, quotes, commas and lines while neutralizing spreadsheet formulas', () => {
   const csv=articlesCsv([{title:'Seattle, "news" — café',source:'=FORMULA()',published:0,url:'https://example.com/story',content:'Line one\nLine two',read:true},{title:'  @command',source:'Normal',published:Date.UTC(2026,8,15),url:'',content:'\tcommand',read:false}]);
-  assert.ok(csv.startsWith('\uFEFF"Title","Source","Published","URL","Content","Read"\r\n'));
+  assert.ok(csv.startsWith('\uFEFF"Title","Source","Published","URL","Content","Read","Updated"\r\n'));
   assert.ok(csv.includes('"Seattle, ""news"" — café","\'=FORMULA()",""'));
-  assert.ok(csv.includes('"Line one\nLine two","Yes"\r\n'));
+  assert.ok(csv.includes('"Line one\nLine two","Yes",""\r\n'));
   assert.ok(csv.includes('"\'  @command","Normal","2026-09-15T00:00:00.000Z"'));
-  assert.ok(csv.includes('"\'\tcommand","No"\r\n'));
+  assert.ok(csv.includes('"\'\tcommand","No",""\r\n'));
 });
 
 

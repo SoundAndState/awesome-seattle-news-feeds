@@ -16,7 +16,33 @@ export default defineConfig({
     async transformIndexHtml(html) {
       const catalog = await loadCatalog();
       const origins = [...new Set([config.proxy, ...catalog.feeds.flatMap(feed => [feed.feed, ...(feed.redirects || [])])].map(url => new URL(url).origin))].sort();
-      return {html: html.replace('__FEED_CONNECT_ORIGINS__', origins.join(' ')), tags: [{tag: 'link', attrs: {rel: 'canonical', href: config.url}, injectTo: 'head'}]};
+      const image = new URL('social-card.png', config.url).href;
+      const imageAlt = 'Sound & State — a Greater Seattle news reader. Articles, local posts, and a shared saved library.';
+      const metadata = [
+        ['name', 'application-name', config.name],
+        ['name', 'description', config.description],
+        ['property', 'og:type', 'website'],
+        ['property', 'og:site_name', config.name],
+        ['property', 'og:title', config.title],
+        ['property', 'og:description', config.description],
+        ['property', 'og:url', config.url],
+        ['property', 'og:locale', 'en_US'],
+        ['property', 'og:image', image],
+        ['property', 'og:image:type', 'image/png'],
+        ['property', 'og:image:width', '1200'],
+        ['property', 'og:image:height', '630'],
+        ['property', 'og:image:alt', imageAlt],
+        ['name', 'twitter:card', 'summary_large_image'],
+        ['name', 'twitter:title', config.title],
+        ['name', 'twitter:description', config.description],
+        ['name', 'twitter:image', image],
+        ['name', 'twitter:image:alt', imageAlt],
+      ];
+      return {html: html.replace('__FEED_CONNECT_ORIGINS__', origins.join(' ')), tags: [
+        {tag: 'title', children: config.title.replaceAll('&', '&amp;'), injectTo: 'head'},
+        {tag: 'link', attrs: {rel: 'canonical', href: config.url}, injectTo: 'head'},
+        ...metadata.map(([attribute, key, content]) => ({tag: 'meta', attrs: {[attribute]: key, content}, injectTo: 'head'})),
+      ]};
     },
     async buildStart() {
       const catalog = await loadCatalog();

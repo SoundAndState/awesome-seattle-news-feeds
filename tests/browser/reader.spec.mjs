@@ -1,6 +1,7 @@
 import {test, expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import catalog from '../../feeds.json' with {type: 'json'};
+import site from '../../site.config.json' with {type: 'json'};
 
 const newsCount = catalog.feeds.filter(feed => feed.category !== 'bluesky').length;
 const socialCount = catalog.feeds.filter(feed => feed.category === 'bluesky').length;
@@ -10,13 +11,13 @@ test.beforeEach(async ({page}) => {await page.route(url => feedUrls.has(url.href
 
 const fixture = id => id.startsWith('bluesky-')
   ? `<rss version="2.0"><channel><title>Local voice</title><link>https://bsky.app/profile/example.bsky.social</link><description>Bluesky posts</description><item><description>A new trail connects two neighborhoods.\nParks &amp; trails &lt;3 — ${id} https://example.com/${'a-long-article-link-'.repeat(12)}</description><link>https://bsky.app/profile/example.bsky.social/post/${id}</link><guid isPermaLink="false">at://did:plc:example/app.bsky.feed.post/${id}</guid><pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate></item></channel></rss>`
-  : `<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Publisher</title><description>Local reporting</description><item><title>Seattle parks get a new trail — ${id}</title><link>https://publisher.example/${id}?utm_source=rss&amp;edition=local&amp;UTM_medium=feed#section</link><pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate><content:encoded><![CDATA[<p>A new trail connects two neighborhoods.</p><script>window.compromised=true</script><img src="https://tracker.example/pixel" onerror="window.compromised=true"><a href="javascript:alert(1)">Unsafe link</a><a href="/more">More reporting</a>]]></content:encoded></item></channel></rss>`;
+  : `<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Publisher</title><description>Local reporting</description><item><title>Seattle parks get a new trail — ${id}</title><link>https://publisher.example/${id}?utm_source=rss&amp;edition=local&amp;UTM_medium=feed#section</link><pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate><atom:updated>2026-09-15T12:45:00Z</atom:updated><content:encoded><![CDATA[<p>A new trail connects two neighborhoods.</p><script>window.compromised=true</script><img src="https://tracker.example/pixel" onerror="window.compromised=true"><a href="javascript:alert(1)">Unsafe link</a><a href="/more">More reporting</a>]]></content:encoded></item></channel></rss>`;
 async function load(page, fail = false) {
   await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*', route => {
     const id = route.request().url().split('/').pop();
     return route.fulfill({status: fail ? 502 : 200, contentType: fail ? 'application/json' : 'application/xml', body: fail ? JSON.stringify({error:'Publisher returned HTTP 403.'}) : fixture(id)});
   });
-  await page.goto('./'); await expect(page.getByRole('button', {name:'Refresh',exact:true})).toBeEnabled({timeout:30000});
+  await page.goto('./'); await expect(page.locator('#feed-progress')).toContainText('Checked',{timeout:30000});await expect(page.getByRole('button', {name:'Refresh',exact:true})).toBeEnabled();
   await expect(page.locator('#all-count')).toHaveText(fail ? '0' : String(newsCount));
 }
 
@@ -84,8 +85,8 @@ test('failed refresh preserves cached content, explains failures and retries onl
 test('backup restores article and post saves into a fresh library',async({page})=>{
   await load(page);await page.locator('.save-button').first().click();await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);await page.locator('.save-button').first().click();
   await page.locator('#about-button').click();const downloadPromise=page.waitForEvent('download');await page.locator('#export-state').click();const backup=await (await downloadPromise).path();
-  const context=await page.context().browser().newContext({baseURL:test.info().project.use.baseURL});const fresh=await context.newPage();await load(fresh);await fresh.locator('#about-button').click();await fresh.locator('#backup-file').setInputFiles(backup);await expect(fresh.locator('#backup-status')).toContainText('Restored 2 saved stories');
-  await fresh.getByRole('button',{name:'Close about'}).click();await fresh.locator('#saved-button').click();await expect(fresh.locator('.story')).toHaveCount(2);await expect(fresh.locator('.post')).toHaveCount(1);await context.close();
+  const context=await page.context().browser().newContext({baseURL:test.info().project.use.baseURL});const fresh=await context.newPage();await fresh.route(url=>feedUrls.has(url.href),r=>r.abort('failed'));await load(fresh,true);await fresh.locator('#about-button').click();await fresh.locator('#backup-file').setInputFiles(backup);await expect(fresh.locator('#backup-status')).toContainText('Restored 2 saved stories');
+  await fresh.getByRole('button',{name:'Close about'}).click();await fresh.locator('#saved-button').click();await expect(fresh.locator('.story')).toHaveCount(2);await expect(fresh.locator('.post')).toHaveCount(1);await expect(fresh.locator('.story-updated time')).toHaveAttribute('datetime','2026-09-15T12:45:00.000Z');await context.close();
 });
 
 test('mobile navigation reaches content quickly and filters close after selection',async({page})=>{
@@ -121,6 +122,41 @@ test('metadata follows article titles and archives remain private until clicked'
   await expect(story.locator('.publisher')).toHaveAttribute('href',new URL(catalog.feeds.find(f=>f.id==='seattle-transit-blog').website).href);
   for(const link of await story.locator('.publisher-link').all()){expect(await link.textContent()).toContain('↗\uFE0E');await expect(link).toHaveAttribute('rel','noopener noreferrer');}
   await story.locator('.story-title').click();await expect(page.locator('#article-dialog .archive-link')).toHaveAttribute('href',expected);expect(requests).toHaveLength(0);
+});
+
+test('sharing metadata and its image are available without JavaScript',async({browser})=>{
+  const context=await browser.newContext({javaScriptEnabled:false,baseURL:test.info().project.use.baseURL});
+  try {
+    const page=await context.newPage();await page.goto('./');
+    await expect(page).toHaveTitle(site.title);
+    await expect(page.locator('title')).toHaveCount(1);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',site.url);
+    for(const selector of ['meta[name="description"]','meta[property="og:description"]','meta[name="twitter:description"]'])await expect(page.locator(selector)).toHaveAttribute('content',site.description);
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content',site.title);
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content','website');
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content',site.url);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content','summary_large_image');
+    const image=new URL(await page.locator('meta[property="og:image"]').getAttribute('content'));
+    expect(image.origin).toBe(new URL(site.url).origin);
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content',image.href);
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute('content',/Sound & State/);
+    const response=await page.request.get(image.pathname);expect(response.ok()).toBe(true);expect(response.headers()['content-type']).toContain('image/png');
+    const png=await response.body();expect(png.subarray(1,4).toString()).toBe('PNG');expect(png.readUInt32BE(16)).toBe(1200);expect(png.readUInt32BE(20)).toBe(630);
+  } finally {await context.close();}
+});
+
+test('cards and previews label full dates, including update-only and date-only entries',async({page})=>{
+  const id='seattle-transit-blog';let xml=fixture(id);
+  await page.route('https://awesome-seattle-feed-proxy.bmenesini.workers.dev/feed/*',r=>r.fulfill({contentType:'application/xml',body:xml}));
+  await page.goto(`./#source=${id}`);await expect(page.locator('.story')).toHaveCount(1);
+  await expect(page.locator('.story-published time')).toHaveAttribute('datetime','2026-09-15T10:00:00.000Z');
+  await expect(page.locator('.story-updated time')).toHaveAttribute('datetime','2026-09-15T12:45:00.000Z');
+  for(const field of ['published','updated'])await expect(page.locator(`.story-${field}`)).toHaveText(new RegExp(`^${field==='published'?'Published':'Updated'} Sep 15, 2026, .*[0-9]:[0-9]{2} .*`));
+  await page.locator('.story-title').click();await expect(page.locator('#article-dialog .story-updated time')).toHaveAttribute('datetime','2026-09-15T12:45:00.000Z');await page.keyboard.press('Escape');await expect(page.locator('#article-dialog')).toBeHidden();
+  await page.locator('.story .save-button').click();const download=page.waitForEvent('download');await page.locator('#export-saved').click();const csv=await readFile(await(await download).path(),'utf8');expect(csv).toContain('"Read","Updated"');expect(csv).toContain('2026-09-15T12:45:00.000Z');
+  xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-published')).toHaveCount(0);await expect(page.locator('.story-updated')).toContainText('2026');
+  xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'<pubDate>2026-09-14</pubDate>').replace(/<atom:updated>.*?<\/atom:updated>/,'<atom:updated>2026-09-15</atom:updated>');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-published')).toHaveText('Published Sep 14, 2026');await expect(page.locator('.story-updated')).toHaveText('Updated Sep 15, 2026');await expect(page.locator('.story-published time')).toHaveAttribute('datetime','2026-09-14');
+  xml=fixture(id).replace(/<pubDate>.*?<\/pubDate>/,'').replace(/<atom:updated>.*?<\/atom:updated>/,'');await expireFeeds(page);await page.reload();await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('.story-dates')).toHaveText('Date not provided');await expect(page.locator('.story time')).toHaveCount(0);
 });
 
 test('direct fallback omits credentials and source errors explain both attempts',async({page})=>{

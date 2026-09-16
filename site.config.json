@@ -1,5 +1,8 @@
 {
   "base": "/",
   "url": "https://soundandstate.com/",
+  "name": "Sound & State",
+  "title": "Sound & State — Greater Seattle News Reader",
+  "description": "Read articles from Greater Seattle news publications and local Bluesky posts. Browse the curated feed list and save items in your browser.",
   "proxy": "https://awesome-seattle-feed-proxy.bmenesini.workers.dev"
 }

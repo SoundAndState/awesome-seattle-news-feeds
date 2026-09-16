@@ -7,6 +7,7 @@ import {articlesCsv} from './export.mjs';
 import {scrollReader} from './scroll-read.mjs';
 import {readerNavigation} from './navigation.mjs';
 import {feedMode, itemMode, normalizeRoute, matchesItem} from './reader-state.mjs';
+import {dateLabel, dateIso, validTimestamp} from './dates.mjs';
 
 const $ = selector => document.querySelector(selector);
 const el = (tag, className, text) => {
@@ -36,7 +37,7 @@ function selectedFeeds(all = false) {return catalog.feeds.filter(feed => feedMod
 function matching(item) {return matchesItem(item, route(), feedMap);}
 function filteredArticles() {
   return [...articles.values()].filter(item => matching(item) && (view !== 'unread' || !states.get(item.id)?.read) && (view !== 'saved' || states.get(item.id)?.saved) && (!query || `${item.title} ${item.excerpt} ${sourceName(item)}`.toLocaleLowerCase().includes(query)))
-    .sort((a,b) => b.published - a.published || b.firstSeen - a.firstSeen || a.id.localeCompare(b.id));
+    .sort((a,b) => (b.published || b.updated || 0) - (a.published || a.updated || 0) || b.firstSeen - a.firstSeen || a.id.localeCompare(b.id));
 }
 function sourceName(article) {return feedMap.get(article.feedIds[0])?.name || article.sourceName || 'Previously saved source';}
 function sourceLink(article) {
@@ -84,15 +85,18 @@ function articleLinks(article, className = 'publisher-link') {
   return [publisher, archive];
 }
 
-function dateLabel(timestamp, full = false) {
-  if (!timestamp) return 'Date not provided';
-  const age = Date.now() - timestamp;
-  if (!full && age >= 0 && age < 86400000) return age < 60000 ? 'Just now' : age < 3600000 ? `${Math.floor(age / 60000)}m ago` : `${Math.floor(age / 3600000)}h ago`;
-  return new Intl.DateTimeFormat('en-US', full ? {dateStyle:'long', timeStyle:'short'} : {month:'short',day:'numeric',...(new Date(timestamp).getFullYear() !== new Date().getFullYear() ? {year:'numeric'} : {})}).format(timestamp);
+function timeNode(timestamp, onlyDate = false) {
+  const node = el('time', '', dateLabel(timestamp, true, onlyDate));
+  if (validTimestamp(timestamp)) {node.dateTime = dateIso(timestamp, onlyDate); node.title = node.textContent;}
+  return node;
 }
-function timeNode(timestamp) {
-  const node = el('time', '', dateLabel(timestamp));
-  if (timestamp) {node.dateTime = new Date(timestamp).toISOString(); node.title = dateLabel(timestamp, true);}
+function itemDates(item) {
+  const node = el('span', 'story-dates');
+  for (const [field, label] of [['published', 'Published'], ['updated', 'Updated']]) {
+    if (!validTimestamp(item[field])) continue;
+    const line = el('span', `story-${field}`); line.append(`${label} `, timeNode(item[field], item[`${field}DateOnly`])); node.append(line);
+  }
+  if (!node.childElementCount) node.textContent = 'Date not provided';
   return node;
 }
 function updateNavigation() {
@@ -132,7 +136,9 @@ function renderProgress() {
   const feeds = selectedFeeds(true), failures = feeds.filter(feed => health.get(feed.id)?.error);
   const attempts = feeds.map(feed => health.get(feed.id)?.lastAttempt || health.get(feed.id)?.lastSuccess || 0).filter(Boolean);
   const active = session && session.mode === mode && !session.controller.signal.aborted;
-  node.append(el('span', '', active ? `Checking ${session.done} of ${session.total}` : attempts.length ? `Last checked ${dateLabel(Math.max(...attempts)).replace(/^Just/, 'just')}` : 'Not checked yet'));
+  const checked = el('span', '', active ? `Checking ${session.done} of ${session.total}` : attempts.length ? `Checked ${dateLabel(Math.max(...attempts))}` : 'Not checked yet');
+  if (!active && attempts.length) checked.title = `Last checked ${dateLabel(Math.max(...attempts), true)}`;
+  node.append(checked);
   if (failures.length) node.append(button(`${failures.length} unavailable`, 'text-button status-link', () => navigate({view:'sources',unavailableOnly:true,source:'',category:'',query:''})));
   $('#refresh').disabled = Boolean(active); $('#refresh').textContent = active ? '↻ Checking' : '↻ Refresh';
 }
@@ -146,8 +152,9 @@ function storyCard(item) {
   const card = el('article', `story ${social ? 'post' : ''} ${state.read ? 'is-read' : ''}`); card.dataset.article = item.id;
   if(social)card.setAttribute('aria-label', `Post by ${sourceName(item)}`);
   const body = el('div', 'story-copy'), metadata = el('div', 'story-meta');
-  metadata.append(sourceLink(item), el('span','meta-dot','·'), timeNode(item.published));
+  metadata.append(sourceLink(item));
   if (!state.read) metadata.append(el('span','unread-dot','Unread'));
+  metadata.append(itemDates(item));
   if (social) {
     body.append(metadata);
     const text = cleanText(item.html).replace(/\[contains quote post or other embedded content\]/gi,'').trim();
@@ -299,7 +306,7 @@ function openArticle(item) {
   setState(item.id,{read:true});
   const social=itemMode(item,feedMap)==='posts', body=$('#article-body'); body.replaceChildren();
   const title=el('h2','article-title',social?'Post preview':item.title); title.id='article-title'; title.tabIndex=-1;
-  const metadata=el('p','article-meta'); metadata.append(sourceLink(item),' · ',timeNode(item.published));
+  const metadata=el('p','article-meta'); metadata.append(sourceLink(item),itemDates(item));
   const actions=el('div','article-links'); actions.append(...articleLinks(item),saveButton(item));
   const content=el('div',`article-content ${social?'post-content':''}`); content.append(articleContent(item.html,item.url||feedMap.get(item.feedIds[0])?.website));
   if(!content.textContent.trim())content.append(el('p','','This feed includes a headline only. Visit the publisher to read the story.'));
@@ -401,8 +408,8 @@ function downloadFile(content, type, filename) {
   const link = el('a'); link.href = url; link.download = filename; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 $('#export-saved').addEventListener('click', () => {
-  const rows = [...articles.values()].filter(article => states.get(article.id)?.saved).sort((a, b) => b.published - a.published || a.id.localeCompare(b.id)).map(article => ({
-    title: article.title, source: sourceName(article), published: article.published, url: article.url, content: cleanText(article.html), read: states.get(article.id)?.read,
+  const rows = [...articles.values()].filter(article => states.get(article.id)?.saved).sort((a, b) => (b.published || b.updated || 0) - (a.published || a.updated || 0) || a.id.localeCompare(b.id)).map(article => ({
+    title: article.title, source: sourceName(article), published: article.published, publishedDateOnly: article.publishedDateOnly, updated: article.updated, updatedDateOnly: article.updatedDateOnly, url: article.url, content: cleanText(article.html), read: states.get(article.id)?.read,
   }));
   downloadFile(articlesCsv(rows), 'text/csv;charset=utf-8', `sound-and-state-saved-${new Date().toISOString().slice(0, 10)}.csv`);
 });
@@ -425,7 +432,8 @@ $('#backup-file').addEventListener('change', async event => {
     const savedIds = new Set(newStates.filter(state => state.saved).map(state => state.id));
     const newArticles = data.savedArticles.map(item => {
       if (!savedIds.has(item.id) || !Array.isArray(item.feedIds) || item.feedIds.length > 1000 || item.feedIds.some(id => typeof id !== 'string' || id.length > 120) || typeof item.title !== 'string' || typeof item.html !== 'string' || item.html.length > 100000 || typeof item.sourceName !== 'string' || !Number.isFinite(item.published) || !Number.isFinite(item.firstSeen)) throw new Error('Backup contains an invalid saved story.');
-      return {id: item.id, url: safeUrl(item.url), title: cleanText(item.title).slice(0, 2000), html: item.html, excerpt: cleanText(item.html).slice(0, 260), sourceName: cleanText(item.sourceName).slice(0, 200), feedIds: item.feedIds, published: item.published, firstSeen: item.firstSeen};
+      if (item.updated !== undefined && item.updated !== 0 && !validTimestamp(item.updated)) throw new Error('Backup contains an invalid update date.');
+      return {id: item.id, url: safeUrl(item.url), title: cleanText(item.title).slice(0, 2000), html: item.html, excerpt: cleanText(item.html).slice(0, 260), sourceName: cleanText(item.sourceName).slice(0, 200), feedIds: item.feedIds, published: item.published, publishedDateOnly: item.publishedDateOnly === true, updated: item.updated || 0, updatedDateOnly: item.updatedDateOnly === true, firstSeen: item.firstSeen};
     });
     for (const item of newStates) states.set(item.id, item);
     for (const item of newArticles) if (!articles.has(item.id)) articles.set(item.id, item);

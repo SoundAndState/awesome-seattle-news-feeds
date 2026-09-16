@@ -1,4 +1,5 @@
 import {parseFeed, parseOpml} from 'feedsmith';
+import {feedDates} from './dates.mjs';
 
 export const REFRESH_MS = 15 * 60 * 1000;
 
@@ -51,16 +52,16 @@ export function normalizeFeed(text, source, now = Date.now()) {
   for (const item of entries.slice(0, 300)) {
     const link = format === 'atom' ? item.links?.find(link => !link.rel || link.rel === 'alternate')?.href : item.url || item.link || (item.guid?.isPermaLink !== false ? item.guid?.value : '');
     const url = safeUrl(link, source.website);
-    const rawDate = item.pubDate || item.published || item.date_published || item.dc?.date || item.updated || item.date_modified;
-    const parsed = Date.parse(rawDate);
-    const published = Number.isFinite(parsed) && parsed <= now + 24 * 60 * 60 * 1000 ? parsed : 0;
+    const dates = feedDates(item, now);
+    // Retain the identity fallback used by older libraries for linkless entries.
+    const identityDate = item.pubDate || item.published || item.date_published || item.dc?.date || item.updated || item.date_modified;
     const social = source.category === 'bluesky';
     const postText = typeof item.description === 'string' ? item.description : '';
     const title = social ? escapeHtml(postHeadline(postText)) : typeof item.title === 'string' ? item.title : 'Untitled story';
     const html = social ? `<p>${escapeHtml(postText).replace(/\r?\n/g, '<br>')}</p>` : item.content?.encoded || (typeof item.content === 'string' ? item.content : '') || item.content_html || item.description || item.summary || item.content_text || '';
-    const guid = item.guid?.value || item.id || `${title}:${rawDate || ''}`;
+    const guid = item.guid?.value || item.id || `${title}:${identityDate || ''}`;
     const id = social && /^at:\/\/did:[^/]+\/app\.bsky\.feed\.post\//.test(guid) ? guid : storyKey(url, source.id, guid);
-    result.set(id, {id, url, title: title.slice(0, 2000), html: String(html).slice(0, 100000), published, firstSeen: now, feedIds: [source.id]});
+    result.set(id, {id, url, title: title.slice(0, 2000), html: String(html).slice(0, 100000), ...dates, firstSeen: now, feedIds: [source.id]});
   }
   return [...result.values()];
 }
