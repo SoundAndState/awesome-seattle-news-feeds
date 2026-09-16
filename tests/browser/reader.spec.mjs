@@ -150,7 +150,7 @@ test('metadata follows article titles and archives remain private until clicked'
   const expected='https://ghostarchive.org/search?go=Go&term='+encodeURIComponent('https://publisher.example/seattle-transit-blog?edition=local');await expect(story.locator('.archive-link')).toHaveAttribute('href',expected);
   await expect(story.locator('.publisher')).toHaveAttribute('href',new URL(catalog.feeds.find(f=>f.id==='seattle-transit-blog').website).href);
   for(const link of await story.locator('.publisher-link').all()){expect(await link.textContent()).toContain('↗\uFE0E');await expect(link).toHaveAttribute('rel','noopener noreferrer');}
-  await story.locator('.story-title').click();await expect(page.locator('#article-dialog .archive-link')).toHaveCount(2);
+  await story.locator('.story-title').click();await expect(page.locator('#article-dialog .archive-link')).toHaveCount(1);
   for(const link of await page.locator('#article-dialog .archive-link').all())await expect(link).toHaveAttribute('href',expected);
   expect(requests).toHaveLength(0);
 });

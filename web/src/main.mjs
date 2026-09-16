@@ -374,7 +374,8 @@ function openArticle(item) {
   body.append(title,metadata,actions,content);
   const footer=el('footer','article-preview-footer'), links=el('div','article-links');
   links.append(...articleLinks(item));
-  footer.append(links,el('p','feed-note','The publisher may include only part of the article in its feed. Choose Read at publisher for the full article and any updates.'));
+  if(cleanText(content.innerHTML).length >= 220)footer.append(links);
+  footer.append(el('p','feed-note','The publisher may include only part of the article in its feed. Choose Read at publisher for the full article and any updates.'));
   body.append(footer);
   $('#article-dialog').showModal();$('#article-dialog').scrollTop=0;title.focus({preventScroll:true});
 }
