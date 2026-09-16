@@ -191,7 +191,12 @@ function storyCard(item) {
     metadata.append(itemDates(item));
     body.append(metadata);
     const text = cleanText(item.html).replace(/\[contains quote post or other embedded content\]/gi,'').trim();
-    const post = el('p','post-text', text || item.title);
+    const url = safeUrl(item.url);
+    const post = url ? external(text || item.title, url, 'post-text') : el('p','post-text', text || item.title);
+    if (url) {
+      post.dataset.story = item.id;
+      post.addEventListener('click', () => setState(item.id, {read:true}));
+    }
     const expanded = expandedPosts.has(item.id); post.classList.toggle('collapsed', !expanded && text.length > 320); body.append(post);
     if (text.length > 320) {
       const expand = button(expanded ? 'Show less' : 'Show more', 'text-button post-expand', () => {
@@ -201,7 +206,6 @@ function storyCard(item) {
       expand.dataset.expand = item.id; expand.setAttribute('aria-expanded', String(expanded)); body.append(expand);
     }
     if (/\[contains quote post or other embedded content\]/i.test(cleanText(item.html))) body.append(el('p','embed-note','Open this post on Bluesky to see quoted posts and other embedded content.'));
-    const preview = button('Preview post', 'text-button preview-post', () => navigate({article:item.id,limit},{keepScroll:true})); preview.dataset.story = item.id; body.append(preview);
   } else {
     const headline = item.title || 'Untitled article';
     const title = el('h2'), open = button('', 'story-title', () => navigate({article:item.id,limit},{keepScroll:true}));
@@ -336,6 +340,11 @@ function closeDialog(dialog) {
 }
 function syncDialogs() {
   const current=navigation?.current; if(!current)return;
+  const item=articles.get(current.article);
+  if(item && itemMode(item,feedMap)==='posts') {
+    navigate({article:'',mode:'posts',view:current.view==='saved'?'saved':'all',savedKind:current.view==='saved'?'posts':current.savedKind,limit},{replace:true,keepScroll:true});
+    return;
+  }
   for(const [id,open] of [['article-dialog',Boolean(current.article)],['about-dialog',current.about],['feed-list-dialog',current.feedList],['filter-dialog',current.filters]]) {
     const dialog=$(`#${id}`);
     if(!open && dialog.open){dialog.close(); if(id==='article-dialog')shownArticle=null; focusItem(dialogReturn); dialogReturn=null;}
@@ -345,7 +354,6 @@ function syncDialogs() {
   if(current.filters && !$('#filter-dialog').open){dialogReturn={element:'#filter-button'};renderFilters();$('#filter-dialog').showModal();}
   if(current.article && (shownArticle!==current.article || !$('#article-dialog').open)) {
     if(!$('#article-dialog').open) dialogReturn={kind:'story',id:current.article,index:[...$('#stories').children].findIndex(card=>card.dataset.article===current.article)};
-    const item=articles.get(current.article);
     if(item){shownArticle=item.id;openArticle(item);} else {
       $('#article-dialog').classList.remove('article-preview'); $('#article-save').replaceChildren(); $('#article-save').hidden=true;
       const heading=el('h2','article-title','The reader cannot find this item in your library'); heading.id='article-title'; heading.tabIndex=-1;
@@ -356,24 +364,20 @@ function syncDialogs() {
 }
 function openArticle(item) {
   setState(item.id,{read:true});
-  const social=itemMode(item,feedMap)==='posts', body=$('#article-body'); body.replaceChildren();
-  $('#article-dialog').classList.toggle('article-preview', !social);
-  const headerSave=$('#article-save'); headerSave.replaceChildren(); headerSave.hidden=social;
-  const title=el('h2','article-title',social?'Post preview':item.title||'Untitled article'); title.id='article-title'; title.tabIndex=-1;
-  if(!social && safeUrl(item.url))title.replaceChildren(external(item.title||'Untitled article',item.url));
-  const metadata=social?el('p','article-meta'):articleMetadata(item,'article-meta');
-  if(social)metadata.append(sourceLink(item),itemDates(item));
+  const body=$('#article-body'); body.replaceChildren();
+  $('#article-dialog').classList.add('article-preview');
+  const headerSave=$('#article-save'); headerSave.replaceChildren(saveButton(item)); headerSave.hidden=false;
+  const title=el('h2','article-title',item.title||'Untitled article'); title.id='article-title'; title.tabIndex=-1;
+  if(safeUrl(item.url))title.replaceChildren(external(item.title||'Untitled article',item.url));
+  const metadata=articleMetadata(item,'article-meta');
   const actions=el('div','article-links'); actions.append(...articleLinks(item));
-  if(social)actions.append(saveButton(item)); else headerSave.append(saveButton(item));
-  const content=el('div',`article-content ${social?'post-content':''}`); content.append(articleContent(item.html,item.url||feedMap.get(item.feedIds[0])?.website));
+  const content=el('div','article-content'); content.append(articleContent(item.html,item.url||feedMap.get(item.feedIds[0])?.website));
   if(!content.textContent.trim())content.append(el('p','','The publisher includes only a headline in this feed. Visit the publisher to read the story.'));
   body.append(title,metadata,actions,content);
-  if(!social) {
-    const footer=el('footer','article-preview-footer'), links=el('div','article-links');
-    links.append(...articleLinks(item));
-    footer.append(links,el('p','feed-note','The publisher may include only part of the article in its feed. Choose Read at publisher for the full article and any updates.'));
-    body.append(footer);
-  }
+  const footer=el('footer','article-preview-footer'), links=el('div','article-links');
+  links.append(...articleLinks(item));
+  footer.append(links,el('p','feed-note','The publisher may include only part of the article in its feed. Choose Read at publisher for the full article and any updates.'));
+  body.append(footer);
   $('#article-dialog').showModal();$('#article-dialog').scrollTop=0;title.focus({preventScroll:true});
 }
 

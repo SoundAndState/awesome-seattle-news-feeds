@@ -90,8 +90,9 @@ test('article rows adapt to their available width and preserve full metadata and
       expect(await card.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
       for (const target of await card.locator('button,a').all()) {
         const box = await target.boundingBox();
-        expect(box.height).toBeGreaterThanOrEqual(44);
-        expect(box.width).toBeGreaterThanOrEqual(44);
+        // Firefox can report a 44px target a fraction of a pixel below 44.
+        expect(box.height).toBeGreaterThanOrEqual(44 - .01);
+        expect(box.width).toBeGreaterThanOrEqual(44 - .01);
       }
     }
     const card = page.locator('.article-card').first();
@@ -199,7 +200,7 @@ test('font failure and forced colors retain readable articles and explicit state
   await expect(card.locator('.story-title')).toBeFocused();
 });
 
-test('switching to a post clears the article-only preview treatment and header action', async ({page}) => {
+test('switching from articles to posts offers source links without previews', async ({page}) => {
   await load(page);
   await page.locator('.story-title').first().click();
   await page.keyboard.press('Escape');
@@ -207,8 +208,7 @@ test('switching to a post clears the article-only preview treatment and header a
   await page.goto(`./#source=${feed.id}`);
   await expect(page.locator('.post')).toHaveCount(3);
   await expect(page.locator('.article-card')).toHaveCount(0);
-  await page.locator('.preview-post').first().click();
-  await expect(page.locator('#article-dialog')).not.toHaveClass(/article-preview/);
-  await expect(page.locator('#article-save')).toBeHidden();
-  await expect(page.locator('.article-links .save-button')).toBeVisible();
+  await expect(page.locator('.preview-post')).toHaveCount(0);
+  await expect(page.locator('.post a.post-text')).toHaveCount(3);
+  await expect(page.locator('#article-dialog')).toBeHidden();
 });
