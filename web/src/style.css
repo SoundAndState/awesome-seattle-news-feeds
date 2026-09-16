@@ -68,8 +68,8 @@ summary {cursor:pointer;min-height:44px;padding:10px 0;font-size:14px;font-weigh
 .notice {border:1px solid #b4a080;background:#fff4dc;padding:10px 14px;font-size:14px;margin:10px 0;overflow-wrap:anywhere}
 #undo-bar {display:flex;align-items:center;justify-content:space-between;gap:12px}
 .new-items {width:100%;border:1px solid var(--ink);background:var(--wash);border-radius:4px;padding:10px;margin:8px 0;font-size:15px}
-.story {border-top:1px solid var(--line);padding:22px 0;max-width:100%;overflow-wrap:anywhere}
-.story-copy {min-width:0;max-width:78ch}
+.story {--read-text:#62625c;--read-marker:#d0d0cc;border-top:1px solid var(--line);padding:22px 0;max-width:100%;overflow-wrap:anywhere}
+.story-copy {position:relative;min-width:0;max-width:78ch;padding-inline-start:1.25rem}
 .story h2 {margin:0 0 8px;font:normal 26px/1.3 var(--serif);text-wrap:pretty}
 .story-title {background:none;padding:0;text-align:left;font:inherit;color:var(--ink)}
 .story-meta {display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:14px;color:var(--muted);margin-bottom:8px;line-height:1.5}
@@ -88,6 +88,7 @@ summary {cursor:pointer;min-height:44px;padding:10px 0;font-size:14px;font-weigh
 .save-button.is-saved,.read-button.is-read {background:var(--wash)}
 .save-button.is-saved .bookmark-icon {fill:currentColor}
 .story.is-read {--ink:#656b67;--muted:#6b716d;color:var(--muted)}
+.story.is-read .story-copy::before {content:"";position:absolute;inset-block:var(--card-padding-block,0);inset-inline-start:.25rem;border-inline-start:.25rem solid var(--read-marker);pointer-events:none}
 .story.is-read .category-tag {background:#e9eae5;color:var(--ink)}
 .post-text {display:block;font-size:18px;font-weight:400;line-height:1.6;margin:0 0 8px;white-space:pre-line;text-decoration:none}
 a.post-text {cursor:pointer}
@@ -218,12 +219,11 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
   letter-spacing:normal;
   text-align:left;
 }
-.article-card {container:article-card / inline-size;padding:0;--card-padding-block:1.25rem;--read-marker:#d0d0cc}
-.article-card.is-read .story-copy::before {content:"";position:absolute;inset-block:var(--card-padding-block);inset-inline-start:.25rem;border-inline-start:.25rem solid var(--read-marker);pointer-events:none}
-.article-card .story-copy {position:relative;max-width:none;padding-block:var(--card-padding-block);padding-inline-start:1.25rem}
+.article-card {container:article-card / inline-size;padding:0;--card-padding-block:1.25rem}
+.article-card .story-copy {max-width:none;padding-block:var(--card-padding-block)}
 .article-card h2 {max-inline-size:44rem;margin:0 0 .5rem;font:600 1.5rem/1.25 var(--article-serif);hyphens:none}
 .article-card .story-title {max-inline-size:100%;min-block-size:2.75rem;color:var(--article-ink);font:inherit;letter-spacing:normal}
-.article-card.is-read .story-title {color:var(--article-muted)}
+.article-card.is-read .story-title,.post.is-read .post-text {color:var(--read-text)}
 .article-card .story-title:is(:hover,:focus-visible) .headline-text {text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.15em;text-decoration-skip-ink:auto}
 .article-metadata {display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:0;margin:0;font:400 .875rem/1.5 var(--article-sans);color:var(--article-muted)}
 .article-attribution {display:flex;flex-wrap:wrap;align-items:center;gap:0 .75rem;min-inline-size:0}
@@ -284,7 +284,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
   .article-preview .article-content {font-size:1.1875rem;line-height:1.65}
 }
 @media(forced-colors:active) {
-  .article-card {--read-marker:GrayText}
+  .story {--read-marker:GrayText;--read-text:CanvasText}
   .story.article-card,.article-preview {--article-paper:Canvas;--article-ink:CanvasText;--article-text:CanvasText;--article-muted:CanvasText;--article-rule:CanvasText;--article-wash:Canvas;--article-border:ButtonText}
   .article-card :where(button,a):focus-visible,.article-preview :where(button,a,[tabindex]):focus-visible {outline-color:Highlight}
   .article-card .save-button.is-saved,.article-preview .save-button.is-saved {border-width:2px}
