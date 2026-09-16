@@ -14,7 +14,7 @@ Submit feed additions and corrections as pull requests editing only [`feeds.json
 
 Use Node.js 24 or newer. `npm ci && npm run ci` builds and validates the catalog, lints the README and OPML, runs unit tests, and builds the reader. `npm run preview` serves the reader locally.
 
-For reader changes, run `npx playwright install chromium` and `npm run test:browser`. For live feed checks, use Python 3.12 or newer and `npm run check:feeds`.
+For reader changes, run `npx playwright install chromium webkit` and `npm run test:browser`. Tests cover desktop Chromium and mobile WebKit. For live feed checks, use Python 3.12 or newer and `npm run check:feeds`.
 
 Deployment uses the repository's `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` Actions secrets. Local deployment reads the same variables from the environment or ignored `.env`; run `npm run deploy:proxy`. Never commit credentials.
 

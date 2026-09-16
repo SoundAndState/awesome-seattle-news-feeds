@@ -54,3 +54,12 @@ test('CSV preserves Unicode, quotes, commas and lines while neutralizing spreads
   assert.ok(csv.includes('"\'  @command","Normal","2026-09-15T00:00:00.000Z"'));
   assert.ok(csv.includes('"\'\tcommand","No"\r\n'));
 });
+
+
+test('canceling an inactive mode stops fetching without a direct publisher retry', async () => {
+  const controller=new AbortController(); let calls=0;
+  await assert.rejects(loadFeed(feed,proxy,{signal:controller.signal,fetchImpl:async(_url,options)=>{
+    calls++; controller.abort(); options.signal.throwIfAborted();
+  }}),{name:'AbortError'});
+  assert.equal(calls,1);
+});

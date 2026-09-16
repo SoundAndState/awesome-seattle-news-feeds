@@ -1,72 +1,57 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A browser-based reader for the Awesome Seattle News Feeds list.">
-  <meta name="theme-color" content="#173f36">
-  <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' __FEED_CONNECT_ORIGINS__; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <title>Sound &amp; State — Seattle News Reader</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A browser-based reader for the Awesome Seattle News Feeds list.">
+<meta name="theme-color" content="#173f36"><meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' __FEED_CONNECT_ORIGINS__; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg"><title>Sound &amp; State — Seattle News Reader</title>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to stories</a>
-  <header class="masthead">
-    <a class="wordmark" href="./" aria-label="Sound and State home"><span class="brand-icon" aria-hidden="true">S<span>&amp;</span>S</span><span>Sound <i>&amp;</i> State<small>A Greater Seattle area News Reader</small></span></a>
-    <nav aria-label="Resources"><button id="about-button" class="text-button">About this reader</button><a href="./feeds.opml" download>Download feed list <span aria-hidden="true">↗&#xfe0e;</span></a><a id="github-link" href="https://github.com/sayhiben/awesome-seattle-news-feeds">GitHub <span aria-hidden="true">↗&#xfe0e;</span></a></nav>
-  </header>
-  <div class="app-layout">
-    <aside class="sidebar" aria-label="Reading filters">
-      <div class="sidebar-heading"><button id="mobile-filter" class="text-button" aria-expanded="false" aria-controls="filter-content">Browse sections <span aria-hidden="true">⌄</span></button></div>
-      <div id="filter-content">
-        <nav class="view-nav" aria-label="Library">
-          <button data-view="all" class="active" aria-pressed="true"><span><span class="nav-icon" aria-hidden="true">▤</span> Latest stories</span><span id="all-count" class="count">0</span></button>
-          <button data-view="unread" aria-pressed="false"><span><span class="nav-icon" aria-hidden="true">○</span> Unread</span><span id="unread-count" class="count">0</span></button>
-          <button data-view="saved" aria-pressed="false"><span><svg class="nav-icon bookmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg> Saved stories</span><span id="saved-count" class="count">0</span></button>
-          <button data-view="sources" aria-pressed="false"><span><span class="nav-icon" aria-hidden="true">▦</span> All sources</span><span id="sources-count" class="count">—</span></button>
-        </nav>
-        <div class="section-label"><span class="eyebrow">Sections</span><button id="clear-section" class="text-button" hidden>Clear</button></div>
-        <nav id="categories" class="category-nav" aria-label="Sections"></nav>
-      </div>
-    </aside>
-    <main id="main" tabindex="-1">
-      <section id="page-heading" class="page-heading sr-only"><h1 id="heading">Latest stories</h1><p id="description" hidden></p></section>
-      <div class="toolbar"><label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Search stories or sources…" aria-label="Search stories or sources"></label><label class="source-select"><span class="sr-only">Filter by source</span><select id="source-filter"><option value="">All sources</option></select></label><button id="refresh" class="primary-button"><span aria-hidden="true">↻</span> Refresh</button></div>
-      <div class="reading-bar"><div><span class="live-dot" aria-hidden="true"></span><span id="result-label">Opening the collection…</span></div><div class="reading-actions"><button id="show-all-sources" class="text-button" hidden>Show all sources</button><button id="mark-read" class="text-button">Mark these read</button></div></div>
-      <div class="reading-options"><label class="scroll-read-control"><input id="scroll-read" type="checkbox">Mark articles read as I scroll past them</label><button id="export-saved" class="text-button download-link" disabled>Download saved articles (CSV)</button></div>
-      <div id="notice" class="notice" role="status" hidden></div>
-      <div id="feed-progress" class="feed-progress" role="status" aria-live="polite"></div>
-      <section id="stories" aria-label="Stories"></section>
-      <button id="load-more" class="load-more" hidden>Show more stories <span aria-hidden="true">↓</span></button>
-      <footer class="reader-footer"><a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds on GitHub</a></footer>
-    </main>
-  </div>
-  <dialog id="article-dialog" aria-labelledby="article-title"><div class="dialog-top"><span class="eyebrow">Feed preview</span><button class="close-button" data-close="article-dialog" aria-label="Close story">×</button></div><div id="article-body"></div></dialog>
-  <dialog id="about-dialog" aria-labelledby="about-title">
-    <div class="dialog-top"><span>About this reader</span><button class="close-button" data-close="about-dialog" aria-label="Close about">×</button></div>
-    <div class="about-content">
-      <h2 id="about-title">Sound &amp; State</h2>
-      <h3>What is this and why?</h3>
-      <p>A browser-based RSS and Atom reader, made for fun and mainly used to preview content from <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds</a>. It is not for profit. The maintainer collects no user data.</p>
-      <h3>Storage and refresh</h3>
-      <p>Reading state, preferences, and cached articles are stored locally in IndexedDB, with no account or server sync. Clearing browser data removes them. Backups are local JSON files; saved articles can also be downloaded as CSV.</p>
-      <p>“Mark articles read as I scroll past them” is off by default. When enabled, an article is marked read after you scroll it above the top of the page.</p>
-      <p>Healthy feeds refresh at most every 15 minutes. Failed feeds retry less often automatically; Refresh retries them immediately. Unsaved content is kept for 30 days, up to 150 items per feed. Saved items remain until removed.</p>
-      <p>Feed requests go to Cloudflare first. Successful responses are shared across readers for up to 15 minutes, or less when the publisher requires it. Errors and private responses are not cached. For KING 5, KREM 2, and MyNorthwest, a GitHub job collects fallback copies every 15 minutes (the schedule can be delayed). Cloudflare uses these only if its publisher request fails. Source details show when a fallback was collected; copies expire within 6 hours, sooner if the publisher requires revalidation.</p>
-      <div class="backup-actions"><button id="export-state" class="secondary-button">Export reading backup</button><button id="import-state" class="secondary-button">Restore backup</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div>
-      <p id="backup-status" role="status"></p>
-      <h3>Privacy and security</h3>
-      <ul>
-        <li><strong>Cookies:</strong> The reader does not set or read cookies. Saved stories, reading state, and preferences use IndexedDB in your browser. Feed requests omit cookies; cookies returned by publishers are not stored in your browser. Publisher and archive sites you open through links may use their own cookies.</li>
-        <li>GitHub serves the site; Cloudflare proxies feed requests. Both receive your IP address and request metadata. Scheduled fallback fetches run on GitHub and send no visitor data to publishers. If the proxy and its fallback fail, your browser retries the feed directly. That publisher then receives your IP address and request metadata. Feed requests send no cookies, credentials, or referrer. Direct retries work only when the publisher permits cross-site access (CORS). Reading state is not uploaded. Searches and reader navigation stay in the URL fragment (after <code>#</code>), which is not sent to the site host.</li>
-        <li>No analytics or third-party fonts. Feed HTML is sanitized with DOMPurify; scripts, frames, forms, and remote images are removed. A content security policy restricts scripts and connections.</li>
-        <li>Article pages and archive searches open only when you follow their links. Those sites receive your IP address; links send no referrer. Ghostarchive searches receive the article URL with <code>utm_*</code> parameters removed. Archived copies may not exist.</li>
-      </ul>
-      <p><a href="./third-party-notices.txt">Software credits</a></p>
-    </div>
-  </dialog>
-  <noscript><p class="notice">This reader needs JavaScript. You can still <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">browse the full list</a> or <a href="./feeds.opml">download the feed list</a>.</p></noscript>
-  <script type="module" src="./src/main.mjs"></script>
+<a class="skip-link" href="#main">Skip to stories</a>
+<header class="masthead">
+<a class="wordmark" href="./" aria-label="Sound and State home"><span class="brand-icon" aria-hidden="true">S<span>&amp;</span>S</span><span>Sound <i>&amp;</i> State<small>A Greater Seattle area News Reader</small></span></a>
+<nav aria-label="Resources"><button id="about-button" class="text-button">About this reader</button><a href="./feeds.opml" download>Download feed list <span aria-hidden="true">↓</span></a><a id="github-link" href="https://github.com/sayhiben/awesome-seattle-news-feeds">GitHub ↗&#xfe0e;</a></nav>
+</header>
+<div class="mode-bar"><nav aria-label="Reading mode" class="mode-switch"><button data-mode="articles" aria-pressed="true">Articles</button><button data-mode="posts" aria-pressed="false">Posts</button></nav><button id="saved-button" data-view="saved" aria-pressed="false">Saved <span id="saved-count" class="count">0</span></button></div>
+<main id="main" tabindex="-1">
+<section id="page-heading" class="page-heading sr-only"><h1 id="heading" tabindex="-1">Latest articles</h1><p id="description" hidden></p></section>
+<div class="view-toolbar">
+<nav id="library-views" class="view-nav" aria-label="Article view"><button data-view="all" aria-pressed="true">Latest <span id="all-count" class="count sr-only">0</span></button><button data-view="unread" aria-pressed="false">Unread <span id="unread-count" class="count sr-only">0</span></button></nav>
+<nav id="saved-kinds" class="view-nav" aria-label="Saved item type" hidden><button data-kind="all" aria-pressed="true">All</button><button data-kind="articles" aria-pressed="false">Articles</button><button data-kind="posts" aria-pressed="false">Posts</button></nav>
+<div class="toolbar-actions"><button id="search-toggle" class="icon-button" aria-label="Search articles" aria-expanded="false" aria-controls="search-panel"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><button id="filter-button" class="text-button" aria-haspopup="dialog">Filters</button></div>
+</div>
+<div id="search-panel" hidden><label class="search"><span class="sr-only" id="search-label">Search articles</span><input id="search" type="search" placeholder="Search articles…" aria-labelledby="search-label" aria-describedby="search-help"></label><p id="search-help" class="hint">Searches content loaded in this browser.</p></div>
+<div id="filter-chips" class="filter-chips" aria-label="Active filters" hidden></div>
+<div class="status-row"><div id="feed-progress" class="feed-progress"></div><button id="refresh" class="text-button" aria-label="Refresh">↻ Refresh</button></div>
+<div class="reading-utility"><details id="reading-options"><summary>Reading options</summary><div class="options-content"><label class="scroll-read-control"><input id="scroll-read" type="checkbox">Mark items read as I scroll past them</label><button id="mark-read" class="secondary-button">Mark matching items read</button><p class="hint">Includes matching items beyond the current batch.</p></div></details><button id="export-saved" class="text-button download-link" disabled>Export saved CSV</button></div>
+<div class="reading-bar"><span id="result-label" class="sr-only">Opening the collection…</span><button id="show-all-sources" class="text-button" hidden>Show all sources</button></div>
+<div id="notice" class="notice" role="status" hidden></div>
+<div id="undo-bar" class="notice" hidden><span id="undo-message" role="status"></span><button id="undo-read" class="text-button">Undo</button></div>
+<p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+<button id="new-items" class="new-items" hidden></button><section id="stories" aria-label="Articles"></section><button id="load-more" class="load-more" hidden>Show more ↓</button>
+<footer class="reader-footer"><a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds on GitHub</a></footer>
+</main>
+<dialog id="filter-dialog" aria-labelledby="filter-title"><div class="dialog-top"><h2 id="filter-title">Filter articles</h2><button class="close-button" data-close="filter-dialog" aria-label="Close filters">×</button></div><div class="filter-content">
+<button id="browse-sources" class="secondary-button">Browse publications <span id="sources-count" class="count"></span></button>
+<section id="section-filter"><h3>Sections</h3><p class="hint">Sections group feeds by area or topic, not individual stories.</p><nav id="categories" class="category-nav" aria-label="Sections"></nav></section>
+<h3 id="source-picker-title">Publications</h3><label class="search"><span class="sr-only" id="source-search-label">Find a publication</span><input id="source-search" type="search" placeholder="Find a publication…" aria-labelledby="source-search-label"></label><div id="source-choices" class="source-choices"></div><p id="source-choice-status" class="hint" role="status"></p>
+</div></dialog>
+<dialog id="article-dialog" aria-labelledby="article-title"><div class="dialog-top"><span class="eyebrow">Feed preview</span><button class="close-button" data-close="article-dialog" aria-label="Close story">×</button></div><div id="article-body"></div></dialog>
+<dialog id="about-dialog" aria-labelledby="about-title"><div class="dialog-top"><span>About this reader</span><button class="close-button" data-close="about-dialog" aria-label="Close about">×</button></div><div class="about-content">
+<h2 id="about-title" tabindex="-1">Sound &amp; State</h2>
+<h3>What is this and why?</h3><p>A browser-based reader made for fun, mainly to preview <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds</a>. It is not for profit. The maintainer collects no user data.</p>
+<h3>Privacy at a glance</h3><ul>
+<li><strong>No reader cookies or analytics.</strong> The reader does not set or read cookies. It uses no third-party fonts.</li>
+<li><strong>Your library stays here.</strong> Saved items, reading state, and preferences use IndexedDB in this browser. There is no account or server sync. Clearing browser data removes them.</li>
+<li><strong>Requests still reach servers.</strong> GitHub and Cloudflare receive your IP address and request metadata. Direct feed retries also disclose these to the publisher. Feed requests omit cookies, credentials, and referrers.</li>
+<li><strong>External sites have their own policies.</strong> Publisher and archive pages open when you follow their links and may use their own cookies.</li>
+</ul>
+<details><summary>Connections and content security</summary><p>GitHub serves the site; Cloudflare proxies feeds. If its publisher request and any cached fallback fail, this browser retries the feed directly when the publisher permits cross-site access (CORS). Publisher cookies from feed requests are not stored in your browser. Reading state is not uploaded. Searches and navigation use the URL fragment (after <code>#</code>), which is not sent to the site host.</p><p>Feed HTML is sanitized with DOMPurify. Scripts, frames, forms, and remote images are removed. A content security policy restricts scripts and connections. Publisher and archive links send no referrer. Ghostarchive receives the article URL with <code>utm_*</code> parameters removed; an archived copy may not exist.</p></details>
+<details><summary>Storage and refresh</summary><p>The active reading mode checks due feeds while visible and when you return to the tab. Healthy feeds are checked at most every 15 minutes; failed feeds back off. Refresh retries failures immediately. New arrivals wait behind a button while you read. Unsaved content is retained for 30 days, up to 150 items per feed. Saved items remain until removed.</p><p>Cloudflare shares successful responses for up to 15 minutes, or less when required by the publisher. Errors and private responses are not cached. A GitHub job collects fallback copies for KING 5, KREM 2, and MyNorthwest every 15 minutes, subject to scheduling delays. These expire within 6 hours, sooner when required. Source details show collection times. Scheduled fetches send no visitor data to publishers.</p><p>The last validated feed catalog is retained for recovery during connection failures. This is not a fully offline application. Automatic scroll marking is off by default and marks an item after you scroll it above the page.</p></details>
+<h3>Back up your library</h3><p>Export read status and saved items to a local JSON file, or restore an existing backup. CSV export is available above the reading list.</p><div class="backup-actions"><button id="export-state" class="secondary-button">Export reading backup</button><button id="import-state" class="secondary-button">Restore backup</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div><p id="backup-status" role="status"></p><p><a href="./third-party-notices.txt">Software credits</a></p>
+</div></dialog>
+<noscript><p class="notice">This reader needs JavaScript. You can still <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">browse the full list</a> or <a href="./feeds.opml">download the feed list</a>.</p></noscript>
+<script type="module" src="./src/main.mjs"></script>
 </body>
 </html>

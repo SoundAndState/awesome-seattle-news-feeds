@@ -27,9 +27,10 @@ function failure(error, direct) {
   return error.message.slice(0, 180);
 }
 
-export async function loadFeed(feed, proxy, {fetchImpl = fetch, timeout = 22000} = {}) {
+export async function loadFeed(feed, proxy, {fetchImpl = fetch, timeout = 22000, signal} = {}) {
   async function attempt(url, direct) {
-    const response = await fetchImpl(url, {signal: AbortSignal.timeout(timeout), mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer'});
+    const deadline = AbortSignal.timeout(timeout);
+    const response = await fetchImpl(url, {signal: signal ? AbortSignal.any([signal, deadline]) : deadline, mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer'});
     if (!response.ok) {
       const info = direct ? {} : await response.json().catch(() => ({}));
       throw new Error(typeof info.error === 'string' ? info.error : `HTTP ${response.status}.`);
@@ -46,6 +47,7 @@ export async function loadFeed(feed, proxy, {fetchImpl = fetch, timeout = 22000}
   let proxyFailure;
   try {return await attempt(`${proxy}/feed/${feed.id}`, false);}
   catch (error) {proxyFailure = failure(error, false);}
+  signal?.throwIfAborted();
   try {
     const url = safeUrl(feed.feed);
     if (!url || new URL(url).protocol !== 'https:') throw new Error('A secure feed URL is required.');

@@ -47,8 +47,8 @@ jobs:
         run: npx wrangler deploy --dry-run
         env:
           WRANGLER_SEND_METRICS: 'false'
-      - name: Install test browser
-        run: npx playwright install --with-deps chromium
+      - name: Install desktop and mobile test browsers
+        run: npx playwright install --with-deps chromium webkit
       - name: Test reader in a browser
         run: npm run test:browser
       - name: Upload generated files for review
