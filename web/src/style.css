@@ -89,10 +89,12 @@ summary {cursor:pointer;min-height:44px;padding:10px 0;font-size:14px;font-weigh
 .save-button.is-saved .bookmark-icon {fill:currentColor}
 .story.is-read {--ink:#656b67;--muted:#6b716d;color:var(--muted)}
 .story.is-read .category-tag {background:#e9eae5;color:var(--ink)}
-.post-text {font-size:18px;line-height:1.6;margin:0 0 8px;white-space:pre-line}
+.post-text {display:block;font-size:18px;font-weight:400;line-height:1.6;margin:0 0 8px;white-space:pre-line;text-decoration:none}
+a.post-text {cursor:pointer}
+a.post-text:hover {color:inherit}
 .post-text.collapsed {display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
 .embed-note,.feed-note {font-size:14px;color:var(--muted);line-height:1.6}
-.preview-post,.post-expand {text-decoration:underline;margin-right:16px}
+.post-expand {text-decoration:underline;margin-right:16px}
 .reader-footer {border-top:1px solid var(--line);margin-top:24px;padding-top:18px;font-size:14px;color:var(--muted)}
 .reader-footer a {display:inline-flex;align-items:center;min-height:44px}
 .load-more {width:100%;background:var(--wash);padding:14px;color:var(--ink);font-size:15px;border-top:1px solid var(--line)}
@@ -121,7 +123,6 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-links {display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin:16px 0 20px}
 /* Keep Georgia's familiar reading measure for long article text. */
 .article-content {font:18px/1.75 Georgia,'Times New Roman',serif;color:#2f443a;overflow-wrap:anywhere}
-.post-content {font-family:system-ui,sans-serif}
 .article-content :is(h1,h2,h3,h4,h5,h6) {font-family:var(--serif);line-height:1.35}
 .article-content blockquote {margin-left:0;border-left:3px solid var(--line);padding-left:20px}
 .article-content table {display:block;overflow:auto;border-collapse:collapse}

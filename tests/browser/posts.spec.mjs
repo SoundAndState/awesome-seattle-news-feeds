@@ -1,0 +1,117 @@
+import {test, expect} from '@playwright/test';
+import catalog from '../../data/feeds.json' with {type:'json'};
+import site from '../../config/site.config.json' with {type:'json'};
+import {renderOpml} from '../../scripts/render.mjs';
+
+const source = catalog.feeds.find(feed => feed.category === 'bluesky');
+const smallCatalog = {...catalog, feeds:[source]};
+const shortText = 'A new trail connects two neighborhoods. Parks & trails <3';
+const longText = `${'Neighbors are exploring the new waterfront paths and sharing ideas for safer crossings. '.repeat(7)}https://example.com/${'a-long-path-'.repeat(20)}`;
+const postUrl = id => `https://bsky.app/profile/example.bsky.social/post/${id}`;
+const postId = id => `at://did:plc:example/app.bsky.feed.post/${id}`;
+const fixture = `<rss version="2.0"><channel><title>Local voice</title><description>Local posts</description>${[
+  ['short', shortText, postUrl('short')],
+  ['long', longText, postUrl('long')],
+  ['unsafe', 'A post without a usable source link.', 'javascript:alert(1)'],
+].map(([id, text, url], index) => `<item><description><![CDATA[${text}]]></description><link>${url}</link><guid isPermaLink="false">${postId(id)}</guid><pubDate>Tue, 15 Sep 2026 ${10 - index}:00:00 GMT</pubDate></item>`).join('')}</channel></rss>`;
+
+async function load(page, hash = '#mode=posts') {
+  await page.route('**/catalog.json', route => route.fulfill({json:smallCatalog}));
+  await page.route('**/feeds.opml', route => route.fulfill({contentType:'application/xml', body:renderOpml(smallCatalog)}));
+  await page.route(`${site.proxy}/feed/*`, route => route.fulfill({contentType:'application/xml', body:fixture}));
+  await page.goto(`./${hash}`);
+  await expect(page.locator('.post')).toHaveCount(3);
+  await expect(page.locator('#refresh')).toBeEnabled();
+}
+
+test('post text opens its source by pointer and keyboard without preview or link styling', async ({page}) => {
+  await load(page);
+  const card = page.locator('.post').filter({hasText:shortText}), text = card.locator('.post-text');
+  await expect(text).toHaveText(shortText);
+  await expect(text).toHaveAttribute('href', postUrl('short'));
+  await expect(text).toHaveAttribute('target', '_blank');
+  await expect(text).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(text).toHaveCSS('font-weight', '400');
+  await expect(text).toHaveCSS('text-decoration-line', 'none');
+  await expect(text).toHaveCSS('cursor', 'pointer');
+  const color = await text.evaluate(node => getComputedStyle(node).color);
+  await text.hover();
+  await expect(text).toHaveCSS('color', color);
+  await expect(text).toHaveCSS('text-decoration-line', 'none');
+  await expect(page.getByRole('button', {name:'Preview post'})).toHaveCount(0);
+
+  const requests = [];
+  await page.context().route(postUrl('short'), route => {
+    requests.push(route.request());
+    return route.fulfill({contentType:'text/html', body:'<h1>Original post</h1>'});
+  });
+  for (const keyboard of [false, true]) {
+    if (keyboard) {
+      await page.keyboard.press('Tab');
+      await text.focus();
+      await expect(text).toBeFocused();
+      await expect(text).toHaveCSS('outline-style', 'solid');
+    }
+    const popupPromise = page.waitForEvent('popup');
+    if (keyboard) await page.keyboard.press('Enter');
+    else await text.click();
+    const popup = await popupPromise;
+    await expect(popup).toHaveURL(postUrl('short'));
+    expect(await popup.evaluate(() => window.opener)).toBeNull();
+    await popup.close();
+    await expect(card.locator('.read-button')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#article-dialog')).toBeHidden();
+    await expect(page).toHaveURL(/#mode=posts$/);
+    if (!keyboard) await card.locator('.read-button').click();
+  }
+  expect(requests).toHaveLength(2);
+  for (const request of requests) expect(request.headers().referer).toBeUndefined();
+});
+
+test('long post links expand and reflow in Posts and Saved while unusable links stay plain text', async ({page}, testInfo) => {
+  await load(page);
+  const card = page.locator('.post').filter({hasText:longText}), text = card.locator('.post-text');
+  await expect(text).toHaveClass(/collapsed/);
+  await card.getByRole('button', {name:'Show more', exact:true}).focus();
+  await page.keyboard.press('Enter');
+  await expect(text).not.toHaveClass(/collapsed/);
+  await expect(text).toHaveText(longText);
+  await expect(text).toHaveAttribute('href', postUrl('long'));
+  await expect(card.getByRole('button', {name:'Show less', exact:true})).toBeFocused();
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({width, height:900});
+    expect(await page.locator('html').evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+    expect(await text.evaluate(node => node.scrollHeight <= node.clientHeight + 1)).toBe(true);
+    if (testInfo.project.name === 'chromium' && width !== 320) {
+      await page.evaluate(() => {document.activeElement.blur(); scrollTo(0, 0);});
+      await page.screenshot({path:testInfo.outputPath(`posts-${width}.png`), fullPage:true});
+    }
+  }
+  const plain = page.locator('.post').filter({hasText:'A post without a usable source link.'});
+  await expect(plain.locator('p.post-text')).toBeVisible();
+  await expect(plain.locator('.post-text')).not.toHaveAttribute('href');
+  await expect(plain.locator('.post-text')).toHaveCSS('cursor', 'auto');
+  await card.locator('.save-button').click();
+  await page.locator('#saved-button').click();
+  await expect(page.locator('.post')).toHaveCount(1);
+  await expect(text).toHaveAttribute('href', postUrl('long'));
+  await expect(page.locator('.preview-post')).toHaveCount(0);
+  await card.getByRole('button', {name:'Show less', exact:true}).focus();
+  await page.keyboard.press('Enter');
+  await expect(text).toHaveClass(/collapsed/);
+  await expect(card.getByRole('button', {name:'Show more', exact:true})).toBeFocused();
+});
+
+test('old post preview URLs return to Posts or Saved without opening a preview', async ({page}) => {
+  await load(page, `#mode=posts&article=${encodeURIComponent(postId('short'))}`);
+  await expect(page).toHaveURL(/#mode=posts$/);
+  await expect(page.locator('#article-dialog')).toBeHidden();
+  const card = page.locator('.post').filter({hasText:shortText});
+  await expect(card.locator('.read-button')).toHaveAttribute('aria-pressed', 'false');
+  await card.locator('.save-button').click();
+  await page.goto(`./#view=saved&article=${encodeURIComponent(postId('short'))}`);
+  await expect(page).toHaveURL(/#mode=posts&view=saved&kind=posts$/);
+  await expect(page.locator('#article-dialog')).toBeHidden();
+  await expect(page.locator('.post')).toHaveCount(1);
+  await expect(card.locator('.post-text')).toHaveAttribute('href', postUrl('short'));
+});
