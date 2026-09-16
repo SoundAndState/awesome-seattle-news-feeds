@@ -42,7 +42,6 @@
     <outline text="North Sound" title="North Sound">
       <outline type="rss" text="Lynnwood Times" title="Lynnwood Times" description="Local and state reporting with a Snohomish County focus." xmlUrl="https://lynnwoodtimes.com/feed/" htmlUrl="https://lynnwoodtimes.com"/>
       <outline type="rss" text="My Edmonds News" title="My Edmonds News" description="Community reporting, local government, and events in Edmonds." xmlUrl="https://myedmondsnews.com/feed/" htmlUrl="https://myedmondsnews.com"/>
-      <outline type="rss" text="My Lynnwood News" title="My Lynnwood News" description="Community reporting, local government, and events from the publication formerly called Lynnwood Today." xmlUrl="https://mylynnwoodnews.com/feed/" htmlUrl="https://mylynnwoodnews.com"/>
       <outline type="rss" text="Salish Current" title="Salish Current" description="Community reporting, arts, and civic coverage for Whatcom, Skagit, and San Juan counties." xmlUrl="https://salish-current.org/feed/" htmlUrl="https://salish-current.org"/>
       <outline type="rss" text="Shoreline Area News" title="Shoreline Area News" description="Shoreline and Lake Forest Park reporting, community announcements, and local events." xmlUrl="https://www.shorelineareanews.com/feeds/posts/default" htmlUrl="https://www.shorelineareanews.com"/>
       <outline type="rss" text="The Everett Herald" title="The Everett Herald" description="Snohomish County reporting, regional news, and local sports." xmlUrl="https://www.heraldnet.com/feed/" htmlUrl="https://www.heraldnet.com"/>

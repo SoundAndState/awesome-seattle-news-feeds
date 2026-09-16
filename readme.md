@@ -77,7 +77,6 @@ Shoreline, Lake Forest Park, Snohomish County, and communities farther north in 
 
 - [Lynnwood Times](https://lynnwoodtimes.com) - Local and state reporting with a Snohomish County focus. [RSS](https://lynnwoodtimes.com/feed/).
 - [My Edmonds News](https://myedmondsnews.com) - Community reporting, local government, and events in Edmonds. [RSS](https://myedmondsnews.com/feed/).
-- [My Lynnwood News](https://mylynnwoodnews.com) - Community reporting, local government, and events from the publication formerly called Lynnwood Today. [RSS](https://mylynnwoodnews.com/feed/).
 - [Salish Current](https://salish-current.org) - Community reporting, arts, and civic coverage for Whatcom, Skagit, and San Juan counties. [RSS](https://salish-current.org/feed/).
 - [Shoreline Area News](https://www.shorelineareanews.com) - Shoreline and Lake Forest Park reporting, community announcements, and local events. [Atom](https://www.shorelineareanews.com/feeds/posts/default).
 - [The Everett Herald](https://www.heraldnet.com) - Snohomish County reporting, regional news, and local sports. [RSS](https://www.heraldnet.com/feed/).

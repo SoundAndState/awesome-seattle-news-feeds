@@ -569,19 +569,6 @@
       ]
     },
     {
-      "id": "my-lynnwood-news",
-      "name": "My Lynnwood News",
-      "website": "https://mylynnwoodnews.com",
-      "feed": "https://mylynnwoodnews.com/feed/",
-      "category": "north-sound",
-      "description": "Community reporting, local government, and events from the publication formerly called Lynnwood Today.",
-      "format": "RSS",
-      "checkedOn": "2026-09-15",
-      "aliases": [
-        "http://lynnwoodtoday.com/feed/"
-      ]
-    },
-    {
       "id": "washington-state-standard",
       "name": "Washington State Standard",
       "website": "https://washingtonstatestandard.com",
