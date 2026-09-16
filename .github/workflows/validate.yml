@@ -25,6 +25,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: npm ci
+      - name: Install guidance validation dependency
+        run: python -m pip install -r scripts/requirements-agent-guidance.txt
+      - name: Check agent guidance links and routing
+        run: npm run check:agents
       - name: Compile published files from JSON
         run: npm run build
       - name: Check generated files match JSON

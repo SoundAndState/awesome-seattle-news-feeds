@@ -52,13 +52,13 @@ For edits, combine the applicable rows below. After fixing a failure, rerun affe
 
 | Change | Verification |
 | --- | --- |
-| Markdown only | Verify local links, file references, and documented commands. For instruction or skill changes, also use [the guidance validation procedure](docs/agent-guidance-validation.md). Application tests are unnecessary. |
+| Markdown only | Verify local links, file references, and documented commands. For instruction or skill changes, run `npm run check:agents` after [checker setup](docs/agent-guidance-validation.md#structural-review), then apply [the change-specific checks](docs/agent-guidance-validation.md#choose-checks-by-change-type). Application tests are unnecessary. |
 | JavaScript behavior | `npm test` |
 | Reader UI or copy | `npm run build:web`, then `npm run test:browser`. Install missing browsers with `npx playwright install chromium webkit`. Inspect affected phone and desktop layouts, including expanded dialogs and long text. |
 | Catalog or generation | `npm run ci`. Review generated differences without hand-editing them. |
 | Cloudflare feed service | `npm test` and `npx wrangler deploy --dry-run` |
-| Python feed health tools | `python -m unittest discover -s tests -p '*_test.py'`. Use `npm run check:feeds` when the task calls for live publisher checks. |
+| Python tools or guidance checker | Install `scripts/requirements-agent-guidance.txt` in the active Python environment, then run `python -m unittest discover -s tests -p '*_test.py'`. Use `npm run check:feeds` when the task calls for live publisher checks. |
 
-`npm run ci` does not include the Python tests, browser tests, or Worker dry run; [the validation workflow](.github/workflows/validate.yml) runs those separately. Live publisher checks also run separately from deterministic tests.
+`npm run ci` does not include the guidance checker, Python tests, browser tests, or Worker dry run; [the validation workflow](.github/workflows/validate.yml) runs those separately. Live publisher checks also run separately from deterministic tests.
 
 Before finishing, run `git diff --check`. Report what changed, which checks passed, and any checks you could not complete. When changing this instruction system, keep procedures in the canonical skills, keep Claude adapters aligned, and record evidence in [the design note](docs/agent-guidance.md) only when the design changes.

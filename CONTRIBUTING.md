@@ -18,6 +18,8 @@ For reader changes, run `npx playwright install chromium webkit` and `npm run te
 
 Follow the [writing guidelines](AGENTS.md#writing-for-readers) when changing reader text. [AGENTS.md](AGENTS.md) contains shared agent instructions; [CLAUDE.md](CLAUDE.md) imports them. The [agent guidance design note](docs/agent-guidance.md) explains the repository skills, supporting research, and how to maintain them.
 
+For guidance validation or Python tests, install the checker dependency with `python -m pip install -r scripts/requirements-agent-guidance.txt`. Run `npm run check:agents` for instruction changes; the [validation guide](docs/agent-guidance-validation.md) defines additional checks by change type.
+
 Deployment uses the repository's `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` Actions secrets. Local deployment reads the same variables from the environment or ignored `.env`; run `npm run deploy:proxy`. Never commit credentials.
 
 Contributions use [CC0 1.0](license). Publisher content retains its original copyright.

@@ -21,6 +21,7 @@ This is a repository-specific engineering judgment informed by the evidence belo
 | [.agents/skills/sound-state-feed-service/](../.agents/skills/sound-state-feed-service/) | Diagnose the delivery path and preserve request boundaries, cache rules, bounded work, and snapshot expiry. |
 | [.claude/skills/](../.claude/skills/) | Discoverable Claude skills with matching names and descriptions, each directing Claude to read one canonical workflow. |
 | [agent-guidance-validation.md](agent-guidance-validation.md) | Structural checks, discovery checks, realistic evaluation cases, and the limits of the initial validation. |
+| [scripts/check_agent_guidance.py](../scripts/check_agent_guidance.py) | Repeatable offline checks for local links, skill metadata, and canonical/adapter routing; runs in CI. |
 
 The project is small enough that nested instruction files would add loading differences and another maintenance surface without a clear benefit. Add one later only when a subtree needs materially different rules. Cross-cutting work can use two skills; each should add a distinct procedure.
 
@@ -79,6 +80,6 @@ Other search results included OpenClaw-specific memory conventions and broad cla
 - Keep evidence and rationale here, workflow steps in the canonical skill, and universal constraints in `AGENTS.md`. Do not make every task read this research note.
 - Correct a recurring observed failure at its narrowest useful location. Remove obsolete instructions instead of continually appending exceptions. Do not convert session transcripts or personal auto-memory into shared rules without review.
 - Check skill triggers with positive and negative examples. Check outputs separately from whether the skill loaded. Record host/version and limitations rather than assuming Codex and Claude behave identically.
-- Prefer the existing schema, deterministic tests, and CI for enforceable behavior. Instruction text is advisory context, not a security boundary. Add a hook or another validator only for an observed gap with a clear benefit; this change adds neither production permissions nor automatic deployment.
+- Prefer the existing schema, deterministic tests, and CI for enforceable behavior. Instruction text is advisory context, not a security boundary. The PR review identified a reproducibility gap in the original structural checks; the checked-in checker now addresses that gap. Add further tooling only for an observed need; this change adds neither production permissions nor automatic deployment.
 
 See [the validation procedure and initial results](agent-guidance-validation.md) before changing this design or claiming a productivity improvement.
