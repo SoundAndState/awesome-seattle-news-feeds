@@ -53,7 +53,7 @@ function bookmarkIcon() {
 function saveButton(article, className = 'save-button') {
   const node = button('', className, async () => {
     await setState(article.id, {saved: !states.get(article.id)?.saved});
-    update(); announce(states.get(article.id)?.saved ? 'Item saved.' : 'Item removed from Saved.');
+    update(); announce(states.get(article.id)?.saved ? 'The reader saved this item.' : 'The reader removed this item from Saved.');
   });
   function update() {
     const saved = Boolean(states.get(article.id)?.saved);
@@ -70,7 +70,7 @@ function updateReadButton(node, article) {
   node.setAttribute('aria-label', `${read ? 'Mark Unread' : 'Mark Read'}: ${article.title}`);
 }
 function readButton(article) {
-  const node = button('', 'read-button', async () => {await setState(article.id, {read: !states.get(article.id)?.read}); announce(states.get(article.id)?.read ? 'Marked read.' : 'Marked unread.');});
+  const node = button('', 'read-button', async () => {await setState(article.id, {read: !states.get(article.id)?.read}); announce(states.get(article.id)?.read ? 'The reader marked this item as read.' : 'The reader marked this item as unread.');});
   const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   icon.setAttribute('viewBox', '0 0 24 24'); icon.setAttribute('aria-hidden', 'true'); icon.classList.add('read-icon');
   const path = document.createElementNS(icon.namespaceURI, 'path'); path.setAttribute('d', 'm5 12 4 4L19 6'); icon.append(path);
@@ -96,7 +96,7 @@ function itemDates(item) {
     if (!validTimestamp(item[field])) continue;
     const line = el('span', `story-${field}`); line.append(`${label} `, timeNode(item[field], item[`${field}DateOnly`])); node.append(line);
   }
-  if (!node.childElementCount) node.textContent = 'Date not provided';
+  if (!node.childElementCount) node.textContent = 'No date in feed';
   return node;
 }
 function updateNavigation() {
@@ -120,7 +120,7 @@ function updateNavigation() {
   $('#search-toggle').setAttribute('aria-label', searchLabel);
   $('#search-panel').hidden = !searchOpen && !query;
   $('#search-toggle').setAttribute('aria-expanded', String(!$('#search-panel').hidden));
-  $('#search-help').textContent = view === 'sources' ? 'Searches the sources in this mode.' : 'Searches content loaded in this browser.';
+  $('#search-help').textContent = view === 'sources' ? `Search the ${mode === 'posts' ? 'accounts' : 'publications'} in this list.` : 'Search the items this reader has loaded in your current view.';
   $('#stories').setAttribute('aria-label', view === 'saved' ? 'Saved items' : view === 'sources' ? 'Sources' : mode === 'posts' ? 'Posts' : 'Articles');
   const chips = $('#filter-chips'); chips.replaceChildren();
   if (category) chips.append(button(`${shortNames[category]} ×`, 'filter-chip', () => navigate({category:''})));
@@ -136,15 +136,15 @@ function renderProgress() {
   const feeds = selectedFeeds(true), failures = feeds.filter(feed => health.get(feed.id)?.error);
   const attempts = feeds.map(feed => health.get(feed.id)?.lastAttempt || health.get(feed.id)?.lastSuccess || 0).filter(Boolean);
   const active = session && session.mode === mode && !session.controller.signal.aborted;
-  const checked = el('span', '', active ? `Checking ${session.done} of ${session.total}` : attempts.length ? `Checked ${dateLabel(Math.max(...attempts))}` : 'Not checked yet');
-  if (!active && attempts.length) checked.title = `Last checked ${dateLabel(Math.max(...attempts), true)}`;
+  const checked = el('span', '', active ? `Checking ${session.done} of ${session.total} feeds` : attempts.length ? `The reader last checked feeds ${dateLabel(Math.max(...attempts))}` : 'The reader has not checked feeds yet.');
+  if (!active && attempts.length) checked.title = `The reader last checked feeds ${dateLabel(Math.max(...attempts), true)}`;
   node.append(checked);
   if (failures.length) node.append(button(`${failures.length} unavailable`, 'text-button status-link', () => navigate({view:'sources',unavailableOnly:true,source:'',category:'',query:''})));
   $('#refresh').disabled = Boolean(active); $('#refresh').textContent = active ? '↻ Checking' : '↻ Refresh';
 }
 function renderPending() {
   const count = view === 'saved' || view === 'sources' ? 0 : [...pending.values()].filter(matching).length;
-  $('#new-items').hidden = !count; $('#new-items').textContent = `${count} new ${mode} available · Show`;
+  $('#new-items').hidden = !count; $('#new-items').textContent = `Show ${count} new ${mode}`;
 }
 
 function storyCard(item) {
@@ -167,7 +167,7 @@ function storyCard(item) {
       });
       expand.dataset.expand = item.id; expand.setAttribute('aria-expanded', String(expanded)); body.append(expand);
     }
-    if (/\[contains quote post or other embedded content\]/i.test(cleanText(item.html))) body.append(el('p','embed-note','Quoted or embedded content is available on Bluesky.'));
+    if (/\[contains quote post or other embedded content\]/i.test(cleanText(item.html))) body.append(el('p','embed-note','Open this post on Bluesky to see quoted posts and other embedded content.'));
     const preview = button('Preview post', 'text-button preview-post', () => navigate({article:item.id,limit},{keepScroll:true})); preview.dataset.story = item.id; body.append(preview);
   } else {
     const title = el('h2'), open = button(item.title || 'Untitled article', 'story-title', () => navigate({article:item.id,limit},{keepScroll:true}));
@@ -181,24 +181,24 @@ function storyCard(item) {
   body.append(footer,actions); card.append(body); return card;
 }
 function friendlyError(error) {
-  if (/403|denied/i.test(error)) return 'The publisher blocked automated requests.';
-  if (/challenge/i.test(error)) return 'The publisher requires a browser check.';
-  if (/timed out|too long/i.test(error)) return 'The publisher did not respond in time.';
-  if (/Invalid feed|No stories/i.test(error)) return 'The publisher did not return a readable feed.';
-  return 'This source could not be reached.';
+  if (/403|denied/i.test(error)) return 'A server refused the feed request. Try opening the publisher’s website.';
+  if (/challenge|browser check/i.test(error)) return 'The publisher asks for a browser check that the reader cannot complete. Open the publisher’s website to continue.';
+  if (/timed out|too long|did not receive the feed in time/i.test(error)) return 'The reader did not receive the feed in time. Choose Retry to try again.';
+  if (/Invalid feed|No stories|could not read the feed/i.test(error)) return 'The reader could not read this feed. You can still try opening the publisher’s website.';
+  return 'The reader could not load this feed. Choose Retry to try again, or open the publisher’s website.';
 }
 function sourceCard(feed) {
   const status = health.get(feed.id), cached = status?.lastSuccess && (status.error || status.transport === 'snapshot');
   const card = el('article','source-card'), top = el('div','source-top');
-  top.append(el('span','category-tag', mode === 'posts' ? 'Bluesky' : shortNames[feed.category]),el('span',`source-status ${status?.error ? 'error' : ''}`,cached ? 'Showing cached content' : status?.error ? 'Unavailable' : status?.lastSuccess ? 'Available' : 'Not checked yet'));
+  top.append(el('span','category-tag', mode === 'posts' ? 'Bluesky' : shortNames[feed.category]),el('span',`source-status ${status?.error ? 'error' : ''}`,cached ? 'Using an earlier copy' : status?.error ? 'Unavailable' : status?.lastSuccess ? 'Available' : 'Waiting to check'));
   const title = el('h2'); title.append(external(feed.name,feed.website)); card.append(top,title,el('p','',feed.description));
   if (status?.error) card.append(el('p','source-detail',friendlyError(status.error)));
-  if (status?.lastSuccess) card.append(el('p','source-detail',`Last loaded ${dateLabel(status.lastSuccess,true)} · ${status.items} items${status.transport === 'direct' ? ' · Direct from publisher' : ''}`));
-  else card.append(el('p','source-detail',status?.error ? 'No cached content is available. You can visit the publisher.' : 'This source has not been loaded yet.'));
-  if (status?.transport === 'snapshot') card.append(el('p','source-detail',`Cached fallback collected ${dateLabel(status.fetchedAt || status.lastSuccess,true)}. Scheduled every 15 minutes; scheduling may be delayed. Copies expire within 6 hours.`));
+  if (status?.lastSuccess) card.append(el('p','source-detail',`The reader last loaded ${status.items} items on ${dateLabel(status.lastSuccess,true)}.${status.transport === 'direct' ? ' Your browser connected directly to the publisher.' : ''}`));
+  else card.append(el('p','source-detail',status?.error ? 'The reader has no earlier copy of this feed. Choose Visit website to read at the publisher.' : 'The reader has not loaded this feed yet. Choose Retry to load it now.'));
+  if (status?.transport === 'snapshot') card.append(el('p','source-detail',`The reader is using a backup that a scheduled task collected on ${dateLabel(status.fetchedAt || status.lastSuccess,true)}. The task runs every 15 minutes, though GitHub may delay it. Cloudflare stops using each copy within 6 hours, or sooner if the publisher requires it.`));
   if (status?.error) {const details = el('details'); details.append(el('summary','','Technical details'),el('p','source-detail',status.error)); card.append(details);}
   const links = el('div','source-links');
-  links.append(button('View items →','text-button',() => navigate({view:'all',source:feed.id,category:'',query:'',unavailableOnly:false})),external('Website ↗',feed.website),external('RSS ↗',feed.feed));
+  links.append(button('View items →','text-button',() => navigate({view:'all',source:feed.id,category:'',query:'',unavailableOnly:false})),external('Visit website ↗',feed.website),external('Open feed ↗',feed.feed));
   if (status?.error || !status?.lastSuccess) {const retry=button('Retry','text-button',()=>refreshFeeds({only:feed.id,retryFailed:true})); retry.disabled=Boolean(session); links.append(retry);}
   card.append(links); return card;
 }
@@ -242,8 +242,8 @@ function render() {
       const anySaved = [...states.values()].some(state=>state.saved && articles.has(state.id));
       const active = session && session.mode === mode && view !== 'saved';
       const filtered = query || category || source || (view === 'saved' && savedKind !== 'all');
-      const title = view === 'saved' ? anySaved ? 'No saved items match.' : 'Nothing saved yet.' : active ? `Loading ${mode}…` : filtered ? 'No items match.' : view === 'unread' ? 'You’re caught up.' : 'No items loaded yet.';
-      const description = view === 'saved' && !anySaved ? 'Save an article or post to find it here.' : filtered ? 'Clear your filters or try another search. Search covers content loaded in this browser.' : active ? 'Content appears as feeds arrive.' : 'Use Refresh or browse sources to check availability.';
+      const title = view === 'saved' ? anySaved ? 'No saved items match.' : 'You have not saved any items yet.' : active ? `Loading ${mode}…` : filtered ? 'No items match.' : view === 'unread' ? 'You’re caught up.' : 'The reader has not loaded any items yet.';
+      const description = view === 'saved' && !anySaved ? 'Save an article or post to find it here.' : filtered ? 'Clear your filters or try another search. The reader searches only the items it has loaded in this view.' : active ? 'The reader adds items as each feed finishes loading.' : 'Choose Refresh to check for new items, or open Filters and browse sources to see which feeds could not load.';
       showEmpty(title,description);
     }
     $('#load-more').hidden = list.length <= limit;
@@ -296,7 +296,7 @@ function syncDialogs() {
     if(!$('#article-dialog').open) dialogReturn={kind:'story',id:current.article,index:[...$('#stories').children].findIndex(card=>card.dataset.article===current.article)};
     const item=articles.get(current.article);
     if(item){shownArticle=item.id;openArticle(item);} else {
-      const heading=el('h2','article-title','Item not in this browser’s library'); heading.id='article-title'; heading.tabIndex=-1;
+      const heading=el('h2','article-title','The reader cannot find this item in your library'); heading.id='article-title'; heading.tabIndex=-1;
       $('#article-body').replaceChildren(heading,el('p','','It may appear after feeds finish loading. Close this preview to browse available items.'));
       if(!$('#article-dialog').open){$('#article-dialog').showModal();heading.focus();}
     }
@@ -309,9 +309,9 @@ function openArticle(item) {
   const metadata=el('p','article-meta'); metadata.append(sourceLink(item),itemDates(item));
   const actions=el('div','article-links'); actions.append(...articleLinks(item),saveButton(item));
   const content=el('div',`article-content ${social?'post-content':''}`); content.append(articleContent(item.html,item.url||feedMap.get(item.feedIds[0])?.website));
-  if(!content.textContent.trim())content.append(el('p','','This feed includes a headline only. Visit the publisher to read the story.'));
+  if(!content.textContent.trim())content.append(el('p','','The publisher includes only a headline in this feed. Visit the publisher to read the story.'));
   body.append(title,metadata,actions,content);
-  if(!social)body.append(el('p','feed-note','Feed content may be an excerpt. Open the original for the full version and updates.'));
+  if(!social)body.append(el('p','feed-note','The publisher may include only part of the article in its feed. Choose Read at publisher for the full article and any updates.'));
   $('#article-dialog').showModal();$('#article-dialog').scrollTop=0;title.focus({preventScroll:true});
 }
 
@@ -347,7 +347,7 @@ async function prune() {
 async function refreshFeeds({retryFailed=false,only=''}={}) {
   if(!catalog || view==='saved' || document.hidden)return;
   if(session){retryAgain={retryFailed,only};return;}
-  if(!navigator.onLine){notice('You’re offline. Previously loaded content is still available.');return;}
+  if(!navigator.onLine){notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.');return;}
   const due=feed=>(retryFailed && health.get(feed.id)?.error)||!health.get(feed.id)?.nextCheck||health.get(feed.id).nextCheck<=Date.now();
   const queue=selectedFeeds().filter(feed=>(!only||feed.id===only)&&due(feed));
   if(!queue.length){renderProgress();return;}
@@ -361,7 +361,7 @@ async function refreshFeeds({retryFailed=false,only=''}={}) {
     await inBatches(queue,async feed=>{if(run.controller.signal.aborted)return;if(due(feed))await fetchFeed(feed,run);else run.done++;});
   };
   try {if(navigator.locks)await navigator.locks.request('sound-and-state-refresh',{signal:run.controller.signal},work);else await work();await prune();}
-  catch(error){if(!run.controller.signal.aborted)notice('The refresh was interrupted. Previously loaded content is still available.');}
+  catch(error){if(!run.controller.signal.aborted)notice('The reader could not finish checking for new items. You can still read your library. Choose Refresh to try again.');}
   finally {session=null;render();if(!run.controller.signal.aborted && run.mode===mode && view!=='saved')announce($('#result-label').textContent);if(retryAgain){const next=retryAgain;retryAgain=null;refreshFeeds(next);}}
 }
 function rememberReading() {if(view!=='saved'&&view!=='sources')readingStarted.add(mode);}
@@ -382,10 +382,10 @@ function setupNavigation() {
   $('#mark-read').addEventListener('click',async()=>{
     undoRead=filteredArticles().filter(item=>!states.get(item.id)?.read).map(item=>({id:item.id,read:Boolean(states.get(item.id)?.read)}));
     const updates=undoRead.map(item=>({...states.get(item.id),id:item.id,read:true}));for(const state of updates)states.set(state.id,state);
-    await save('state',updates);$('#reading-options').open=false;$('#undo-message').textContent=`Marked ${updates.length} ${mode} read. `;$('#undo-bar').hidden=false;render();$('#undo-read').focus({preventScroll:true});
+    await save('state',updates);$('#reading-options').open=false;$('#undo-message').textContent=`The reader marked ${updates.length} ${mode} as read. `;$('#undo-bar').hidden=false;render();$('#undo-read').focus({preventScroll:true});
   });
-  $('#undo-read').addEventListener('click',async()=>{const updates=undoRead.map(item=>({...states.get(item.id),...item}));for(const state of updates)states.set(state.id,state);await save('state',updates);undoRead=[];$('#undo-bar').hidden=true;render();$('#heading').focus({preventScroll:true});announce('Previous read status restored.');});
-  $('#new-items').addEventListener('click',()=>{for(const [id,item] of pending)if(itemMode(item,feedMap)===mode){articles.set(id,item);pending.delete(id);}render();window.scrollTo({top:0,behavior:'instant'});scrolling.sync();$('#heading').focus({preventScroll:true});announce('New items added to the list.');});
+  $('#undo-read').addEventListener('click',async()=>{const updates=undoRead.map(item=>({...states.get(item.id),...item}));for(const state of updates)states.set(state.id,state);await save('state',updates);undoRead=[];$('#undo-bar').hidden=true;render();$('#heading').focus({preventScroll:true});announce('The reader restored each item’s previous read or unread mark.');});
+  $('#new-items').addEventListener('click',()=>{for(const [id,item] of pending)if(itemMode(item,feedMap)===mode){articles.set(id,item);pending.delete(id);}render();window.scrollTo({top:0,behavior:'instant'});scrolling.sync();$('#heading').focus({preventScroll:true});announce('The reader added new items to the list.');});
   $('#stories').addEventListener('pointerdown',rememberReading);$('#stories').addEventListener('keydown',rememberReading);
   window.addEventListener('scroll',()=>{if(scrollY>200&&!document.querySelector('dialog[open]'))rememberReading();},{passive:true});
 }
@@ -397,8 +397,8 @@ for(const dialog of document.querySelectorAll('dialog')) {
 }
 $('.wordmark').addEventListener('click',event=>{if(event.button||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate({mode:'articles',view:'all',source:'',category:'',query:'',unavailableOnly:false});});
 $('.skip-link').addEventListener('click',event=>{event.preventDefault();$('#main').focus();});
-window.addEventListener('offline',()=>{session?.controller.abort();notice('You’re offline. Previously loaded content is still available.');});
-window.addEventListener('online',()=>{notice('Connection restored.');refreshFeeds();});
+window.addEventListener('offline',()=>{session?.controller.abort();notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.');});
+window.addEventListener('online',()=>{notice('You’re back online. The reader can check for new items again.');refreshFeeds();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)session?.controller.abort();else refreshFeeds();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape')$('#reading-options').open=false;});
 document.addEventListener('click',event=>{if(!$('#reading-options').contains(event.target))$('#reading-options').open=false;});
@@ -416,29 +416,31 @@ $('#export-saved').addEventListener('click', () => {
 $('#export-state').addEventListener('click', () => {
   const backup = {format: 'sound-and-state', version: 1, exportedAt: new Date().toISOString(), state: [...states.values()], savedArticles: [...articles.values()].filter(article => states.get(article.id)?.saved)};
   downloadFile(JSON.stringify(backup), 'application/json', `sound-and-state-${new Date().toISOString().slice(0, 10)}.json`);
-  $('#backup-status').textContent = 'Backup exported: read status and saved stories.';
+  $('#backup-status').textContent = 'Check your browser’s downloads for a backup of your saved items and which items you have read.';
 });
 $('#import-state').addEventListener('click', () => $('#backup-file').click());
 $('#backup-file').addEventListener('change', async event => {
   try {
     const file = event.target.files[0]; if (!file) return;
-    if (file.size > 20 * 1024 * 1024) throw new Error('Backup is too large (20 MB maximum).');
-    const data = JSON.parse(await file.text());
-    if (data.format !== 'sound-and-state' || data.version !== 1 || !Array.isArray(data.state) || !Array.isArray(data.savedArticles) || data.state.length > 100000 || data.savedArticles.length > 5000) throw new Error('This is not a supported Sound & State backup.');
+    if (file.size > 20 * 1024 * 1024) throw new Error('The reader cannot restore a backup larger than 20 MB. Choose a smaller backup.');
+    let data;
+    try {data = JSON.parse(await file.text());}
+    catch {throw new Error('The reader cannot read this file as a JSON backup. Choose a file from Export reading backup.');}
+    if (!data || data.format !== 'sound-and-state' || data.version !== 1 || !Array.isArray(data.state) || !Array.isArray(data.savedArticles) || data.state.length > 100000 || data.savedArticles.length > 5000) throw new Error('The reader cannot restore this file. Choose a JSON backup from Export reading backup.');
     const newStates = data.state.map(item => {
-      if (typeof item.id !== 'string' || item.id.length > 4096 || (item.read !== undefined && typeof item.read !== 'boolean') || (item.saved !== undefined && typeof item.saved !== 'boolean')) throw new Error('Backup contains invalid reading state.');
+      if (!item || typeof item.id !== 'string' || item.id.length > 4096 || (item.read !== undefined && typeof item.read !== 'boolean') || (item.saved !== undefined && typeof item.saved !== 'boolean')) throw new Error('The reader cannot read which items this backup marks as read or saved. Choose another backup.');
       return {id: item.id, read: Boolean(item.read || states.get(item.id)?.read), saved: Boolean(item.saved || states.get(item.id)?.saved)};
     });
     const savedIds = new Set(newStates.filter(state => state.saved).map(state => state.id));
     const newArticles = data.savedArticles.map(item => {
-      if (!savedIds.has(item.id) || !Array.isArray(item.feedIds) || item.feedIds.length > 1000 || item.feedIds.some(id => typeof id !== 'string' || id.length > 120) || typeof item.title !== 'string' || typeof item.html !== 'string' || item.html.length > 100000 || typeof item.sourceName !== 'string' || !Number.isFinite(item.published) || !Number.isFinite(item.firstSeen)) throw new Error('Backup contains an invalid saved story.');
-      if (item.updated !== undefined && item.updated !== 0 && !validTimestamp(item.updated)) throw new Error('Backup contains an invalid update date.');
+      if (!item || !savedIds.has(item.id) || !Array.isArray(item.feedIds) || item.feedIds.length > 1000 || item.feedIds.some(id => typeof id !== 'string' || id.length > 120) || typeof item.title !== 'string' || typeof item.html !== 'string' || item.html.length > 100000 || typeof item.sourceName !== 'string' || !Number.isFinite(item.published) || !Number.isFinite(item.firstSeen)) throw new Error('The reader cannot read a saved item in this backup. Choose another backup.');
+      if (item.updated !== undefined && item.updated !== 0 && !validTimestamp(item.updated)) throw new Error('The reader cannot read an item’s update date in this backup. Choose another backup.');
       return {id: item.id, url: safeUrl(item.url), title: cleanText(item.title).slice(0, 2000), html: item.html, excerpt: cleanText(item.html).slice(0, 260), sourceName: cleanText(item.sourceName).slice(0, 200), feedIds: item.feedIds, published: item.published, publishedDateOnly: item.publishedDateOnly === true, updated: item.updated || 0, updatedDateOnly: item.updatedDateOnly === true, firstSeen: item.firstSeen};
     });
     for (const item of newStates) states.set(item.id, item);
     for (const item of newArticles) if (!articles.has(item.id)) articles.set(item.id, item);
     await save('state', newStates); await save('articles', newArticles); render();
-    $('#backup-status').textContent = `Restored ${newArticles.length} saved stories and merged reading state.`;
+    $('#backup-status').textContent = `The reader combined ${newArticles.length} saved items and the backup’s read marks with your library.`;
   } catch (error) {$('#backup-status').textContent = error.message;}
   finally {event.target.value = '';}
 });
@@ -448,7 +450,7 @@ async function start() {
   try {
     const libraryPromise=openLibrary(notice);
     const remotePromise=Promise.all([fetch(`${import.meta.env.BASE_URL}catalog.json`,{signal:AbortSignal.timeout(10000)}),fetch(`${import.meta.env.BASE_URL}feeds.opml`,{signal:AbortSignal.timeout(10000)})]).then(async([json,xml])=>{
-      if(!json.ok||!xml.ok)throw new Error('The feed catalog could not be loaded.');
+      if(!json.ok||!xml.ok)throw new Error('The reader could not download the feed list. Check your connection and reload the page.');
       return verifyOpml(await xml.text(),await json.json());
     }).then(value=>({value}),error=>({error}));
     const library=await libraryPromise, cached=library.settings.find(item=>item.id==='catalog')?.value;
@@ -458,7 +460,7 @@ async function start() {
       if(remote.error) {
         if(!library.articles.length)throw remote.error;
         catalog={feeds:[],categories:[]};catalogFallback=true;
-        notice('The feed catalog is unavailable. Showing content already stored in this browser. Reload when connected to check sources.');
+        notice('The reader could not download the feed list. You can still browse the items it already has in your library. Check your connection and reload the page to try again.');
       } else {catalog=remote.value;await save('settings',[{id:'catalog',value:catalog}]);}
     }
     feedMap=new Map(catalog.feeds.map(feed=>[feed.id,feed]));categoryMap=new Map(catalog.categories.map(section=>[section.id,section]));
@@ -479,13 +481,13 @@ async function start() {
     }});
     navigation.start();initial=false;
     if(cached)remotePromise.then(async remote=>{
-      if(remote.error){notice('Using the saved feed catalog. The current catalog could not be reached. Your library is available.');return;}
+      if(remote.error){notice('The reader could not download the latest feed list, so it is using an earlier copy. You can still browse your library. Reload the page to try again.');return;}
       const changed=JSON.stringify(remote.value)!==JSON.stringify(catalog);
       await save('settings',[{id:'catalog',value:remote.value}]);
-      if(changed)notice('The feed list has been updated. Reload when you’re ready to use it.');
+      if(changed)notice('The reader found a newer feed list. Reload the page when you’re ready to use it.');
     });
     refreshFeeds();
     setInterval(()=>{if(!document.hidden){renderProgress();refreshFeeds();}},60000);
-  } catch(error) {notice(error.message);$('#result-label').textContent='Collection unavailable';showEmpty('Unable to load the feed list.','Try reloading, or download the feed list to open it in another reader.');}
+  } catch(error) {notice(error.message);$('#result-label').textContent='The reader could not open your library.';showEmpty('The reader could not load the feed list.','Check your connection and reload the page, or choose Download feed list to use another reader.');}
 }
 start();

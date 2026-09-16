@@ -24,7 +24,7 @@ export function feedDates(item, now) {
 }
 
 export function dateLabel(timestamp, full = false, onlyDate = false) {
-  if (!validTimestamp(timestamp)) return 'Date not provided';
+  if (!validTimestamp(timestamp)) return 'No date in feed';
   return (onlyDate ? dateOnly : full ? fullDate : compactDate).format(timestamp);
 }
 

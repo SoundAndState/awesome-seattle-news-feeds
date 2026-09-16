@@ -47,7 +47,7 @@ export function normalizeFeed(text, source, now = Date.now()) {
   if (/<!DOCTYPE|<!ENTITY/i.test(text)) throw new Error('Feed contains unsupported XML declarations.');
   const {feed, format} = parseFeed(text);
   const entries = format === 'atom' ? feed.entries : feed.items;
-  if (!entries?.length) throw new Error('No stories were returned.');
+  if (!entries?.length) throw new Error('The feed contains no articles or posts.');
   const result = new Map();
   for (const item of entries.slice(0, 300)) {
     const link = format === 'atom' ? item.links?.find(link => !link.rel || link.rel === 'alternate')?.href : item.url || item.link || (item.guid?.isPermaLink !== false ? item.guid?.value : '');
@@ -71,7 +71,7 @@ export function verifyOpml(text, catalog) {
   const walk = items => {for (const item of items || []) { if (item.xmlUrl) outlines.push(item.xmlUrl); walk(item.outlines); }};
   walk(parseOpml(text).body?.outlines);
   const urls = new Set(outlines);
-  if (urls.size !== catalog.feeds.length || catalog.feeds.some(feed => !urls.has(feed.feed))) throw new Error('The published feed list is out of sync. Please try again later.');
+  if (urls.size !== catalog.feeds.length || catalog.feeds.some(feed => !urls.has(feed.feed))) throw new Error('The reader found two versions of the feed list that do not match. Reload the page in a few minutes to try again.');
   return catalog;
 }
 

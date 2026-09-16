@@ -1,5 +1,5 @@
 @import url('./typography.css');
-:root {font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#233b34;background:#f6f4ef;font-synthesis:none;font-size:16px;line-height:1.6;--paper:#f6f4ef;--ink:#173f36;--muted:#52645b;--line:#ccd4c9;--accent:#974222;--wash:#e6ece3;--serif:Georgia,'Times New Roman',serif}
+:root {font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#233b34;background:#f6f4ef;font-synthesis:none;font-size:16px;line-height:1.6;--paper:#f6f4ef;--ink:#173f36;--muted:#52645b;--line:#ccd4c9;--accent:#974222;--wash:#e6ece3;--serif:'Noto Serif',Georgia,'Times New Roman',serif}
 * {box-sizing:border-box}
 body {margin:0}
 button,input,select {font:inherit}
@@ -15,16 +15,21 @@ a:hover,button:hover {color:var(--accent)}
 .skip-link:focus {top:12px}
 .story,button,a,input,summary {scroll-margin-top:76px}
 .mode-bar button,.dialog-top button {scroll-margin-top:0}
-.masthead {max-width:1100px;margin:auto;padding:22px 28px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
-.wordmark {display:flex;align-items:center;gap:14px;text-decoration:none;font:bold 34px/1.15 var(--serif);letter-spacing:-1px;min-width:0}
-.wordmark i {font-weight:normal;color:var(--accent)}
-.wordmark small {display:block;font:500 13px/1.5 system-ui,sans-serif;letter-spacing:0;margin-top:5px;max-width:34ch}
-.brand-icon {background:var(--ink);color:var(--paper);font:22px var(--serif);width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:4px;letter-spacing:-2px;flex-shrink:0}
-.brand-icon span {font-style:italic;color:#d7a482;font-size:20px;margin:0 1px}
-.masthead nav {display:flex;gap:20px;align-items:center;font-size:14px}
-.masthead nav a {text-decoration:none;display:inline-flex;align-items:center;gap:4px;min-height:44px}
+/* The masthead, reading modes, and stories share one editorial measure. */
+.masthead {max-width:1000px;margin:auto;padding:8px 28px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:0 20px;color:var(--ink)}
+.wordmark {display:inline-flex;align-items:center;gap:4px;text-decoration:none;min-width:0;min-height:52.67px;max-width:100%;color:var(--ink)}
+.wordmark:hover {color:var(--ink)}
+.brand-copy {min-width:0}
+.brand-name {display:block;font:700 35px/1 var(--serif);font-kerning:normal;letter-spacing:-.042em}
+.brand-name i {font-weight:400;color:var(--accent);letter-spacing:-.055em}
+.wordmark small {display:block;margin-top:0;font:400 12.5px/1.4 system-ui,sans-serif;letter-spacing:.035em;color:var(--muted)}
+.brand-icon {display:block;width:52.49px;height:52.49px;flex-shrink:0;position:relative;top:-.17px}
+.masthead nav {display:flex;flex-wrap:wrap;gap:0 14px;align-items:center;font-size:13px;color:var(--muted)}
+.masthead nav a,.masthead nav .text-button {display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0;font-size:inherit;line-height:1.5;text-decoration:none}
+.masthead nav a:hover,.masthead nav .text-button:hover {text-decoration:underline}
+.resource-icon {width:13px;height:13px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
 .text-button {background:none;padding:6px 0;font-size:14px;text-align:left;line-height:1.5}
-.mode-bar {position:sticky;top:0;z-index:5;max-width:1100px;margin:auto;padding:8px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--paper);border-block:1px solid var(--line)}
+.mode-bar {position:sticky;top:0;z-index:5;max-width:1000px;margin:auto;padding:4px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--paper);border-block:1px solid var(--line)}
 .mode-switch {display:flex;gap:4px;padding:3px;background:var(--wash);border-radius:6px}
 .mode-switch button {padding:6px 24px;background:transparent;border-radius:4px;font-size:16px}
 .mode-switch [aria-pressed=true] {background:var(--ink);color:white}
@@ -112,9 +117,10 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .article-meta {font-size:15px;color:var(--muted);line-height:1.6;margin:0}
 .article-title,.about-content h2 {font:normal 32px/1.3 var(--serif);margin:0 0 14px;text-wrap:pretty;overflow-wrap:anywhere}
 .article-links {display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin:16px 0 20px}
-.article-content {font:18px/1.75 var(--serif);color:#2f443a;overflow-wrap:anywhere}
+/* Keep Georgia's familiar reading measure for long article text. */
+.article-content {font:18px/1.75 Georgia,'Times New Roman',serif;color:#2f443a;overflow-wrap:anywhere}
 .post-content {font-family:system-ui,sans-serif}
-.article-content h2,.article-content h3 {line-height:1.35}
+.article-content :is(h1,h2,h3,h4,h5,h6) {font-family:var(--serif);line-height:1.35}
 .article-content blockquote {margin-left:0;border-left:3px solid var(--line);padding-left:20px}
 .article-content table {display:block;overflow:auto;border-collapse:collapse}
 .article-content th,.article-content td {border:1px solid var(--line);padding:8px}
@@ -134,11 +140,12 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .source-choices {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px;gap:4px}
 .source-choice {text-align:left;font-size:15px;line-height:1.5;padding:10px;background:none;border-bottom:1px solid var(--line)}
 @media(max-width:760px) {
-  .masthead {padding:8px 16px 0;gap:0;align-items:flex-start}
-  .wordmark {font-size:28px;gap:12px}
-  .brand-icon {width:40px;height:40px;font-size:20px}
-  .wordmark small {font-size:12px;margin-top:0}
-  .masthead nav {width:100%;justify-content:space-between;gap:12px;font-size:14px}
+  .masthead {padding:6px 16px 0;gap:0;align-items:flex-start}
+  .wordmark {min-height:49.5px}
+  .brand-name {font-size:31px}
+  .brand-icon {width:49.04px;height:49.04px;top:-.08px}
+  .wordmark small {line-height:1.48;letter-spacing:.015em}
+  .masthead nav {width:100%;justify-content:flex-start;gap:0 18px}
   #github-link {display:none}
   .mode-bar {padding:3px 16px;gap:12px}
   .mode-switch {padding:0;gap:0}

@@ -43,7 +43,7 @@ test('date-only values retain their calendar day and do not invent a time', () =
   assert.equal(item.publishedDateOnly, true); assert.equal(item.updatedDateOnly, true);
   assert.equal(dateLabel(item.published, true, true), 'Sep 14, 2026');
   assert.equal(dateIso(item.updated, true), '2026-09-15');
-  assert.equal(dateLabel(0), 'Date not provided'); assert.equal(dateIso(Infinity), '');
+  assert.equal(dateLabel(0), 'No date in feed'); assert.equal(dateIso(Infinity), '');
   for (const timestamp of [Date.now(), Date.parse('2024-01-10T09:30:00Z')]) {
     assert.match(dateLabel(timestamp), /\b\d{4}\b/);
     assert.match(dateLabel(timestamp, true), /\b\d{4}\b/);

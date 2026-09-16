@@ -22,8 +22,8 @@ async function feedText(response) {
 }
 
 function failure(error, direct) {
-  if (error.name === 'TimeoutError' || error.name === 'AbortError') return 'Request timed out.';
-  if (error instanceof TypeError) return direct ? 'Browser request failed (CORS or network error).' : 'Could not reach Cloudflare.';
+  if (error.name === 'TimeoutError' || error.name === 'AbortError') return 'The reader did not receive the feed in time.';
+  if (error instanceof TypeError) return direct ? 'Your browser could not load the feed directly. The publisher may block access from other websites (CORS), or a network problem may have interrupted the request.' : 'Your browser could not connect to Cloudflare.';
   return error.message.slice(0, 180);
 }
 
@@ -33,7 +33,7 @@ export async function loadFeed(feed, proxy, {fetchImpl = fetch, timeout = 22000,
     const response = await fetchImpl(url, {signal: signal ? AbortSignal.any([signal, deadline]) : deadline, mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer'});
     if (!response.ok) {
       const info = direct ? {} : await response.json().catch(() => ({}));
-      throw new Error(typeof info.error === 'string' ? info.error : `HTTP ${response.status}.`);
+      throw new Error(typeof info.error === 'string' ? info.error : `The server returned HTTP ${response.status}.`);
     }
     const text = await feedText(response);
     try {return {
@@ -42,7 +42,7 @@ export async function loadFeed(feed, proxy, {fetchImpl = fetch, timeout = 22000,
       fetchedAt: direct ? 0 : Date.parse(response.headers.get('x-feed-fetched-at')) || 0,
       stale: !direct && response.headers.get('x-feed-stale') === 'true',
     };}
-    catch (error) {throw new Error(`Invalid feed: ${error.message}`);}
+    catch (error) {throw new Error(`The reader could not read the feed: ${error.message}`);}
   }
   let proxyFailure;
   try {return await attempt(`${proxy}/feed/${feed.id}`, false);}
@@ -50,7 +50,7 @@ export async function loadFeed(feed, proxy, {fetchImpl = fetch, timeout = 22000,
   signal?.throwIfAborted();
   try {
     const url = safeUrl(feed.feed);
-    if (!url || new URL(url).protocol !== 'https:') throw new Error('A secure feed URL is required.');
+    if (!url || new URL(url).protocol !== 'https:') throw new Error('The reader requires an HTTPS address to load a feed directly.');
     return await attempt(url, true);
-  } catch (error) {throw new Error(`Proxy: ${proxyFailure} Direct: ${failure(error, true)}`);}
+  } catch (error) {throw new Error(`Through Cloudflare: ${proxyFailure} Direct from the publisher: ${failure(error, true)}`);}
 }

@@ -8,13 +8,15 @@ Submit feed additions and corrections as pull requests editing only [`feeds.json
 - Check that the feed has current, relevant stories. Prefer original reporting and direct publisher feeds. Label opinion, advocacy, official announcements, and satire accurately.
 - Check existing entries and `aliases` for duplicates. Keep distinct topic feeds. Add `redirects` only for verified, exact HTTPS destinations needed by the proxy.
 - Put Bluesky accounts in the `bluesky` category. Use the native `https://bsky.app/profile/<did>/rss` feed and the current profile URL; account IDs keep subscriptions stable across handle changes.
-- Low-quality sources may not be accepted. Inclusion is subject to the maintainer's discretion.
+- The maintainer decides which sources to include and may decline sources that do not meet these standards.
 
 ## Development
 
 Use Node.js 24 or newer. `npm ci && npm run ci` builds and validates the catalog, lints the README and OPML, runs unit tests, and builds the reader. `npm run preview` serves the reader locally.
 
 For reader changes, run `npx playwright install chromium webkit` and `npm run test:browser`. Tests cover desktop Chromium and mobile WebKit. For live feed checks, use Python 3.12 or newer and `npm run check:feeds`.
+
+Follow the [writing guidelines](AGENTS.md#writing-for-readers) when changing reader text. [AGENTS.md](AGENTS.md) also contains the project map and instructions for coding agents; [CLAUDE.md](CLAUDE.md) imports those same instructions for Claude Code.
 
 Deployment uses the repository's `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` Actions secrets. Local deployment reads the same variables from the environment or ignored `.env`; run `npm run deploy:proxy`. Never commit credentials.
 
