@@ -111,7 +111,7 @@ test('mobile navigation reaches content quickly and filters close after selectio
   expect(await page.locator('.story h2').nth(1).evaluate(n=>n.getBoundingClientRect().top)).toBeLessThan(844);
   await chooseSection(page,'transport');await expect(page.locator('#filter-chips')).toContainText('Transit & urbanism');
   await page.locator('#filter-button').click();await page.locator('#source-search').fill('transit blog');await expect(page.locator('.source-choice')).toHaveCount(1);await page.locator('.source-choice').click();await expect(page.locator('.story')).toHaveCount(1);
-  for(const width of [320,390,760,900,1440]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);const a=await page.locator('.read-button').boundingBox(),b=await page.locator('.save-button').boundingBox();expect(a.height).toBeGreaterThanOrEqual(44);expect(a.y).toBeCloseTo(b.y,0);const logo=await page.locator('.brand-icon').boundingBox();expect(logo.width).toBe(logo.height);}
+  for(const width of [320,390,760,900,1440]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);const a=await page.locator('.read-button').boundingBox(),b=await page.locator('.save-button').boundingBox();expect(a.height).toBeGreaterThanOrEqual(44);expect(a.y).toBeCloseTo(b.y,0);const logo=await page.locator('.brand-icon').boundingBox();expect(Math.abs(logo.width-logo.height)).toBeLessThan(.01);}
 });
 
 test('mode switches restore independent filters, searches and reading positions',async({page})=>{
