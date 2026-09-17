@@ -32,7 +32,8 @@ export async function mockFeeds(target, {fail = false, bodies = {}} = {}) {
 export async function loadReader(page, {fail = false, catalog: selected = catalog, bodies = {}} = {}) {
   await mockCatalog(page, selected);
   await mockFeeds(page, {fail, bodies});
-  await page.goto('./');
+  // These scenarios inspect both read and unread items; defaults have separate coverage.
+  await page.goto('./#view=all');
   await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds');
   await expect(page.locator('#refresh')).toBeEnabled();
   await expect(page.locator('#all-count')).toHaveText(fail ? '0' : String(selected.feeds.filter(feed => feed.category !== 'bluesky').length));
@@ -84,3 +85,14 @@ export const test = base.extend({
     }
   },
 });
+
+export async function openMenu(page) {
+  await expect(page.locator('dialog[open]')).toHaveCount(0);
+  const toggle = page.locator('#menu-toggle');
+  if (await toggle.isVisible() && await toggle.getAttribute('aria-expanded') === 'false') await toggle.click();
+  await expect(page.locator('#resource-menu')).toBeVisible();
+}
+
+export async function expectResourceFocus(page, selector) {
+  await expect(page.locator(await page.locator('#menu-toggle').isVisible() ? '#menu-toggle' : selector)).toBeFocused();
+}

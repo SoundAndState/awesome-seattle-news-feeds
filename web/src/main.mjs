@@ -28,22 +28,70 @@ const readingStarted = new Set(), expandedPosts = new Set();
 const scrolling = scrollReader($('#stories'), markScrolledArticles);
 let catalog, feedMap, categoryMap, navigation, shownArticle, renderedSelection, renderTimer, session, retryAgain, loadingRun;
 let mode = 'articles', view = 'all', category = '', source = '', query = '', savedKind = 'all', unavailableOnly = false, limit = 60;
-let searchOpen = false, undoRead = [], dialogReturn, initial = true, catalogFallback = false;
+let preferredView = 'unread', excluded = new Set();
+let undoRead = [], dialogReturn, initial = true, catalogFallback = false;
 const shortNames = {regional:'Seattle & regional', neighborhoods:'Seattle neighborhoods', eastside:'Eastside', 'north-sound':'North Sound', 'south-sound':'South Sound', statewide:'Washington state', transport:'Transit & urbanism', culture:'Food, culture & history', commentary:'Commentary & advocacy', official:'Government & services', community:'Community organizations', satire:'Satire'};
 const route = () => ({mode, view, category, source, savedKind, query});
 const navigate = (changes, options) => navigation?.go(changes, options);
 function notice(message) {$('#notice').textContent = message; $('#notice').hidden = !message;}
 function announce(message) {$('#announcement').textContent = message;}
+async function toggleExcluded(id) {
+  if (excluded.has(id)) excluded.delete(id); else excluded.add(id);
+  await save('settings', [{id:'excludedSources',value:[...excluded]}]);
+  render();
+  announce(excluded.has(id) ? 'The reader excluded this source from your feeds. Saved items remain available.' : 'The reader included this source in your feeds.');
+}
+const systemTheme = matchMedia('(prefers-color-scheme: dark)');
+function applyTheme() {
+  const choice = $('#theme').value;
+  const dark = choice === 'dark' || (choice === 'auto' && systemTheme.matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  $('meta[name="theme-color"]').content = dark ? '#111110' : '#f9f9f8';
+}
+systemTheme.addEventListener('change', applyTheme);
+$('#theme').addEventListener('change', async () => {
+  const theme = $('#theme').value;
+  applyTheme(); await save('settings', [{id:'theme',value:theme}]);
+  announce(theme === 'auto' ? 'The reader now follows your device’s theme.' : `The reader now uses the ${theme === 'dark' ? 'Dark' : 'Light'} theme.`);
+});
+applyTheme();
+function closeMenu() {
+  const focused = $('#resource-menu').contains(document.activeElement);
+  $('#reader-header').classList.remove('menu-open');
+  $('#menu-toggle').setAttribute('aria-expanded', 'false');
+  $('#menu-toggle').setAttribute('aria-label', 'Open menu');
+  if (focused && matchMedia('(max-width: 760px)').matches) $('#menu-toggle').focus({preventScroll:true});
+}
+$('#menu-toggle').addEventListener('click', () => {
+  const open = $('#reader-header').classList.toggle('menu-open');
+  $('#menu-toggle').setAttribute('aria-expanded', String(open));
+  $('#menu-toggle').setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+});
+document.addEventListener('click', event => {if (!event.target.closest('.masthead')) closeMenu();});
+document.addEventListener('focusin', event => {if (!event.target.closest('.masthead')) closeMenu();});
+document.addEventListener('keydown', event => {if (event.key === 'Escape') closeMenu();});
+// Focus rings remain available to keyboard users, including on iOS.
+document.addEventListener('pointerdown', () => document.documentElement.classList.add('pointer-navigation'), true);
+document.addEventListener('keydown', () => document.documentElement.classList.remove('pointer-navigation'), true);
+window.addEventListener('scroll', () => {
+  $('#reader-header').classList.toggle('compact', scrollY > 100);
+  $('#back-to-top').hidden = scrollY < 500;
+}, {passive:true});
+$('#back-to-top').addEventListener('click', () => {
+  window.scrollTo({top:0,behavior:'instant'});
+  $('.wordmark').focus({preventScroll:true});
+  scrolling.sync();
+});
 function selectedFeeds(all = false) {return catalog.feeds.filter(feed => feedMode(feed) === mode && (all || ((!category || feed.category === category) && (!source || feed.id === source))));}
-function matching(item) {return matchesItem(item, route(), feedMap);}
+function matching(item) {return matchesItem(item, route(), feedMap, excluded);}
 function filteredArticles() {
-  return [...articles.values()].filter(item => matching(item) && (view !== 'unread' || !states.get(item.id)?.read) && (view !== 'saved' || states.get(item.id)?.saved) && (!query || `${item.title} ${item.excerpt} ${sourceName(item)}`.toLocaleLowerCase().includes(query)))
+  return [...articles.values()].filter(item => matching(item) && (view !== 'unread' || !states.get(item.id)?.read) && (view !== 'saved' || states.get(item.id)?.saved) && (!query || `${item.title} ${item.author || ''} ${item.excerpt} ${sourceName(item)}`.toLocaleLowerCase().includes(query)))
     .sort((a,b) => (b.published || b.updated || 0) - (a.published || a.updated || 0) || b.firstSeen - a.firstSeen || a.id.localeCompare(b.id));
 }
 function sourceName(article) {return feedMap.get(article.feedIds[0])?.name || article.sourceName || 'Previously saved source';}
 function sourceLink(article) {
   const feed = feedMap.get(article.feedIds[0]);
-  return feed ? external(sourceName(article), feed.website, 'publisher') : el('span', 'publisher', sourceName(article));
+  return feed ? button(sourceName(article), 'publisher', () => navigate({mode:feedMode(feed),view:'sources',source:feed.id,category:'',query:'',unavailableOnly:false})) : el('span', 'publisher', sourceName(article));
 }
 function bookmarkIcon() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -106,12 +154,17 @@ function articleMetadata(item, className, showReadStatus = false) {
   const categoryId = item.feedIds.map(id => feedMap.get(id)?.category).find(Boolean);
   const classification = {satire:'Satire', commentary:'Commentary & advocacy', official:'Official information'}[categoryId];
   if (classification) attribution.append(el('span', `category-tag category-${categoryId}`, classification));
+  if (item.author) attribution.append(el('span', 'author', `By ${cleanText(item.author)}`));
   if (showReadStatus) attribution.append(el('span', 'article-read-status', states.get(item.id)?.read ? 'Read' : 'Unread'));
-  metadata.append(attribution, itemDates(item));
+  const dates = el('div', 'date-line');
+  const dot = el('span', `read-dot ${states.get(item.id)?.read ? '' : 'unread-dot'}`, states.get(item.id)?.read ? 'Read' : 'Unread');
+  dot.setAttribute('aria-label', dot.textContent);
+  dates.append(dot, itemDates(item));
+  metadata.append(attribution, dates);
   return metadata;
 }
 function updateNavigation() {
-  for (const node of document.querySelectorAll('[data-mode]')) node.setAttribute('aria-pressed', String(view !== 'saved' && node.dataset.mode === mode));
+  for (const node of document.querySelectorAll('[data-mode]')) node.setAttribute('aria-pressed', String(['all','unread'].includes(view) && node.dataset.mode === mode));
   for (const node of document.querySelectorAll('[data-view]')) node.setAttribute('aria-pressed', String(node.dataset.view === view));
   for (const node of document.querySelectorAll('[data-kind]')) node.setAttribute('aria-pressed', String(node.dataset.kind === savedKind));
   const current = [...articles.values()].filter(item => itemMode(item, feedMap) === mode);
@@ -121,18 +174,19 @@ function updateNavigation() {
   $('#saved-count').textContent = savedCount;
   $('#export-saved').disabled = !savedCount;
   $('#export-saved').setAttribute('aria-label', 'Export all saved items as CSV');
-  $('#library-views').hidden = view === 'saved'; $('#saved-kinds').hidden = view !== 'saved';
+  $('#export-saved').hidden = view !== 'saved';
+  $('#excluded-count').textContent = excluded.size;
+  $('#publications-button').textContent = mode === 'posts' ? 'Accounts' : 'Publications';
+  $('#library-views').hidden = false; $('#saved-kinds').hidden = view !== 'saved';
   $('#library-views').setAttribute('aria-label', mode === 'posts' ? 'Post view' : 'Article view');
-  $('#filter-button').hidden = view === 'saved'; $('#refresh').hidden = view === 'saved';
-  $('#reading-options').hidden = view === 'sources' || view === 'saved';
+  $('#filter-button').hidden = ['saved','excluded'].includes(view); $('#refresh').hidden = ['saved','excluded'].includes(view);
+  $('#reading-options').hidden = ['sources','saved','excluded'].includes(view);
   $('#show-all-sources').hidden = view !== 'sources' || !unavailableOnly;
-  const searchLabel = view === 'saved' ? 'Search saved items' : view === 'sources' ? `Search ${mode === 'posts' ? 'accounts' : 'publications'}` : `Search ${mode}`;
+  const searchLabel = view === 'excluded' ? 'Search excluded sources' : view === 'saved' ? 'Search saved items' : view === 'sources' ? `Search ${mode === 'posts' ? 'accounts' : 'publications'}` : `Search ${mode}`;
   $('#search-label').textContent = searchLabel; $('#search').placeholder = `${searchLabel}…`;
-  $('#search-toggle').setAttribute('aria-label', searchLabel);
-  $('#search-panel').hidden = !searchOpen && !query;
-  $('#search-toggle').setAttribute('aria-expanded', String(!$('#search-panel').hidden));
-  $('#search-help').textContent = view === 'sources' ? `Search the ${mode === 'posts' ? 'accounts' : 'publications'} in this list.` : 'Search the items this reader has loaded in your current view.';
-  $('#stories').setAttribute('aria-label', view === 'saved' ? 'Saved items' : view === 'sources' ? 'Sources' : mode === 'posts' ? 'Posts' : 'Articles');
+  $('#clear-search').hidden = !$('#search').value;
+  $('#search-help').textContent = view === 'excluded' ? 'Search the sources you have excluded.' : view === 'sources' ? `Search the ${mode === 'posts' ? 'accounts' : 'publications'} in this list.` : 'Search the items this reader has loaded in your current view.';
+  $('#stories').setAttribute('aria-label', view === 'saved' ? 'Saved items' : ['sources','excluded'].includes(view) ? 'Sources' : mode === 'posts' ? 'Posts' : 'Articles');
   const chips = $('#filter-chips'); chips.replaceChildren();
   if (category) chips.append(button(`${shortNames[category]} ×`, 'filter-chip', () => navigate({category:''})));
   if (source) chips.append(button(`${feedMap.get(source)?.name} ×`, 'filter-chip', () => navigate({source:''})));
@@ -191,11 +245,8 @@ function storyCard(item) {
   const state = states.get(item.id) || {}, social = itemMode(item, feedMap) === 'posts';
   const card = el('article', `story ${social ? 'post' : 'article-card'} ${state.read ? 'is-read' : ''}`); card.dataset.article = item.id;
   if(social)card.setAttribute('aria-label', `Post by ${sourceName(item)}`);
-  const body = el('div', 'story-copy'), metadata = social ? el('div', 'story-meta') : articleMetadata(item, 'story-meta');
+  const body = el('div', 'story-copy'), metadata = articleMetadata(item, 'story-meta');
   if (social) {
-    metadata.append(sourceLink(item));
-    if (!state.read) metadata.append(el('span','unread-dot','Unread'));
-    metadata.append(itemDates(item));
     body.append(metadata);
     const text = cleanText(item.html).replace(/\[contains quote post or other embedded content\]/gi,'').trim();
     const url = safeUrl(item.url);
@@ -224,8 +275,7 @@ function storyCard(item) {
   }
   const footer = el('div','story-foot'); footer.append(...articleLinks(item));
   const actions = el('div','story-actions'); actions.append(saveButton(item),readButton(item));
-  if (social) body.append(footer,actions);
-  else {const utility = el('div', 'article-footer'); utility.append(footer,actions); body.append(utility);}
+  const utility = el('div', 'article-footer'); utility.append(footer,actions); body.append(utility);
   card.append(body); return card;
 }
 function friendlyError(error) {
@@ -238,7 +288,7 @@ function friendlyError(error) {
 function sourceCard(feed) {
   const status = health.get(feed.id), cached = status?.lastSuccess && (status.error || status.transport === 'snapshot');
   const card = el('article','source-card'), top = el('div','source-top');
-  top.append(el('span','category-tag', mode === 'posts' ? 'Bluesky' : shortNames[feed.category]),el('span',`source-status ${status?.error ? 'error' : ''}`,cached ? 'Using an earlier copy' : status?.error ? 'Unavailable' : status?.lastSuccess ? 'Available' : 'Waiting to check'));
+  top.append(el('span','category-tag', feedMode(feed) === 'posts' ? 'Bluesky' : shortNames[feed.category]),el('span',`source-status ${status?.error ? 'error' : ''}`,cached ? 'Using an earlier copy' : status?.error ? 'Unavailable' : status?.lastSuccess ? 'Available' : 'Waiting to check'));
   const title = el('h2'); title.append(external(feed.name,feed.website)); card.append(top,title,el('p','',feed.description));
   if (status?.error) card.append(el('p','source-detail',friendlyError(status.error)));
   if (status?.lastSuccess) card.append(el('p','source-detail',`The reader last loaded ${status.items} items on ${dateLabel(status.lastSuccess,true)}.${status.transport === 'direct' ? ' Your browser connected directly to the publisher.' : ''}`));
@@ -246,12 +296,16 @@ function sourceCard(feed) {
   if (status?.transport === 'snapshot') card.append(el('p','source-detail',`The reader is using a backup that a scheduled task collected on ${dateLabel(status.fetchedAt || status.lastSuccess,true)}. The task runs every 15 minutes, though GitHub may delay it. Cloudflare stops using each copy within 6 hours, or sooner if the publisher requires it.`));
   if (status?.error) {const details = el('details'); details.append(el('summary','','Technical details'),el('p','source-detail',status.error)); card.append(details);}
   const links = el('div','source-links');
-  links.append(button('View items →','text-button',() => navigate({view:'all',source:feed.id,category:'',query:'',unavailableOnly:false})),external('Visit website ↗',feed.website),external('Open feed ↗',feed.feed));
-  if (status?.error || !status?.lastSuccess) {const retry=button('Retry','text-button',()=>refreshFeeds({only:feed.id,retryFailed:true})); retry.disabled=Boolean(session); links.append(retry);}
+  links.append(button('View items →','text-button',() => navigate({mode:feedMode(feed),view:'all',source:feed.id,category:'',query:'',unavailableOnly:false})),external('Visit website ↗',feed.website),external('Open feed ↗',feed.feed));
+  if (view !== 'excluded' && (status?.error || !status?.lastSuccess)) {const retry=button('Retry','text-button',()=>refreshFeeds({only:feed.id,retryFailed:true})); retry.disabled=Boolean(session); links.append(retry);}
+  const exclude = button(excluded.has(feed.id) ? 'Include source' : 'Exclude source', 'secondary-button', () => toggleExcluded(feed.id));
+  exclude.dataset.exclude = feed.id; exclude.setAttribute('aria-pressed', String(excluded.has(feed.id)));
+  links.append(exclude);
+  if (excluded.has(feed.id)) card.append(el('p', 'source-detail', 'Excluded from your feeds. Your saved items are still available.'));
   card.append(links); return card;
 }
 function captureFocus() {
-  const node = document.activeElement, keys = ['save','read','story','expand'];
+  const node = document.activeElement, keys = ['save','read','story','expand','exclude'];
   const kind = keys.find(key => node?.dataset[key]);
   if (!kind || node.closest('dialog')) return null;
   const index = [...$('#stories').children].indexOf(node.closest('.story'));
@@ -259,7 +313,15 @@ function captureFocus() {
 }
 function focusItem(target) {
   if (!target) return;
-  if (target.element) {$(target.element)?.focus({preventScroll:true}); return;}
+  if (target.element) {
+    const element = $(target.element);
+    if (element?.closest('#resource-menu') && matchMedia('(max-width: 760px)').matches) {
+      closeMenu();
+      $('#menu-toggle').focus({preventScroll:true});
+      return;
+    }
+    element?.focus({preventScroll:true}); return;
+  }
   const controls = [...$('#stories').querySelectorAll(`[data-${target.kind}]`)];
   const exact = controls.find(node => node.dataset[target.kind] === target.id);
   const fallback = $('#stories').children[Math.max(0,Math.min(target.index,$('#stories').children.length-1))]?.querySelector('[data-story], [data-save]');
@@ -271,16 +333,22 @@ function render() {
   const selection = JSON.stringify([mode,view,category,source,query,savedKind,unavailableOnly]);
   const anchor = selection === renderedSelection && scrollY > 0 ? [...$('#stories').querySelectorAll('.story')].map(card=>({id:card.dataset.article,top:card.getBoundingClientRect().top,bottom:card.getBoundingClientRect().bottom})).find(card=>card.bottom > 60 && card.top < innerHeight && (view !== 'unread' || !states.get(card.id)?.read)) : null;
   const focus = captureFocus();
-  const heading = view === 'saved' ? 'Saved items' : view === 'sources' ? unavailableOnly ? 'Unavailable sources' : mode === 'posts' ? 'Accounts' : 'Publications' : `${view === 'unread' ? 'Unread' : 'Latest'} ${mode}`;
+  const heading = view === 'excluded' ? 'Excluded sources' : view === 'saved' ? 'Saved items' : view === 'sources' ? unavailableOnly ? 'Unavailable sources' : mode === 'posts' ? 'Accounts' : 'Publications' : `${view === 'unread' ? 'Unread' : 'Latest'} ${mode}`;
   $('#heading').textContent = heading; document.title = `${heading} — Sound & State`;
-  $('#page-heading').classList.toggle('sr-only',view !== 'saved' && view !== 'sources');
+  $('#page-heading').classList.toggle('sr-only',!['saved','sources','excluded'].includes(view));
   $('#description').hidden = true; updateNavigation(); renderProgress(); renderPending();
-  const container = $('#stories'); container.className = view === 'sources' ? 'source-grid' : ''; container.replaceChildren();
-  if (view === 'sources') {
-    const sources = selectedFeeds().filter(feed=>(!unavailableOnly || health.get(feed.id)?.error) && (!query || `${feed.name} ${feed.description}`.toLocaleLowerCase().includes(query))).sort((a,b)=>a.name.localeCompare(b.name));
+  const container = $('#stories'); container.className = ['sources','excluded'].includes(view) ? 'source-grid' : ''; container.replaceChildren();
+  if (view === 'sources' || view === 'excluded') {
+    const available = view === 'excluded' ? [...excluded].map(id => feedMap.get(id) || {id,name:id,description:'This source is no longer in the catalog.'}) : selectedFeeds();
+    const sources = available.filter(feed=>(!unavailableOnly || health.get(feed.id)?.error) && (!query || `${feed.name} ${feed.description}`.toLocaleLowerCase().includes(query))).sort((a,b)=>a.name.localeCompare(b.name));
     $('#result-label').textContent = `${sources.length} ${unavailableOnly ? 'unavailable ' : ''}sources`;
-    container.append(...sources.map(sourceCard));
-    if (!sources.length) showEmpty('No sources match.', 'Clear your filters to see more sources.');
+    container.append(...sources.map(feed => {
+      if (feedMap.has(feed.id)) return sourceCard(feed);
+      const card = el('article', 'source-card');
+      card.append(el('h2', '', feed.name), el('p', '', feed.description), button('Include source', 'secondary-button', () => toggleExcluded(feed.id)));
+      return card;
+    }));
+    if (!sources.length) showEmpty(view === 'excluded' && !query ? 'No excluded sources.' : 'No sources match.', view === 'excluded' ? 'Select a publisher’s name in the feed to exclude a source, or clear your search.' : 'Clear your filters to see more sources.');
     $('#load-more').hidden = true;
   } else {
     const list = filteredArticles();
@@ -309,7 +377,9 @@ async function markScrolledArticles(ids) {
   const updates=ids.map(id=>({...states.get(id),id,read:true}));
   for (const state of updates) states.set(state.id,state);
   for (const card of $('#stories').querySelectorAll('.story')) if(ids.includes(card.dataset.article)) {
-    card.classList.add('is-read'); card.querySelector('.unread-dot')?.remove();
+    card.classList.add('is-read');
+    const dot = card.querySelector('.read-dot');
+    if (dot) {dot.classList.remove('unread-dot'); dot.textContent = 'Read'; dot.setAttribute('aria-label', 'Read');}
     updateReadButton(card.querySelector('[data-read]'), articles.get(card.dataset.article));
   }
   updateNavigation(); await save('state',updates);
@@ -356,7 +426,7 @@ function syncDialogs() {
   }
   if(current.about && !$('#about-dialog').open){dialogReturn={element:'#about-button'};$('#about-dialog').showModal();$('#about-title').focus();}
   if(current.feedList && !$('#feed-list-dialog').open)openFeedList();
-  if(current.filters && !$('#filter-dialog').open){dialogReturn={element:'#filter-button'};renderFilters();$('#filter-dialog').showModal();}
+  if(current.filters && !$('#filter-dialog').open){dialogReturn={element:$('#filter-button').getClientRects().length?'#filter-button':'#menu-filter-button'};renderFilters();$('#filter-dialog').showModal();}
   if(current.article && (shownArticle!==current.article || !$('#article-dialog').open)) {
     if(!$('#article-dialog').open) dialogReturn={kind:'story',id:current.article,index:[...$('#stories').children].findIndex(card=>card.dataset.article===current.article)};
     if(item){shownArticle=item.id;openArticle(item);} else {
@@ -416,11 +486,11 @@ async function prune() {
   for(const id of remove){articles.delete(id);pending.delete(id);}await removeArticles(remove);
 }
 async function refreshFeeds({retryFailed=false,only=''}={}) {
-  if(!catalog || view==='saved' || document.hidden)return;
+  if(!catalog || ['saved','excluded'].includes(view) || document.hidden)return;
   if(session){retryAgain={retryFailed,only};return;}
   if(!navigator.onLine){notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.');return;}
   const due=feed=>(retryFailed && health.get(feed.id)?.error)||!health.get(feed.id)?.nextCheck||health.get(feed.id).nextCheck<=Date.now();
-  const queue=selectedFeeds().filter(feed=>(!only||feed.id===only)&&due(feed));
+  const queue=selectedFeeds().filter(feed=>(!excluded.has(feed.id)||source===feed.id||only===feed.id||view==='sources')&&(!only||feed.id===only)&&due(feed));
   if(!queue.length){renderProgress();return;}
   const run={mode,controller:new AbortController(),done:0,total:queue.length,buffer:[...articles.values()].some(item=>itemMode(item,feedMap)===mode)};
   session=run;render();
@@ -446,16 +516,23 @@ function setupNavigation() {
   for(const node of document.querySelectorAll('[data-view]'))node.addEventListener('click',()=>navigate(node.dataset.view==='saved'?{view:'saved',savedKind:'all',source:'',category:'',query:'',unavailableOnly:false}:{view:node.dataset.view,unavailableOnly:false}));
   for(const node of document.querySelectorAll('[data-kind]'))node.addEventListener('click',()=>navigate({savedKind:node.dataset.kind}));
   $('#filter-button').addEventListener('click',()=>navigate({filters:true,limit},{keepScroll:true}));
+  $('#menu-filter-button').addEventListener('click',()=>navigate({view:['all','unread'].includes(view)?view:preferredView,filters:true,limit},{keepScroll:true}));
   $('#browse-sources').addEventListener('click',()=>navigate({view:'sources',source:'',category:'',query:'',unavailableOnly:false},{replace:true}));
   $('#source-search').addEventListener('input',renderFilterSources);
   $('#show-all-sources').addEventListener('click',()=>navigate({unavailableOnly:false,category:'',source:'',query:''}));
-  $('#search-toggle').addEventListener('click',()=>{searchOpen=!searchOpen;if(!searchOpen && query)navigate({query:''});updateNavigation();if(searchOpen)$('#search').focus();});
+  $('#clear-search').addEventListener('click',()=>{navigate({query:''});$('#search').focus();announce('Search cleared.');});
+  $('#publications-button').addEventListener('click',()=>navigate({view:'sources',source:'',category:'',query:'',unavailableOnly:false}));
+  $('#excluded-button').addEventListener('click',()=>navigate({view:'excluded',source:'',category:'',query:'',unavailableOnly:false}));
   $('#search').addEventListener('input',event=>{navigate({query:event.target.value},{search:true});announce($('#result-label').textContent);});
   $('#search').addEventListener('blur',()=>navigation.endSearch());
   $('#refresh').addEventListener('click',()=>refreshFeeds({retryFailed:true}));
   $('#dismiss-loading').addEventListener('click',()=>{loadingRun=null;renderProgress();$('#refresh').focus({preventScroll:true});});
   $('#load-more').addEventListener('click',()=>navigate({limit:limit+60},{replace:true,keepScroll:true}));
-  $('#scroll-read').addEventListener('change',async event=>{scrolling.setEnabled(event.target.checked);await save('settings',[{id:'markReadOnScroll',enabled:event.target.checked}]);});
+  $('#scroll-read').addEventListener('change',async event=>{
+    const enabled = event.target.checked;
+    scrolling.setEnabled(enabled);await save('settings',[{id:'markReadOnScroll',enabled}]);
+    announce(enabled ? 'The reader will mark items read as you scroll past them.' : 'The reader will wait for you to mark items read.');
+  });
   $('#mark-read').addEventListener('click',async()=>{
     undoRead=filteredArticles().filter(item=>!states.get(item.id)?.read).map(item=>({id:item.id,read:Boolean(states.get(item.id)?.read)}));
     const updates=undoRead.map(item=>({...states.get(item.id),id:item.id,read:true}));for(const state of updates)states.set(state.id,state);
@@ -475,7 +552,7 @@ for(const dialog of document.querySelectorAll('dialog')) {
   dialog.addEventListener('cancel',event=>{event.preventDefault();closeDialog(dialog);});
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closeDialog(dialog);}});
 }
-$('.wordmark').addEventListener('click',event=>{if(event.button||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate({mode:'articles',view:'all',source:'',category:'',query:'',unavailableOnly:false});});
+$('.wordmark').addEventListener('click',event=>{if(event.button||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate({mode:'articles',view:preferredView,source:'',category:'',query:'',unavailableOnly:false});});
 $('.skip-link').addEventListener('click',event=>{event.preventDefault();$('#main').focus();});
 window.addEventListener('offline',()=>{session?.controller.abort();notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.');});
 window.addEventListener('online',()=>{notice('You’re back online. The reader can check for new items again.');refreshFeeds();});
@@ -515,7 +592,7 @@ $('#backup-file').addEventListener('change', async event => {
     const newArticles = data.savedArticles.map(item => {
       if (!item || !savedIds.has(item.id) || !Array.isArray(item.feedIds) || item.feedIds.length > 1000 || item.feedIds.some(id => typeof id !== 'string' || id.length > 120) || typeof item.title !== 'string' || typeof item.html !== 'string' || item.html.length > 100000 || typeof item.sourceName !== 'string' || !Number.isFinite(item.published) || !Number.isFinite(item.firstSeen)) throw new Error('The reader cannot read a saved item in this backup. Choose another backup.');
       if (item.updated !== undefined && item.updated !== 0 && !validTimestamp(item.updated)) throw new Error('The reader cannot read an item’s update date in this backup. Choose another backup.');
-      return {id: item.id, url: safeUrl(item.url), title: cleanText(item.title).slice(0, 2000), html: item.html, excerpt: cleanText(item.html).slice(0, 260), sourceName: cleanText(item.sourceName).slice(0, 200), feedIds: item.feedIds, published: item.published, publishedDateOnly: item.publishedDateOnly === true, updated: item.updated || 0, updatedDateOnly: item.updatedDateOnly === true, firstSeen: item.firstSeen};
+      return {id: item.id, url: safeUrl(item.url), title: cleanText(item.title).slice(0, 2000), html: item.html, excerpt: cleanText(item.html).slice(0, 260), sourceName: cleanText(item.sourceName).slice(0, 200), author: typeof item.author === 'string' ? cleanText(item.author).slice(0, 500) : '', feedIds: item.feedIds, published: item.published, publishedDateOnly: item.publishedDateOnly === true, updated: item.updated || 0, updatedDateOnly: item.updatedDateOnly === true, firstSeen: item.firstSeen};
     });
     for (const item of newStates) states.set(item.id, item);
     for (const item of newArticles) if (!articles.has(item.id)) articles.set(item.id, item);
@@ -547,17 +624,23 @@ async function start() {
     for(const item of library.articles)articles.set(item.id,item);
     for(const item of library.state)states.set(item.id,item);
     for(const item of library.feeds)health.set(item.id,item);
-    $('#scroll-read').checked=library.settings.find(item=>item.id==='markReadOnScroll')?.enabled===true;scrolling.setEnabled($('#scroll-read').checked);
+    preferredView = library.settings.find(item=>item.id==='listView')?.value === 'all' ? 'all' : 'unread';
+    excluded = new Set(library.settings.find(item=>item.id==='excludedSources')?.value || []);
+    const theme = library.settings.find(item=>item.id==='theme')?.value;
+    $('#theme').value = ['light','dark'].includes(theme) ? theme : 'auto'; applyTheme();
+    $('#scroll-read').checked=library.settings.find(item=>item.id==='markReadOnScroll')?.enabled!==false;scrolling.setEnabled($('#scroll-read').checked);
     setupNavigation();await prune();
-    navigation=readerNavigation({normalize:next=>normalizeRoute(next,feedMap,categoryMap),apply:(next,y)=>{
+    navigation=readerNavigation({preferredView:()=>preferredView,normalize:next=>normalizeRoute(next,feedMap,categoryMap),apply:(next,y)=>{
       const changed=mode!==next.mode||view!==next.view||category!==next.category||source!==next.source;
       const needsRender=JSON.stringify([next.mode,next.view,next.category,next.source,next.query.toLocaleLowerCase().trim(),next.savedKind,next.unavailableOnly])!==renderedSelection || next.limit!==limit;
-      if(changed){session?.controller.abort();loadingRun=null;searchOpen=Boolean(next.query);$('#reading-options').open=false;}
+      if(changed){session?.controller.abort();loadingRun=null;$('#reading-options').open=false;}
       ({mode,view,category,source,savedKind,unavailableOnly,limit}=next);query=next.query.toLocaleLowerCase().trim();$('#search').value=next.query;
+      if (['all','unread'].includes(view) && preferredView !== view) {preferredView=view; save('settings',[{id:'listView',value:view}]);}
+      closeMenu();
       if(needsRender)render();else{updateNavigation();syncDialogs();}
       window.scrollTo({top:y,behavior:'instant'});scrolling.sync();
       if(changed && !next.article && !next.about && !next.feedList && !next.filters)announce($('#result-label').textContent);
-      if(!initial && changed && view!=='saved')refreshFeeds();
+      if(!initial && changed && !['saved','excluded'].includes(view))refreshFeeds();
     }});
     const feedListOpen=$('#feed-list-dialog').open;
     navigation.start();initial=false;

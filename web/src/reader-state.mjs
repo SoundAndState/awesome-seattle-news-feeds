@@ -6,7 +6,7 @@ export function itemMode(item, feedMap) {
 }
 
 export function normalizeRoute(route, feedMap, categoryMap) {
-  const view = ['all', 'unread', 'saved', 'sources'].includes(route.view) ? route.view : 'all';
+  const view = ['all', 'unread', 'saved', 'sources', 'excluded'].includes(route.view) ? route.view : 'unread';
   const legacyPosts = route.category === 'bluesky' || feedMap.get(route.source)?.category === 'bluesky';
   const mode = route.mode === 'posts' || (!route.mode && legacyPosts) ? 'posts' : 'articles';
   const source = view !== 'saved' && feedMap.has(route.source) && feedMode(feedMap.get(route.source)) === mode ? route.source : '';
@@ -20,8 +20,9 @@ export function normalizeRoute(route, feedMap, categoryMap) {
     unavailableOnly: view === 'sources' && Boolean(route.unavailableOnly)};
 }
 
-export function matchesItem(item, route, feedMap) {
+export function matchesItem(item, route, feedMap, excluded = new Set()) {
   const mode = itemMode(item, feedMap);
   if (route.view === 'saved') return route.savedKind === 'all' || mode === route.savedKind;
+  if (!route.source && item.feedIds.every(id => excluded.has(id))) return false;
   return mode === route.mode && (!route.category || item.feedIds.some(id => feedMap.get(id)?.category === route.category)) && (!route.source || item.feedIds.includes(route.source));
 }

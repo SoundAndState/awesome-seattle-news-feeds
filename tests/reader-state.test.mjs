@@ -11,6 +11,15 @@ const article={id:'https://publisher.example/article',feedIds:['local-news']};
 const post={id:postId('123'),feedIds:['bluesky-reporter']};
 const route=value=>normalizeRoute(value,feeds,categories);
 
+test('unread is the default and exclusions preserve explicit source browsing and Saved',()=>{
+  assert.equal(route({}).view,'unread');
+  const excluded=new Set(article.feedIds);
+  assert.equal(matchesItem(article,route({}),feeds,excluded),false);
+  assert.equal(matchesItem(article,route({source:article.feedIds[0]}),feeds,excluded),true);
+  assert.equal(matchesItem(article,route({view:'saved'}),feeds,excluded),true);
+  assert.equal(matchesItem({...article,feedIds:[...article.feedIds,'transit-news']},route({}),feeds,excluded),true);
+});
+
 test('legacy routes infer modes and explicit modes reject incompatible filters',()=>{
   assert.equal(route({category:'bluesky'}).mode,'posts');
   assert.equal(route({source:'bluesky-reporter'}).mode,'posts');

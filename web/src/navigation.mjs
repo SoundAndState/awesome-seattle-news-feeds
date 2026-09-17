@@ -1,19 +1,19 @@
 const defaults = {mode: '', view: 'all', savedKind: 'all', category: '', source: '', query: '', unavailableOnly: false, limit: 60, article: '', about: false, feedList: false, filters: false};
 
 // Hashes keep searches and article IDs out of requests to the site host.
-export function readerNavigation({normalize, apply}) {
+export function readerNavigation({normalize, apply, preferredView = () => 'unread'}) {
   let current, entryKey, searching = false;
   const positions = new Map();
   let contexts = {};
   const route = value => normalize({...defaults, ...value});
   const fromUrl = () => {
     const params = new URLSearchParams(location.hash.slice(1));
-    return route({mode: params.get('mode') || '', view: params.get('view') || 'all', savedKind: params.get('kind') || 'all', category: params.get('section') || '', source: params.get('source') || '', query: params.get('q') || '', unavailableOnly: params.has('unavailable'), article: params.get('article') || '', about: params.has('about'), feedList: params.has('feed-list'), filters: params.has('filters')});
+    return route({mode: params.get('mode') || '', view: params.get('view') || preferredView(), savedKind: params.get('kind') || 'all', category: params.get('section') || '', source: params.get('source') || '', query: params.get('q') || '', unavailableOnly: params.has('unavailable'), article: params.get('article') || '', about: params.has('about'), feedList: params.has('feed-list'), filters: params.has('filters')});
   };
   const url = state => {
     const params = new URLSearchParams();
     if (state.mode === 'posts') params.set('mode', 'posts');
-    if (state.view !== 'all') params.set('view', state.view);
+    params.set('view', state.view);
     if (state.view === 'saved' && state.savedKind !== 'all') params.set('kind', state.savedKind);
     if (state.category) params.set('section', state.category);
     if (state.source) params.set('source', state.source);
@@ -28,7 +28,7 @@ export function readerNavigation({normalize, apply}) {
   function remember() {
     if (!current) return;
     positions.set(entryKey, window.scrollY);
-    if (current.view !== 'saved' && !current.article && !current.about && !current.feedList && !current.filters) contexts[current.mode] = {route: current, y: window.scrollY};
+    if (['all', 'unread'].includes(current.view) && !current.article && !current.about && !current.feedList && !current.filters) contexts[current.mode] = {route: current, y: window.scrollY};
     history.replaceState({...history.state, reader: true, key: entryKey, route: current, y: window.scrollY, contexts}, '', url(current));
   }
   function restore(state) {
@@ -64,7 +64,7 @@ export function readerNavigation({normalize, apply}) {
     switchMode(mode) {
       remember();
       const previous = contexts[mode];
-      go(previous?.route || {...defaults, mode}, {scroll: previous?.y || 0});
+      go({...defaults, ...previous?.route, mode, view: preferredView(), unavailableOnly: false}, {scroll: previous?.y || 0});
     },
     endSearch() {searching = false;},
     close() {

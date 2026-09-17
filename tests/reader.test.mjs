@@ -6,6 +6,17 @@ import {makeCatalog, makeSource} from './fixtures/catalog.mjs';
 import {rssFeed, atomFeed, postItem, NOW} from './fixtures/feeds.mjs';
 
 const source = makeSource();
+test('bylines preserve RSS, Dublin Core, and Atom authors without inventing missing names', () => {
+  for (const [extraXml, expected] of [
+    ['<author>Alex Reporter</author>', 'Alex Reporter'],
+    ['<dc:creator>Alex Reporter</dc:creator><dc:creator>Robin Writer</dc:creator><dc:creator>Alex Reporter</dc:creator>', 'Alex Reporter, Robin Writer'],
+    ['<dcterms:creator>Alex Reporter</dcterms:creator>', 'Alex Reporter'],
+    ['', ''],
+  ]) assert.equal(normalizeFeed(rssFeed([{extraXml}]), source)[0].author, expected);
+  assert.equal(normalizeFeed(atomFeed([{extraXml:'<author><name>Alex Reporter</name></author><author><name>Robin Writer</name></author>'}]), source)[0].author, 'Alex Reporter, Robin Writer');
+  const inherited = atomFeed([{}]).replace('</feed>', '<author><name>Feed Reporter</name></author></feed>');
+  assert.equal(normalizeFeed(inherited, source)[0].author, 'Feed Reporter');
+});
 test('archive searches encode the complete URL once, remove UTM parameters, and preserve article query parameters', () => {
   const url = archiveUrl('https://example.com/a%20story?utm_source=rss&article=42&UTM_medium=feed&utm_source=duplicate&q=a%26b#comments');
   const search = new URL(url);

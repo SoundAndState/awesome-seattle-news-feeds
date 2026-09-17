@@ -3,28 +3,42 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#173f36"><meta name="referrer" content="no-referrer">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' __FEED_CONNECT_ORIGINS__; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to stories</a>
+<div class="reader-header" id="reader-header">
 <header class="masthead">
 <a class="wordmark" href="./" aria-label="Sound and State home">
   <img class="brand-icon" src="./favicon.svg" width="48" height="48" alt="">
-  <span class="brand-copy"><span class="brand-name">Sound <i>&amp;</i> State</span><small>Greater Seattle news reader</small></span>
+  <span class="brand-copy"><span class="brand-name">Sound <i>&amp;</i> State</span><small>a Greater Seattle area news reader</small></span>
 </a>
-<nav aria-label="Resources"><button id="about-button" class="text-button">About this reader</button><button id="feed-list-button" class="text-button" aria-haspopup="dialog" aria-controls="feed-list-dialog">Download feed list <svg class="resource-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v10m-4-4 4 4 4-4M3 14h10"/></svg></button><a id="github-link" href="https://github.com/sayhiben/awesome-seattle-news-feeds">GitHub <svg class="resource-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a></nav>
+<button id="menu-toggle" class="icon-button" aria-label="Open menu" aria-expanded="false" aria-controls="resource-menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<nav id="resource-menu" aria-label="Resources">
+<button id="publications-button" class="text-button">Publications</button>
+<button id="menu-filter-button" class="text-button">Filter feeds</button>
+<button id="excluded-button" class="text-button">Excluded sources <span id="excluded-count" class="count">0</span></button>
+<label class="theme-control" for="theme">Theme <select id="theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+<button id="about-button" class="text-button">About this reader</button>
+<button id="feed-list-button" class="text-button" aria-haspopup="dialog" aria-controls="feed-list-dialog">Download feed list</button>
+<a id="github-link" href="https://github.com/sayhiben/awesome-seattle-news-feeds">GitHub ↗</a>
+</nav>
 </header>
-<div class="mode-bar"><nav aria-label="Reading mode" class="mode-switch"><button data-mode="articles" aria-pressed="true">Articles</button><button data-mode="posts" aria-pressed="false">Posts</button></nav><button id="saved-button" data-view="saved" aria-pressed="false">Saved <span id="saved-count" class="count">0</span></button></div>
-<main id="main" tabindex="-1">
-<section id="page-heading" class="page-heading sr-only"><h1 id="heading" tabindex="-1">Latest articles</h1><p id="description" hidden></p></section>
-<div class="view-toolbar">
-<nav id="library-views" class="view-nav" aria-label="Article view"><button data-view="all" aria-pressed="true">Latest <span id="all-count" class="count sr-only">0</span></button><button data-view="unread" aria-pressed="false">Unread <span id="unread-count" class="count sr-only">0</span></button></nav>
-<nav id="saved-kinds" class="view-nav" aria-label="Saved item type" hidden><button data-kind="all" aria-pressed="true">All</button><button data-kind="articles" aria-pressed="false">Articles</button><button data-kind="posts" aria-pressed="false">Posts</button></nav>
-<div class="toolbar-actions"><button id="search-toggle" class="icon-button" aria-label="Search articles" aria-expanded="false" aria-controls="search-panel"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><button id="filter-button" class="text-button" aria-haspopup="dialog">Filters</button></div>
+<div class="mode-bar">
+<nav aria-label="Reading mode" class="mode-switch"><button data-mode="articles" aria-pressed="true">Articles</button><button data-mode="posts" aria-pressed="false">Posts</button></nav>
+<button id="saved-button" data-view="saved" aria-pressed="false">Saved <span id="saved-count" class="count">0</span></button>
 </div>
-<div id="search-panel" hidden><label class="search"><span class="sr-only" id="search-label">Search articles</span><input id="search" type="search" placeholder="Search articles…" aria-labelledby="search-label" aria-describedby="search-help"></label><p id="search-help" class="hint">Search the items this reader has loaded in your current view.</p></div>
+<div class="header-tools">
+<nav id="library-views" class="view-nav" aria-label="Article view"><button data-view="all" aria-pressed="false">Latest <span id="all-count" class="count sr-only">0</span></button><button data-view="unread" aria-pressed="true">Unread <span id="unread-count" class="count sr-only">0</span></button></nav>
+<div id="search-panel"><div class="search"><span class="sr-only" id="search-label">Search articles</span><input id="search" type="search" placeholder="Search articles…" aria-labelledby="search-label" aria-describedby="search-help"><button id="clear-search" type="button" aria-label="Clear search" hidden>×</button></div><p id="search-help" class="sr-only">Search the items this reader has loaded in your current view.</p></div>
+<button id="filter-button" class="text-button" aria-haspopup="dialog">Filters</button>
+</div>
+</div>
+<main id="main" tabindex="-1">
+<section id="page-heading" class="page-heading sr-only"><h1 id="heading" tabindex="-1">Unread articles</h1><p id="description" hidden></p></section>
+<nav id="saved-kinds" class="view-nav" aria-label="Saved item type" hidden><button data-kind="all" aria-pressed="true">All</button><button data-kind="articles" aria-pressed="false">Articles</button><button data-kind="posts" aria-pressed="false">Posts</button></nav>
 <div id="filter-chips" class="filter-chips" aria-label="Active filters" hidden></div>
 <div id="feed-loading" class="feed-loading" hidden>
   <div class="loading-copy">
@@ -43,12 +57,13 @@
 <button id="new-items" class="new-items" hidden></button><section id="stories" aria-label="Articles"></section><button id="load-more" class="load-more" hidden>Show more ↓</button>
 <footer class="reader-footer"><a href="https://github.com/sayhiben/awesome-seattle-news-feeds">Awesome Seattle News Feeds on GitHub</a></footer>
 </main>
+<button id="back-to-top" class="secondary-button" hidden>↑ Back to top</button>
 <dialog id="filter-dialog" aria-labelledby="filter-title"><div class="dialog-top"><h2 id="filter-title">Filter articles</h2><button class="close-button" data-close="filter-dialog" aria-label="Close filters">×</button></div><div class="filter-content">
 <button id="browse-sources" class="secondary-button">Browse publications <span id="sources-count" class="count"></span></button>
 <section id="section-filter"><h3>Sections</h3><p class="hint">Choose a section to see publications that cover that area or topic. Individual stories may cover other topics.</p><nav id="categories" class="category-nav" aria-label="Sections"></nav></section>
 <h3 id="source-picker-title">Publications</h3><label class="search"><span class="sr-only" id="source-search-label">Find a publication</span><input id="source-search" type="search" placeholder="Find a publication…" aria-labelledby="source-search-label"></label><div id="source-choices" class="source-choices"></div><p id="source-choice-status" class="hint" role="status"></p>
 </div></dialog>
-<dialog id="article-dialog" class="article-preview" aria-labelledby="article-title"><div id="article-body"></div><div class="article-dialog-actions"><span id="article-save" hidden></span><button class="close-button" data-close="article-dialog" aria-label="Close story">Close</button></div></dialog>
+<dialog id="article-dialog" class="article-preview" aria-labelledby="article-title"><div class="dialog-top article-dialog-actions"><span id="article-save" hidden></span><button class="close-button" data-close="article-dialog" aria-label="Close story">×</button></div><div id="article-body"></div></dialog>
 <dialog id="feed-list-dialog" aria-labelledby="feed-list-title"><div class="dialog-top"><span>Download feed list</span><button class="close-button" data-close="feed-list-dialog" aria-label="Close feed list guide">×</button></div><div class="feed-list-content">
 <h2 id="feed-list-title" tabindex="-1">Use these feeds in another reader</h2>
 <p>Download the complete feed list, then import it into your RSS reader to follow these sources. The file uses OPML, a format for sharing lists of feeds.</p>
@@ -91,9 +106,10 @@
 <p>Cloudflare keeps copies of feeds for up to 15 minutes so it can reuse them across requests. It keeps them for less time when the publisher requires it, and it does not store error responses or content the publisher marks as private.</p>
 <p>GitHub also runs a scheduled task to collect backup copies of the KING 5, KREM 2, and MyNorthwest feeds. The task runs every 15 minutes, though GitHub may delay it. Cloudflare stops using each backup within 6 hours, or sooner if the publisher requires it. Browse publications to see when the task collected a copy. The task does not send your information to publishers.</p>
 <p>The reader keeps a copy of the feed list in your browser so you can still browse your library if it cannot download the latest list. You need an internet connection to load new content, and the reader may not reopen while you are offline.</p>
-<p>You can turn on Mark items read as I scroll past them in Reading options. Once you enable it, the reader marks an item as read when you scroll it past the top of the screen.</p>
+<p>The reader starts in Unread and marks items as read when you scroll them past the top of the screen. Turn off Mark items read as I scroll past them in Reading options if you prefer to mark them yourself. The reader remembers your choice and whether you last selected Latest or Unread.</p>
 </details>
-<h3>Back up your library</h3><p>Choose Export reading backup to download a JSON file with your saved articles and posts and a record of which items you have read. Choose Restore backup to add items from a backup and combine its read and saved marks with your current library. You can also choose Export saved items as CSV above the reading list to download all your saved items for a spreadsheet.</p><div class="backup-actions"><button id="export-state" class="secondary-button">Export reading backup</button><button id="import-state" class="secondary-button">Restore backup</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div><p id="backup-status" role="status"></p><p><a href="./third-party-notices.txt">Software credits</a></p>
+<h3>Choose what you see</h3><p>Choose Auto, Light, or Dark in the Theme menu. Auto follows your device’s appearance. Select a publisher’s name to see its details and exclude that source from your feeds. Open Excluded sources in the menu to include it again. Saved items remain available, and you can still browse an excluded source directly.</p>
+<h3>Back up your library</h3><p>Choose Export reading backup to download a JSON file with your saved articles and posts and a record of which items you have read. Choose Restore backup to add items from a backup and combine its read and saved marks with your current library. You can also choose Export saved items as CSV on the Saved page to download all your saved items for a spreadsheet.</p><div class="backup-actions"><button id="export-state" class="secondary-button">Export reading backup</button><button id="import-state" class="secondary-button">Restore backup</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div><p id="backup-status" role="status"></p><p><a href="./third-party-notices.txt">Software credits</a></p>
 </div></dialog>
 <noscript><p class="notice">This reader needs JavaScript. You can still <a href="https://github.com/sayhiben/awesome-seattle-news-feeds">browse the full list</a> or <a href="./feeds.opml">download the feed list</a>.</p></noscript>
 <script type="module" src="./src/main.mjs"></script>

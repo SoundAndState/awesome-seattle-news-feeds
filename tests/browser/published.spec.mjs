@@ -1,4 +1,4 @@
-import {test, expect} from './fixtures.mjs';
+import {test, expect, expectResourceFocus, openMenu} from './fixtures.mjs';
 import {readFile} from 'node:fs/promises';
 import site from '../../config/site.config.json' with {type:'json'};
 
@@ -31,7 +31,7 @@ test('feed list guide requires an explicit download and keeps import help availa
   // Browser-managed downloads do not use page routes consistently across engines.
   await page.goto('./#view=saved');await expect(page.locator('#result-label')).toHaveText('0 saved items · Newest first');const downloads=[];page.on('download',download=>downloads.push(download));
   const trigger=page.locator('#feed-list-button'),dialog=page.locator('#feed-list-dialog'),downloadLink=dialog.locator('[download]');
-  await trigger.click();await expect(dialog).toBeVisible();await expect(page.locator('#feed-list-title')).toBeFocused();
+  await openMenu(page);await trigger.click();await expect(dialog).toBeVisible();await expect(page.locator('#feed-list-title')).toBeFocused();
   expect(downloads).toHaveLength(0);
   const guides=dialog.locator('.import-guides a');await expect(guides).toHaveCount(6);
   for(const link of await guides.all()) {
@@ -46,20 +46,20 @@ test('feed list guide requires an explicit download and keeps import help availa
   expect(download.suggestedFilename()).toBe('feeds.opml');expect(await download.failure()).toBeNull();
   expect(await readFile(await download.path(),'utf8')).toBe(await readFile(new URL('../../feeds.opml',import.meta.url),'utf8'));
   await expect(dialog).toBeVisible();await expect(guides.first()).toBeVisible();expect(downloads).toHaveLength(1);
-  await page.goBack();await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
+  await page.goBack();await expect(dialog).toBeHidden();await expectResourceFocus(page,'#feed-list-button');
   await page.goForward();await expect(dialog).toBeVisible();await page.reload();await expect(dialog).toBeVisible();
-  await page.keyboard.press('Escape');await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
+  await page.keyboard.press('Escape');await expect(dialog).toBeHidden();await expectResourceFocus(page,'#feed-list-button');
   await page.goto('./#feed-list=1');await expect(dialog).toBeVisible();await dialog.locator('.close-button').click();await expect(dialog).toBeHidden();
   await expect(page).not.toHaveURL(/feed-list/);
-  await trigger.click();await page.mouse.click(1,1);await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
+  await openMenu(page);await trigger.click();await page.mouse.click(1,1);await expect(dialog).toBeHidden();await expectResourceFocus(page,'#feed-list-button');
 });
 
 test('feed list guide works when the catalog cannot load',async({page})=>{
   await page.route('**/catalog.json',route=>route.abort('internetdisconnected'));
   await page.goto('./');await expect(page.locator('#result-label')).toHaveText('The reader could not open your library.');
-  await page.locator('#feed-list-button').click();await expect(page.locator('#feed-list-dialog')).toBeVisible();
+  await openMenu(page);await page.locator('#feed-list-button').click();await expect(page.locator('#feed-list-dialog')).toBeVisible();
   const downloadPromise=page.waitForEvent('download');await page.locator('#feed-list-dialog [download]').click();const download=await downloadPromise;
   expect(download.suggestedFilename()).toBe('feeds.opml');expect(await download.failure()).toBeNull();
-  await page.keyboard.press('Escape');await expect(page.locator('#feed-list-dialog')).toBeHidden();await expect(page.locator('#feed-list-button')).toBeFocused();
-  await page.locator('#feed-list-button').click();await page.getByRole('button',{name:'Close feed list guide'}).click();await expect(page.locator('#feed-list-dialog')).toBeHidden();
+  await page.keyboard.press('Escape');await expect(page.locator('#feed-list-dialog')).toBeHidden();await expectResourceFocus(page,'#feed-list-button');
+  await openMenu(page);await page.locator('#feed-list-button').click();await page.getByRole('button',{name:'Close feed list guide'}).click();await expect(page.locator('#feed-list-dialog')).toBeHidden();
 });

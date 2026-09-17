@@ -1,0 +1,8 @@
+/* Radix Colors: Sand and Jade (MIT, WorkOS).
+ * https://www.radix-ui.com/colors — license in third-party/radix-colors-license.txt.
+ */
+:root {color-scheme:light;--paper:#f9f9f8;--surface:#fdfdfc;--ink:#21201c;--muted:#63635e;--line:#dad9d6;--border:#8d8d86;--wash:#f1f0ef;--accent:#208368}
+:root[data-theme=dark] {color-scheme:dark;--paper:#191918;--surface:#111110;--ink:#eeeeec;--muted:#b5b3ad;--line:#3b3a37;--border:#6f6d66;--wash:#222221;--accent:#1fd8a4}
+@media(prefers-color-scheme:dark) {
+  :root:not([data-theme=light]) {color-scheme:dark;--paper:#191918;--surface:#111110;--ink:#eeeeec;--muted:#b5b3ad;--line:#3b3a37;--border:#6f6d66;--wash:#222221;--accent:#1fd8a4}
+}

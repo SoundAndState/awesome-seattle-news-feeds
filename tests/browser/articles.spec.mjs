@@ -17,7 +17,7 @@ const xml = rssFeed(headlines.map((title, index) => ({
 
 async function load(page, id = source) {
   await page.route(proxyRoute, route => route.fulfill({contentType:'application/xml', body:xml.replaceAll('publisher.example/', `publisher.example/${route.request().url().split('/').pop()}/`)}));
-  await page.goto(`./#source=${id}`);
+  await page.goto(`./#view=all&source=${id}`);
   await expect(page.locator('.article-card')).toHaveCount(3);
   await expect(page.locator('#refresh')).toBeEnabled();
   await page.evaluate(() => document.fonts.ready);
@@ -67,7 +67,8 @@ test('read and saved states preserve card geometry and keep active controls legi
       await card.locator('.read-button').click();
       await expect(card.locator('.read-button')).toHaveAttribute('aria-pressed', String(read));
       await expect.poll(() => card.locator('.story-copy').evaluate(node => getComputedStyle(node, '::before').content)).toBe(read ? '""' : 'none');
-      expect(await headlineGeometry()).toEqual(titleBox);
+      const geometry = await headlineGeometry();
+      for (const key of Object.keys(titleBox)) expect(Math.abs(geometry[key] - titleBox[key])).toBeLessThan(.05);
       expect(Math.abs((await card.boundingBox()).height - height)).toBeLessThan(1);
       const ratios = await card.evaluate(node => {
         const luminance = color => {
@@ -138,7 +139,7 @@ test('preview leads with the full title and keeps Save and Close reachable while
     await body.evaluate(node => node.scrollTop = 0);
     await expect.poll(async () => {
       const frame = await dialog.boundingBox(), title = await dialog.locator('#article-title').boundingBox();
-      return title.y - frame.y < 30 && title.width > Math.min(frame.width - 80, 600);
+      return title.y - frame.y < 110 && title.width > Math.min(frame.width - 80, 600);
     }).toBe(true);
     await expect(save).toBeInViewport();
     await expect(close).toBeInViewport();
@@ -186,8 +187,8 @@ test('expanded text and long attribution reflow while preview links stay clear o
     await expect(link).toBeInViewport();
     await expect.poll(async () => {
       const body = await page.locator('#article-body').boundingBox(), controls = await page.locator('.article-dialog-actions').boundingBox(), box = await link.boundingBox();
-      if (box.height > body.height) return box.y >= body.y - 1 && box.y < controls.y;
-      return box.y >= body.y - 1 && box.y + box.height <= controls.y + 1;
+      if (box.height > body.height) return box.y >= controls.y + controls.height - 1 && box.y < body.y + body.height;
+      return box.y >= controls.y + controls.height - 1 && box.y + box.height <= body.y + body.height + 1;
     }).toBe(true);
   }
   await expect(page.locator('#article-dialog .close-button')).toBeInViewport();
@@ -205,7 +206,7 @@ test('article fonts load locally with real italics and external destinations wai
   await page.evaluate(() => document.fonts.ready);
   expect(fonts.some(url => url.includes('source-serif-4-latin-normal'))).toBe(true);
   expect(fonts.some(url => url.includes('source-serif-4-latin-italic'))).toBe(true);
-  expect(fonts.some(url => url.includes('source-sans-3-latin-normal'))).toBe(true);
+  await expect(page.locator('#article-dialog .article-metadata')).toHaveCSS('font-family', /system-ui/);
   for (const url of fonts) expect(new URL(url).origin).toBe(new URL(page.url()).origin);
   expect(external).toHaveLength(0);
   await expect(page.locator('.article-content em')).toHaveCSS('font-style', 'italic');

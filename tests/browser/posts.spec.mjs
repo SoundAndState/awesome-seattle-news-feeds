@@ -11,7 +11,7 @@ const fixture = rssFeed([
   postItem('unsafe', {text:'A post without a usable source link.', url:'javascript:alert(1)', published:'Tue, 15 Sep 2026 08:00:00 GMT'}),
 ]);
 
-async function load(page, hash = '#mode=posts') {
+async function load(page, hash = '#mode=posts&view=all') {
   await page.route(proxyRoute, route => route.fulfill({contentType:'application/xml', body:fixture}));
   await page.goto(`./${hash}`);
   await expect(page.locator('.post')).toHaveCount(3);
@@ -55,7 +55,7 @@ test('post text opens its source by pointer and keyboard without preview or link
     await popup.close();
     await expect(card.locator('.read-button')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#article-dialog')).toBeHidden();
-    await expect(page).toHaveURL(/#mode=posts$/);
+    await expect(page).toHaveURL(/#mode=posts&view=all$/);
     if (!keyboard) await card.locator('.read-button').click();
   }
   expect(requests).toHaveLength(2);
@@ -97,8 +97,8 @@ test('long post links expand and reflow in Posts and Saved while unusable links 
 });
 
 test('old post preview URLs return to Posts or Saved without opening a preview', async ({page}) => {
-  await load(page, `#mode=posts&article=${encodeURIComponent(postId('short'))}`);
-  await expect(page).toHaveURL(/#mode=posts$/);
+  await load(page, `#mode=posts&view=all&article=${encodeURIComponent(postId('short'))}`);
+  await expect(page).toHaveURL(/#mode=posts&view=all$/);
   await expect(page.locator('#article-dialog')).toBeHidden();
   const card = page.locator('.post').filter({hasText:shortText});
   await expect(card.locator('.read-button')).toHaveAttribute('aria-pressed', 'false');
@@ -127,8 +127,8 @@ test('read posts dim and show an inset bar without shifting text, including scro
     const before = await geometry();
     await card.locator('.read-button').click();
     await expect(card).toHaveClass(/is-read/);
-    await expect(text).toHaveCSS('color', 'rgb(98, 98, 92)');
-    expect(await marker()).toEqual({content:'""', width:'4px', color:'rgb(208, 208, 204)', pointerEvents:'none'});
+    await expect(text).toHaveCSS('color', 'rgb(99, 99, 94)');
+    expect(await marker()).toEqual({content:'""', width:'4px', color:'rgb(218, 217, 214)', pointerEvents:'none'});
     expect(await geometry()).toEqual(before);
     await expect(text).toHaveCSS('text-decoration-line', 'none');
     await expect(text).toHaveCSS('cursor', 'pointer');
@@ -150,7 +150,7 @@ test('read posts dim and show an inset bar without shifting text, including scro
   await page.locator('#saved-button').click();
   await page.reload();
   await expect(card).toHaveClass(/is-read/);
-  await expect(text).toHaveCSS('color', 'rgb(98, 98, 92)');
+  await expect(text).toHaveCSS('color', 'rgb(99, 99, 94)');
   expect((await marker()).width).toBe('4px');
   await page.emulateMedia({forcedColors:'active'});
   expect((await marker()).content).toBe('""');
