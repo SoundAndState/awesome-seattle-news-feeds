@@ -61,7 +61,9 @@ export function normalizeFeed(text, source, now = Date.now()) {
     const html = social ? `<p>${escapeHtml(postText).replace(/\r?\n/g, '<br>')}</p>` : item.content?.encoded || (typeof item.content === 'string' ? item.content : '') || item.content_html || item.description || item.summary || item.content_text || '';
     const guid = item.guid?.value || item.id || `${title}:${identityDate || ''}`;
     const id = social && /^at:\/\/did:[^/]+\/app\.bsky\.feed\.post\//.test(guid) ? guid : storyKey(url, source.id, guid);
-    result.set(id, {id, url, title: title.slice(0, 2000), html: String(html).slice(0, 100000), ...dates, firstSeen: now, feedIds: [source.id]});
+    const people = item.dc?.creators || item.dcterms?.creators || item.authors || item.atom?.authors || (format === 'atom' ? item.source?.authors || feed.authors : []) || [];
+    const author = [...new Set(people.map(person => typeof person === 'string' ? person : person.name || '').filter(Boolean))].join(', ').slice(0, 500);
+    result.set(id, {id, url, title: title.slice(0, 2000), author, html: String(html).slice(0, 100000), ...dates, firstSeen: now, feedIds: [source.id]});
   }
   return [...result.values()];
 }

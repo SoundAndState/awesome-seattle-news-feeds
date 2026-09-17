@@ -67,6 +67,7 @@ export default defineConfig({
           if (error.code !== 'ENOENT') throw error;
         }
       }
+      notices += `Radix Colors (https://github.com/radix-ui/colors)\n${await fs.readFile('third-party/radix-colors-license.txt', 'utf8')}\n`;
       notices += `Noto Serif (Google Fonts)\n${await fs.readFile('web/src/fonts/noto-serif/OFL.txt', 'utf8')}\n`;
       notices += `SpinKit Flow (https://github.com/tobiasahlin/SpinKit)\n${await fs.readFile('third-party/spinkit-license.txt', 'utf8')}\n`;
       for (const [name, directory] of [['Source Serif 4', 'source-serif-4'], ['Source Sans 3', 'source-sans-3']]) {
