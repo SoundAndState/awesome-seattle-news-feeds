@@ -64,6 +64,7 @@ test('publisher navigation and exclusions preserve Saved and can be managed acro
   await expect(page.locator('#library-views')).toBeVisible();
   await expect(page.locator('#export-saved')).toBeVisible();
   await page.reload();
+  await expect(page.locator(`[data-article="${id}"]`)).toBeVisible();
   await openMenu(page);
   await page.locator('#excluded-button').click();
   await expect(page.locator('.source-card')).toHaveCount(1);
@@ -117,6 +118,7 @@ test('themes follow the device in Auto and persist an explicit choice; both list
   await page.locator('#theme').selectOption('light');
   await expect(page.locator('#announcement')).toContainText('Light theme');
   await page.reload();
+  await expect(page.locator('.story').first()).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await openMenu(page);
   await page.locator('#theme').selectOption('auto');
