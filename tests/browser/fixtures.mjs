@@ -34,7 +34,8 @@ export async function loadReader(page, {fail = false, catalog: selected = catalo
   await mockFeeds(page, {fail, bodies});
   // These scenarios inspect both read and unread items; defaults have separate coverage.
   await page.goto('./#view=all');
-  await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds');
+  // Fresh Firefox profiles can take longer to open IndexedDB on shared runners.
+  await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds', {timeout:15000});
   await expect(page.locator('#refresh')).toBeEnabled();
   await expect(page.locator('#all-count')).toHaveText(fail ? '0' : String(selected.feeds.filter(feed => feed.category !== 'bluesky').length));
   await page.getByRole('button', {name: 'Dismiss feed status'}).click();
