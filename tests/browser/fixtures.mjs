@@ -100,3 +100,20 @@ export async function openMenu(page) {
 export async function expectResourceFocus(page, selector) {
   await expect(page.locator(await page.locator('#menu-toggle').isVisible() ? '#menu-toggle' : selector)).toBeFocused();
 }
+
+export async function readStoredLibrary(page) {
+  return page.evaluate(async name => {
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open(name);
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    try {
+      return await new Promise((resolve, reject) => {
+        const result = {}, tables = ['articles', 'state', 'feeds', 'settings'];
+        const tx = db.transaction(tables, 'readonly');
+        for (const table of tables) {const request = tx.objectStore(table).getAll(); request.onsuccess = () => {result[table] = request.result;};}
+        tx.oncomplete = () => resolve(result); tx.onabort = () => reject(tx.error);
+      });
+    } finally {db.close();}
+  }, site.storageNamespace);
+}

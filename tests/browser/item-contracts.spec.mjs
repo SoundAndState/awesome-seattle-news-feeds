@@ -22,6 +22,7 @@ test('all source adapters share safe rendering and durable saved items', async (
     await expect(content.getByText('More reporting')).toHaveAttribute('href', 'https://publisher.example/more');
     expect(await page.evaluate(() => window.compromised)).toBeUndefined();
     await page.getByRole('button', {name: 'Close story', exact: true}).click();
+    await expect(page.locator('#article-dialog')).toBeHidden();
   }
   await expect(page.locator('#saved-count')).toHaveText('4');
   await page.reload();

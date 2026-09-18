@@ -33,6 +33,9 @@ the production catalog.
   story in each supported format through `contractFeed(format, overrides)`.
   Pass an array of overrides for multiple entries. Shared item contract and
   browser sanitization tests use this matrix; extend it when adding an adapter.
+- [`browser-library.mjs`](browser-library.mjs) creates isolated IndexedDB engines
+  for production Dexie transaction tests. Multiple connections in one test share
+  its databases; teardown closes every connection without changing global APIs.
 
 For example, a unit test can supply an update-only article without another XML
 file:

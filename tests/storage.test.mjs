@@ -7,9 +7,16 @@ const storedItem = (id, overrides) => ({...articleItem(id, overrides), id});
 
 function database({before = async () => {}} = {}) {
   const records = Object.fromEntries(['articles', 'state', 'feeds', 'settings'].map(name => [name, new Map()]));
-  const db = {version: () => ({stores() {}})};
+  const db = {version: () => ({stores() {}}), async open() {}, backendDB: () => ({version: 20}), async transaction(mode, names, work) {
+    const snapshots = Object.fromEntries(names.map(name => [name, new Map(records[name])]));
+    try {return await work();} catch (error) {
+      for (const name of names) {records[name].clear(); for (const [id, row] of snapshots[name]) records[name].set(id, row);}
+      throw error;
+    }
+  }};
   for (const [name, recordsById] of Object.entries(records)) db[name] = {
     async toArray() {const snapshot = [...recordsById.values()]; await before(name, 'read'); return snapshot;},
+    async bulkGet(ids) {const snapshot = ids.map(id => recordsById.get(id)); await before(name, 'get'); return snapshot;},
     async bulkPut(items) {await before(name, 'write'); for (const item of items) {assert.equal(typeof item.id, 'string'); recordsById.set(item.id, item);}},
     async bulkDelete(ids) {await before(name, 'delete'); for (const id of ids) recordsById.delete(id);},
   };
@@ -35,6 +42,7 @@ test('library instances isolate namespaces, fallback items, and warning recipien
   assert.deepEqual(warnings.map(messages => messages.length), [1, 1]);
   assert.match(warnings[0][0], /Export reading backup/);
   assert.doesNotMatch(warnings[1][0], /Export reading backup/);
+  await first.updateStates([{id: item.id, saved: false}]);
   await first.removeArticles([item.id]);
   assert.deepEqual((await first.openLibrary()).articles, []);
   assert.equal((await second.openLibrary()).articles.length, 1);
@@ -71,6 +79,8 @@ test('fallback keeps accepted saves and deletions when a persistent write fails'
   const restored = await library.openLibrary();
   assert.deepEqual(restored.articles, [item]);
   assert.deepEqual(restored.state, [{id: item.id, saved: true, read: true}]);
+  assert.deepEqual(await library.removeArticles([item.id]), []);
+  await library.updateStates([{id: item.id, saved: false}]);
   await library.removeArticles([item.id]);
   assert.deepEqual((await library.openLibrary()).articles, []);
 });

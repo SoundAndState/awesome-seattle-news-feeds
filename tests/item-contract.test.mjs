@@ -39,7 +39,7 @@ for (const format of contractFormats) {
     assert.ok(item.published > 0 && item.updated > item.published);
     const states = new Map([[item.id, {id: item.id, saved: true, read: true}]]);
     const backup = readingBackup({states, articles: new Map([[item.id, item]])}, site);
-    const restored = restoreReadingBackup(backup, emptyLibrary(), plain);
+    const restored = restoreReadingBackup(backup, emptyLibrary(), plain, site);
     assert.deepEqual(restored.articles, [item]);
     assert.deepEqual(restored.states, [...states.values()]);
   });
@@ -68,7 +68,7 @@ for (const format of contractFormats) {
     assert.equal(item.author.length, ITEM_LIMITS.author);
     const prepared = prepareItem({...item, sourceName: source.name}, plain);
     const backup = readingBackup({states: new Map([[item.id, {id: item.id, saved: true}]]), articles: new Map([[item.id, prepared]])}, site);
-    assert.equal(restoreReadingBackup(backup, emptyLibrary(), plain).articles[0].id, item.id);
+    assert.equal(restoreReadingBackup(backup, emptyLibrary(), plain, site).articles[0].id, item.id);
     assert.throws(() => parse({id: `${id}x`, url: null}), /identity exceeds/);
   });
 
@@ -121,7 +121,7 @@ test('legacy linkless and native Bluesky identities survive without modernizing 
   const old = {...post, sourceName: posts.name};
   delete old.kind; delete old.updated; delete old.author; delete old.updatedDateOnly; delete old.publishedDateOnly;
   const backup = readingBackup({states: new Map([[old.id, {id: old.id, saved: true}]]), articles: new Map([[old.id, old]])}, site);
-  const restored = restoreReadingBackup(backup, emptyLibrary(), plain).articles[0];
+  const restored = restoreReadingBackup(backup, emptyLibrary(), plain, site).articles[0];
   assert.equal(restored.id, old.id); assert.equal(restored.kind, undefined);
   assert.equal(itemMode(restored, new Map()), 'posts');
   assert.equal(restored.updated, 0);
@@ -157,7 +157,7 @@ test('provenance limits are shared with backups and invalid imports leave the li
   const backup = readingBackup({states: new Map([[item.id, {id: item.id, saved: true}]]), articles: new Map([[item.id, item]])}, site);
   for (const update of [{id: 'x'.repeat(ITEM_LIMITS.id + 1)}, {html: 'x'.repeat(ITEM_LIMITS.html + 1)}, {feedIds: ['x'.repeat(ITEM_LIMITS.feedId + 1)]}, {feedIds: Array(ITEM_LIMITS.feedIds + 1).fill('source')}, {updated: Infinity}, {kind: 'video'}]) {
     assert.throws(() => validateItem({...item, ...update}));
-    assert.throws(() => restoreReadingBackup({...backup, savedArticles: [item, {...item, ...update}]}, current, plain));
+    assert.throws(() => restoreReadingBackup({...backup, savedArticles: [item, {...item, ...update}]}, current, plain, site));
     assert.equal(current.articles.size, 0); assert.equal(current.states.size, 0);
   }
   const filled = {...item, feedIds: Array.from({length: ITEM_LIMITS.feedIds}, (_, i) => `source-${i}`)};

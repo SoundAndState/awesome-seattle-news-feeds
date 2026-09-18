@@ -33,7 +33,7 @@ export function selectItems(state, {retainRead = true} = {}) {
  * No browser connection, listener, or timer is created by constructing a store.
  */
 export function createReaderStore(site, {library, loadFeed, cleanText, loadCatalog, createNavigation, runtime}) {
-  const {openLibrary, save, removeArticles} = library;
+  const {openLibrary, save, updateStates, importItems, removeArticles} = library;
   let navigation, queuedNavigation, activeRun, loadingRun, retryAgain, startupController, started = false, epoch = 0;
   let stateWrites = Promise.resolve();
   const stateVersions = new Map();
@@ -76,19 +76,14 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       const displayedItem = get().articles.get(id) || get().pending.get(id);
       return queueStateWrite(async () => {
         const current = get().states.get(id);
-        const item = {...current, id, ...(typeof changes === 'function' ? changes(current) : changes)};
-        if (current && item.read === current.read && item.saved === current.saved) {
-          if (!retain && get().retainedRead.has(id)) {
-            const retainedRead = new Set(get().retainedRead); retainedRead.delete(id); set({retainedRead});
-          }
-          return;
-        }
+        const change = typeof changes === 'function' ? changes(current) : changes;
         const article = get().articles.get(id) || get().pending.get(id) || displayedItem;
-        if (item.saved && !current?.saved && article) await save('articles', [article]);
-        await save('state', [item]);
+        const result = await updateStates([{id, ...change}], {articles: article ? [article] : []});
+        const item = result.states[0];
+        const storedArticle = result.articles[0] || article;
         const retainedRead = new Set(get().retainedRead);
         if (!retain) retainedRead.delete(id);
-        const restored = item.saved && article && !get().articles.has(id) && !get().pending.has(id) ? {articles: new Map(get().articles).set(id, article)} : {};
+        const restored = item.saved && storedArticle && !get().articles.has(id) && !get().pending.has(id) ? {articles: new Map(get().articles).set(id, storedArticle)} : {};
         commitStates([item], {retainedRead, ...restored});
       });
     };
@@ -105,13 +100,42 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
           else for (const id of ids) kept.set(id, (kept.get(id) || 0) + 1);
         }
         if (!remove.length) return;
-        await removeArticles(remove);
+        const removed = await removeArticles(remove);
         if (!isCurrent()) return;
         const articles = new Map(get().articles), pending = new Map(get().pending);
-        for (const id of remove) {articles.delete(id); pending.delete(id);}
+        for (const id of removed) {articles.delete(id); pending.delete(id);}
         set({articles, pending});
       });
     }
+    // Reconcile local marks even in Saved, offline, or when no feed is due.
+    // Queue behind accepted intents; a destroyed/restarted reader ignores this
+    // completion. Keep new unsaved content buffered while someone is reading.
+    function syncLibrary() {
+      const generation = epoch;
+      return queueStateWrite(async () => {
+        if (!started || !get().ready || generation !== epoch) return;
+        const before = get();
+        const stored = await openLibrary(notice);
+        if (!started || generation !== epoch) return;
+        const articles = new Map(get().articles), pending = new Map(get().pending);
+        const states = new Map(stored.state.map(item => [item.id, item]));
+        for (const item of stored.articles) {
+          if (states.get(item.id)?.saved) {
+            const local = articles.get(item.id) || pending.get(item.id);
+            const previous = before.articles.get(item.id) || before.pending.get(item.id);
+            articles.set(item.id, local && local !== previous ? local : item);
+            pending.delete(item.id);
+          }
+          else if (!articles.has(item.id) && !pending.has(item.id)) pending.set(item.id, item);
+        }
+        for (const id of new Set([...get().states.keys(), ...states.keys()])) stateVersions.set(id, (stateVersions.get(id) || 0) + 1);
+        set({states, articles, pending});
+      });
+    }
+    const exportSnapshot = () => queueStateWrite(async () => {
+      const stored = await openLibrary(notice);
+      return {...get(), articles: new Map(stored.articles.map(item => [item.id, item])), states: new Map(stored.state.map(item => [item.id, item]))};
+    });
     async function fetchSource(feed, run) {
       const previous = get().health.get(feed.id) || {id: feed.id};
       try {
@@ -260,8 +284,9 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         });
         const offline = () => {activeRun?.controller.abort(); publishRun(); notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.');};
         const online = () => {notice('You’re back online. The reader can check for new items again.'); refresh();};
-        const visibility = () => {if (!runtime.isVisible()) {activeRun?.controller.abort(); publishRun();} else refresh();};
-        removeListeners = runtime.subscribe({offline, online, visibility, tick: () => {if (runtime.isVisible()) {set({now: runtime.now()}); refresh();}}});
+        const reconcile = () => {syncLibrary().then(() => {if (isCurrent()) refresh();});};
+        const visibility = () => {if (!runtime.isVisible()) {activeRun?.controller.abort(); publishRun();} else reconcile();};
+        removeListeners = runtime.subscribe({offline, online, visibility, tick: () => {if (runtime.isVisible()) {set({now: runtime.now()}); reconcile();}}});
         refresh();
       } catch (error) {if (started && epoch === generation) set({failed: true, notice: error.message});}
     }
@@ -269,7 +294,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       articles: new Map(), states: new Map(), health: new Map(), pending: new Map(), catalog: null, feedMap: new Map(), categoryMap: new Map(), route: {...emptyRoute},
       preferredView: 'unread', excluded: new Set(), theme: 'auto', markReadOnScroll: true,
       retainedRead: new Set(), expandedPosts: new Set(), undoRead: [], notice: '', announcement: '', backupStatus: '', session: null, loadingRun: null, ready: false, failed: false, catalogFallback: false, now: runtime.now(),
-      start, refresh, announce, setNotice: notice, setItemState,
+      start, refresh, syncLibrary, announce, setNotice: notice, setItemState,
       destroy() {started = false; epoch++; retryAgain = null; startupController?.abort(); activeRun?.controller.abort(); activeRun = null; loadingRun = null; removeListeners(); removeListeners = () => {}; navigation?.destroy(); navigation = null; onNavigate = () => {}; set({ready: false, session: null, loadingRun: null});},
       navigate,
       switchMode(mode) {if (navigation) navigation.switchMode(mode); else navigate({mode});},
@@ -278,23 +303,22 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       async toggleSaved(id) {await setItemState(id, current => ({saved: !current?.saved})); announce(get().states.get(id)?.saved ? 'The reader saved this item.' : 'The reader removed this item from Saved.');},
       async toggleRead(id) {await setItemState(id, current => ({read: !current?.read})); announce(get().states.get(id)?.read ? 'The reader marked this item as read.' : 'The reader marked this item as unread.');},
       markScrolled(ids) {return queueStateWrite(async () => {
-        const state = get(), states = new Map(state.states), retainedRead = new Set(state.retainedRead);
-        const updates = ids.filter(id => state.articles.has(id)).map(id => ({...states.get(id), id, read: true}));
-        await save('state', updates);
+        const state = get(), retainedRead = new Set(state.retainedRead);
+        const {states: updates} = await updateStates(ids.filter(id => state.articles.has(id)).map(id => ({id, read: true})));
         // Navigation while a write is pending starts a new visible selection.
         if (get().route === state.route) for (const item of updates) retainedRead.add(item.id);
         commitStates(updates, {retainedRead: get().route === state.route ? retainedRead : get().retainedRead});
       });},
       bulkRead() {return queueStateWrite(async () => {
-        const state = get(), states = new Map(state.states);
-        const undoRead = selectItems(state).filter(item => !states.get(item.id)?.read).map(item => ({id: item.id, read: Boolean(states.get(item.id)?.read)}));
-        const updates = undoRead.map(item => ({...states.get(item.id), id: item.id, read: true}));
-        await save('state', updates);
+        const state = get();
+        const result = await updateStates(selectItems(state).filter(item => !state.states.get(item.id)?.read).map(({id}) => ({id, read: true})));
+        const previous = new Map(result.previous.map(item => [item.id, item]));
+        const updates = result.states;
+        const undoRead = updates.filter(item => !previous.get(item.id)?.read).map(({id}) => ({id, read: false}));
         commitStates(updates, {undoRead, retainedRead: new Set()});
       });},
       undo() {return queueStateWrite(async () => {
-        const state = get(), states = new Map(state.states), updates = state.undoRead.map(item => ({...states.get(item.id), ...item}));
-        await save('state', updates);
+        const {states: updates} = await updateStates(get().undoRead);
         commitStates(updates, {undoRead: [], retainedRead: new Set()});
         announce('The reader restored each item’s previous read or unread mark.');
       });},
@@ -314,9 +338,13 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       rememberReading() {if (!['saved', 'sources'].includes(get().route.view)) readingStarted.add(get().route.mode);},
       toggleExpanded(id) {const expandedPosts = new Set(get().expandedPosts); if (expandedPosts.has(id)) expandedPosts.delete(id); else expandedPosts.add(id); set({expandedPosts});},
       dismissLoading() {loadingRun = null; publishRun();},
-      exportBackup() {set({backupStatus: 'Check your browser’s downloads for a backup of your saved items and which items you have read.'}); const now = new Date(runtime.now()); return {content: JSON.stringify(readingBackup(get(), site, now)), type: 'application/json', filename: `${site.storageNamespace}-${now.toISOString().slice(0, 10)}.json`};},
-      exportSaved() {
-        const state = get();
+      async exportBackup() {
+        const state = await exportSnapshot(), now = new Date(runtime.now());
+        set({backupStatus: 'Check your browser’s downloads for a backup of your saved items and which items you have read.'});
+        return {content: JSON.stringify(readingBackup(state, site, now)), type: 'application/json', filename: `${site.storageNamespace}-${now.toISOString().slice(0, 10)}.json`};
+      },
+      async exportSaved() {
+        const state = await exportSnapshot();
         const rows = [...state.articles.values()].filter(item => state.states.get(item.id)?.saved).sort(sortItems).map(item => ({title: item.title, source: sourceName(item, state), published: item.published, publishedDateOnly: item.publishedDateOnly, updated: item.updated, updatedDateOnly: item.updatedDateOnly, url: item.url, content: cleanText(item.html), read: state.states.get(item.id)?.read}));
         return {content: articlesCsv(rows), type: 'text/csv;charset=utf-8', filename: `${site.storageNamespace}-saved-${new Date(runtime.now()).toISOString().slice(0, 10)}.csv`};
       },
@@ -327,11 +355,20 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
           let data;
           try {data = JSON.parse(await file.text());} catch {throw new Error('The reader cannot read this file as a JSON backup. Choose a file from Export reading backup.');}
           await queueStateWrite(async () => {
-            const restored = restoreReadingBackup(data, get(), cleanText);
-            await save('articles', restored.articles); await save('state', restored.states);
-            const articles = new Map(get().articles);
-            for (const item of restored.articles) if (!articles.has(item.id)) articles.set(item.id, item);
-            commitStates(restored.states, {articles, backupStatus: `The reader combined ${restored.articles.length} saved items and the backup’s read marks with your library.`});
+            const current = get();
+            const restored = restoreReadingBackup(data, {states: new Map(), articles: new Map([...current.pending, ...current.articles])}, cleanText, site);
+            // The storage boundary merges against current disk records in one
+            // transaction, including changes made by another tab during parsing.
+            const available = new Map([...current.pending, ...current.articles, ...restored.articles.map(item => [item.id, item])]);
+            const result = await importItems({...restored, articles: restored.states.filter(item => item.saved && available.has(item.id)).map(item => available.get(item.id))});
+            const articles = new Map(get().articles), pending = new Map(get().pending);
+            for (const item of result.articles) {
+              const local = articles.get(item.id) || pending.get(item.id);
+              const previous = current.articles.get(item.id) || current.pending.get(item.id);
+              articles.set(item.id, local && local !== previous ? local : item);
+              pending.delete(item.id);
+            }
+            commitStates(result.states, {articles, pending, backupStatus: `The reader combined ${result.added} saved items and the backup’s read marks with your library.`});
           });
         } catch (error) {set({backupStatus: error.message});}
       },
