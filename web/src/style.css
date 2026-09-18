@@ -300,10 +300,11 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .mode-bar {position:static;border:0;padding:0 28px;gap:12px}
 .mode-switch {background:none;border-radius:0;padding:0;gap:20px;align-self:stretch}
 .mode-switch button {border-radius:0;border-bottom:3px solid transparent;padding:10px 4px;font-size:18px;font-weight:600;color:var(--muted)}
-.mode-switch [aria-pressed=true] {background:none;color:var(--ink);border-color:var(--accent)}
+.mode-switch [aria-pressed=true] {background:none;color:var(--ink);border-color:transparent;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:.3em;text-decoration-skip-ink:none}
 .mode-switch button:hover {background:var(--wash)}
 .header-tools {display:flex;align-items:center;gap:16px;margin:auto;padding:8px 28px 12px}
 .header-tools .view-nav {gap:4px;flex-shrink:0}
+.header-tools .view-nav button[aria-pressed=true] {border-bottom-color:transparent;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.3em;text-decoration-skip-ink:none}
 #search-panel {flex:1;min-width:0;padding:0}
 .search {padding:0 10px;min-height:44px}
 .search input {min-height:42px}
@@ -324,8 +325,9 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .post .embed-note {margin-bottom:0}
 .reading-utility:has(#export-saved[hidden]):has(#reading-options[hidden]) {display:none}
 /* Every dialog has a fixed top control row and its own scrolling body. */
-dialog,#feed-list-dialog {width:min(760px,calc(100% - 48px));max-width:calc(100% - 48px);height:fit-content;max-height:calc(100dvh - 64px);margin:auto;overflow:hidden;border-radius:8px;background:var(--surface)}
+dialog,#feed-list-dialog {width:min(760px,calc(100% - 48px));max-width:calc(100% - 48px);height:calc(100dvh - 64px);max-height:calc(100dvh - 64px);margin:auto;overflow:hidden;border-radius:8px;background:var(--surface)}
 dialog[open] {display:flex;flex-direction:column}
+html:has(dialog[open]),html:has(dialog[open]) body {overflow:hidden;overscroll-behavior:none}
 dialog::backdrop,.article-preview::backdrop {background:#111110b8;backdrop-filter:blur(3px)}
 .dialog-top,.article-preview .article-dialog-actions {position:static;flex-shrink:0;border:0;border-bottom:1px solid var(--line);padding:10px 20px;min-height:65px;background:var(--surface)}
 .dialog-top {font-family:var(--article-sans)}
@@ -378,7 +380,7 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
   .compact .header-tools .view-nav button {padding-inline:6px}
   .compact #clear-search {width:32px;min-width:32px}
   .story {padding-block:0}
-  dialog,#feed-list-dialog {width:calc(100% - 32px);max-width:calc(100% - 32px);max-height:calc(100dvh - 48px);margin:auto}
+  dialog,#feed-list-dialog {width:calc(100% - 32px);max-width:calc(100% - 32px);height:calc(100dvh - 48px);max-height:calc(100dvh - 48px);margin:auto}
   .dialog-top,.article-preview .article-dialog-actions {padding:8px 16px;min-height:61px}
   #article-body,.article-preview #article-body,.about-content,.filter-content,.feed-list-content {padding:20px}
   .article-preview .article-title,.about-content h2,.feed-list-content h2 {font-size:1.75rem}

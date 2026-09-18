@@ -552,6 +552,22 @@ for(const dialog of document.querySelectorAll('dialog')) {
   dialog.addEventListener('cancel',event=>{event.preventDefault();closeDialog(dialog);});
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closeDialog(dialog);}});
 }
+// Safari can still pan the page with its browser bars collapsed. Keep single-finger
+// gestures inside scrollable dialog content, including nested tables and code.
+let dialogTouch;
+document.addEventListener('touchstart',event=>{dialogTouch=event.touches.length===1?{x:event.touches[0].clientX,y:event.touches[0].clientY}:null;},{passive:true});
+document.addEventListener('touchmove',event=>{
+  const dialog=document.querySelector('dialog[open]');
+  if(!dialog||!dialogTouch||event.touches.length!==1)return;
+  const touch=event.touches[0],dx=dialogTouch.x-touch.clientX,dy=dialogTouch.y-touch.clientY;
+  dialogTouch={x:touch.clientX,y:touch.clientY};
+  for(let node=event.target;node instanceof Element&&node!==dialog&&dialog.contains(node);node=node.parentElement) {
+    const style=getComputedStyle(node);
+    if((/auto|scroll/.test(style.overflowY)&&((dy<0&&node.scrollTop>0)||(dy>0&&node.scrollTop+node.clientHeight<node.scrollHeight-1)))||
+      (/auto|scroll/.test(style.overflowX)&&((dx<0&&node.scrollLeft>0)||(dx>0&&node.scrollLeft+node.clientWidth<node.scrollWidth-1))))return;
+  }
+  if(event.cancelable)event.preventDefault();
+},{passive:false});
 $('.wordmark').addEventListener('click',event=>{if(event.button||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();navigate({mode:'articles',view:preferredView,source:'',category:'',query:'',unavailableOnly:false});});
 $('.skip-link').addEventListener('click',event=>{event.preventDefault();$('#main').focus();});
 window.addEventListener('offline',()=>{session?.controller.abort();notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.');});
