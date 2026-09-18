@@ -22,6 +22,9 @@ the production catalog.
   samples. JavaScript builders use their envelopes, and the Python health tests
   read these same files. `NOW`, `PUBLISHED`, and `UPDATED` in `feeds.mjs` define
   the shared dates. Python uses the same reference time as `NOW`.
+- [`json-feeds.mjs`](json-feeds.mjs) exports `jsonFeed(items)` and
+  `postsJson(posts)` for the portable JSON adapters. Use these builders
+  for alternate-brand browser checks as well as normalization tests.
 
 For example, a unit test can supply an update-only article without another XML
 file:

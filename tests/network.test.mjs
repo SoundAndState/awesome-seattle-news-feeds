@@ -42,7 +42,7 @@ test('both failure reasons survive, and oversized direct feeds are rejected', as
   ]) {
     let calls=0;
     await assert.rejects(loadFeed(feed,proxy,{fetchImpl:async()=>++calls===1?new Response('{"error":"Publisher blocked proxy."}',{status:502}):direct()}), error=>{
-      assert.match(error.message,/Through Cloudflare: Publisher blocked proxy\. Direct from the publisher:/); assert.match(error.message,reason); return true;
+      assert.match(error.message,/Through the feed service: Publisher blocked proxy\. Direct from the publisher:/); assert.match(error.message,reason); return true;
     });
     assert.equal(calls,2);
   }

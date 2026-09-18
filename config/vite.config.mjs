@@ -1,23 +1,30 @@
 import {defineConfig} from 'vite';
 import fs from 'node:fs/promises';
-import {loadCatalog, validateCatalog} from '../scripts/catalog.mjs';
 import {renderOpml} from '../scripts/render.mjs';
-import config from './site.config.json' with {type: 'json'};
+import {loadReaderConfig} from './reader-config.mjs';
+
+const {site: config, catalog, opmlCatalog, origins, publicDir} = await loadReaderConfig();
 
 export default defineConfig({
   root: 'web',
+  publicDir,
   base: config.base,
   // Never load the repository's private .env into the frontend build.
   envDir: false,
-  define: {__PROXY_URL__: JSON.stringify(config.proxy)},
-  build: {outDir: '../dist', emptyOutDir: true},
+  define: {__READER_CONFIG__: JSON.stringify(config)},
+  oxc: {jsx: {runtime: 'automatic'}},
+  build: {
+    outDir: '../dist', emptyOutDir: true,
+    // Keep framework code cacheable across catalog, branding, and reader edits.
+    rolldownOptions: {output: {codeSplitting: {groups: [
+      {name: 'react-runtime', test: /node_modules[\\/](?:react|react-dom|scheduler|zustand)[\\/]/, priority: 20},
+    ]}}},
+  },
   plugins: [{
     name: 'curated-catalog',
     async transformIndexHtml(html) {
-      const catalog = await loadCatalog();
-      const origins = [...new Set([config.proxy, ...catalog.feeds.flatMap(feed => [feed.feed, ...(feed.redirects || [])])].map(url => new URL(url).origin))].sort();
-      const image = new URL('social-card.png', config.url).href;
-      const imageAlt = 'Sound & State — a Greater Seattle news reader. Articles, local posts, and a shared saved library.';
+      const image = new URL(config.assets.socialImage, config.url).href;
+      const imageAlt = `${config.name} — ${config.description}`;
       const metadata = [
         ['name', 'application-name', config.name],
         ['name', 'description', config.description],
@@ -38,23 +45,18 @@ export default defineConfig({
         ['name', 'twitter:image', image],
         ['name', 'twitter:image:alt', imageAlt],
       ];
-      return {html: html.replace('__FEED_CONNECT_ORIGINS__', origins.join(' ')), tags: [
-        {tag: 'title', children: config.title.replaceAll('&', '&amp;'), injectTo: 'head'},
+      const shell = html.replace('__FEED_CONNECT_ORIGINS__', origins.join(' ')).replace('href="./favicon.svg"', `href="${config.assets.logo}"`);
+      return {html: config.opmlUrl ? shell : shell.replace(/<noscript>[\s\S]*?<\/noscript>/, '<noscript><p>This reader needs JavaScript to show its collection.</p></noscript>'), tags: [
+        {tag: 'title', children: config.title.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;'), injectTo: 'head'},
         {tag: 'link', attrs: {rel: 'canonical', href: config.url}, injectTo: 'head'},
         ...metadata.map(([attribute, key, content]) => ({tag: 'meta', attrs: {[attribute]: key, content}, injectTo: 'head'})),
       ]};
     },
     async buildStart() {
-      const catalog = await loadCatalog();
-      await validateCatalog(catalog);
-      this.emitFile({type: 'asset', fileName: 'catalog.json', source: JSON.stringify({
-        title: catalog.title, repository: catalog.repository,
-        categories: catalog.categories,
-        feeds: catalog.feeds.map(({id, name, website, feed, category, description}) => ({id, name, website, feed, category, description})),
-      })});
-      this.emitFile({type: 'asset', fileName: 'feeds.opml', source: renderOpml(catalog)});
+      this.emitFile({type: 'asset', fileName: 'catalog.json', source: JSON.stringify(catalog)});
+      this.emitFile({type: 'asset', fileName: 'feeds.opml', source: renderOpml(opmlCatalog)});
       let notices = 'Third-party software included in this reader\n\n';
-      for (const pkg of ['feedsmith', 'dexie', 'dompurify', 'entities', 'feedsmith/node_modules/fast-xml-parser', 'strnum', 'fast-xml-builder', 'xml-naming', 'path-expression-matcher', 'is-unsafe', '@nodable/entities']) {
+      for (const pkg of ['react', 'react-dom', 'scheduler', 'zustand', 'feedsmith', 'dexie', 'dompurify', 'entities', 'feedsmith/node_modules/fast-xml-parser', 'strnum', 'fast-xml-builder', 'xml-naming', 'path-expression-matcher', 'is-unsafe', '@nodable/entities']) {
         const dir = `node_modules/${pkg}`;
         try {
           const metadata = JSON.parse(await fs.readFile(`${dir}/package.json`, 'utf8'));

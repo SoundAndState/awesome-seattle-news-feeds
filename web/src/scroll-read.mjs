@@ -23,8 +23,14 @@ export function scrollReader(container, onRead) {
     positions = current; lastY = window.scrollY; lastHeaderHeight = height;
     if (ids.length) onRead(ids);
   }
-  window.addEventListener('scroll', () => {if (enabled && !frame) frame = requestAnimationFrame(check);}, {passive: true});
+  const onScroll = () => {if (enabled && !frame) frame = requestAnimationFrame(check);};
+  window.addEventListener('scroll', onScroll, {passive: true});
   window.addEventListener('resize', sync);
   document.addEventListener('visibilitychange', sync);
-  return {sync, setEnabled(value) {enabled = value; sync();}};
+  return {sync, setEnabled(value) {enabled = value; sync();}, destroy() {
+    cancelAnimationFrame(frame);
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', sync);
+    document.removeEventListener('visibilitychange', sync);
+  }};
 }

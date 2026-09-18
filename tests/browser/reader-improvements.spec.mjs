@@ -33,6 +33,7 @@ test('search clears without dropping source filters; all main controls remain vi
   await loadReader(page);
   await page.locator('#search').fill('transit-news');
   await expect(page.locator('.story')).toHaveCount(1);
+  await expect(page.locator('#announcement')).toContainText('1 article');
   await page.getByRole('button', {name:'Clear search'}).click();
   await expect(page.locator('#search')).toHaveValue('');
   await expect(page.locator('#search')).toBeFocused();
@@ -40,6 +41,7 @@ test('search clears without dropping source filters; all main controls remain vi
   await page.locator('#filter-button').click();
   await page.locator('[data-source="transit-news"]').click();
   await page.locator('#search').fill('no match');
+  await expect(page.locator('#announcement')).toContainText('0 articles');
   await page.getByRole('button', {name:'Clear search'}).click();
   await expect(page.locator('.story')).toHaveCount(1);
   await expect(page).toHaveURL(/source=transit-news/);

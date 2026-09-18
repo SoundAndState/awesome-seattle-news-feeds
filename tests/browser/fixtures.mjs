@@ -90,6 +90,9 @@ export const test = base.extend({
 export async function openMenu(page) {
   await expect(page.locator('dialog[open]')).toHaveCount(0);
   const toggle = page.locator('#menu-toggle');
+  // React may mount after DOMContentLoaded. Do not mistake an absent control
+  // for the desktop layout, where the attached menu toggle is intentionally hidden.
+  await expect(toggle).toBeAttached();
   if (await toggle.isVisible() && await toggle.getAttribute('aria-expanded') === 'false') await toggle.click();
   await expect(page.locator('#resource-menu')).toBeVisible();
 }
