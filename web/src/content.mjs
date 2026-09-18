@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify';
-import {safeUrl} from './feeds.mjs';
+import {safeUrl} from './links.mjs';
 
 export function cleanText(value) {
   const spaced = String(value || '').replace(/<br\s*\/?>|<\/(?:p|div|li|h[1-6])>/gi, ' ');

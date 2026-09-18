@@ -1,4 +1,5 @@
-import {normalizeFeed, verifyOpml} from './feeds.mjs';
+import {normalizeFeed} from './feeds.mjs';
+import {verifyOpml} from './opml.mjs';
 import {normalizeCatalog, httpsUrl, feedServiceUrl} from './catalog.mjs';
 
 export async function loadCatalog(site, {pageUrl, fetchImpl = fetch, timeout = 10000, signal} = {}) {

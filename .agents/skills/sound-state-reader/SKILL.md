@@ -19,7 +19,8 @@ Use these entry points selectively; a label change does not require reading ever
 | Layout, themes, typography | [style.css](../../../web/src/style.css), [themes.css](../../../web/src/themes.css), [typography.css](../../../web/src/typography.css) |
 | Articles, Posts, shared Saved, routes | [reader-store.mjs](../../../web/src/reader-store.mjs), [reader-state.mjs](../../../web/src/reader-state.mjs), [navigation.mjs](../../../web/src/navigation.mjs) |
 | Persistence, backup import/export | [storage.mjs](../../../web/src/storage.mjs), [backup.mjs](../../../web/src/backup.mjs), [export.mjs](../../../web/src/export.mjs) |
-| Feed retries, source adapters, content safety, dates | [network.mjs](../../../web/src/network.mjs), [feeds.mjs](../../../web/src/feeds.mjs), [content.mjs](../../../web/src/content.mjs), [dates.mjs](../../../web/src/dates.mjs) |
+| Feed retries and scheduling | [network.mjs](../../../web/src/network.mjs), [refresh-policy.mjs](../../../web/src/refresh-policy.mjs) |
+| Source adapters, item identity, merging, content safety, dates | [reader-item-contract.md](../../../docs/reader-item-contract.md), [source-adapters/](../../../web/src/source-adapters/), [item-model.mjs](../../../web/src/item-model.mjs), [feeds.mjs](../../../web/src/feeds.mjs), [content.mjs](../../../web/src/content.mjs), [dates.mjs](../../../web/src/dates.mjs) |
 | Site branding and reusable catalog configuration | [site-config.mjs](../../../web/src/site-config.mjs), [catalog.mjs](../../../web/src/catalog.mjs), [reader-config.mjs](../../../config/reader-config.mjs), [site.config.json](../../../config/site.config.json) |
 | Focus, scrolling, dialog touch behavior | [ui-effects.mjs](../../../web/src/ui-effects.mjs), [scroll-read.mjs](../../../web/src/scroll-read.mjs), [dialogs.jsx](../../../web/src/components/dialogs.jsx) |
 

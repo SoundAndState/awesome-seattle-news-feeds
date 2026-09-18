@@ -29,6 +29,10 @@ the production catalog.
   store tests. It supplies an independent clock, online/visibility state,
   optional locks, and event subscriptions without replacing browser globals.
   Use `advance`, `setOnline`, and `setVisible` to drive lifecycle transitions.
+- [`source-contracts.mjs`](source-contracts.mjs) expresses the same fictional
+  story in each supported format through `contractFeed(format, overrides)`.
+  Pass an array of overrides for multiple entries. Shared item contract and
+  browser sanitization tests use this matrix; extend it when adding an adapter.
 
 For example, a unit test can supply an update-only article without another XML
 file:

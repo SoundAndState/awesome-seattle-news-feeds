@@ -1,5 +1,5 @@
 import {memo, useLayoutEffect, useRef} from 'react';
-import {safeUrl, archiveUrl} from '../feeds.mjs';
+import {safeUrl, archiveUrl} from '../links.mjs';
 import {cleanText, articleContent} from '../content.mjs';
 import {dateLabel, dateIso, validTimestamp} from '../dates.mjs';
 import {feedMode, itemMode} from '../reader-state.mjs';
