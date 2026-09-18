@@ -1,4 +1,5 @@
-import {normalizeFeed, safeUrl} from './feeds.mjs';
+import {normalizeFeed} from './feeds.mjs';
+import {httpsUrl, feedServiceUrl} from './catalog.mjs';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 async function feedText(response) {
@@ -6,6 +7,7 @@ async function feedText(response) {
     await response.body?.cancel();
     throw new Error('Feed exceeds the 5 MB limit.');
   }
+  if (!response.body) throw new Error('The server returned an empty feed.');
   const reader = response.body.getReader();
   const chunks = [];
   let bytes = 0;
@@ -23,11 +25,16 @@ async function feedText(response) {
 
 function failure(error, direct) {
   if (error.name === 'TimeoutError' || error.name === 'AbortError') return 'The reader did not receive the feed in time.';
-  if (error instanceof TypeError) return direct ? 'Your browser could not load the feed directly. The publisher may block access from other websites (CORS), or a network problem may have interrupted the request.' : 'Your browser could not connect to Cloudflare.';
+  if (error instanceof TypeError) return direct ? 'Your browser could not load the feed directly. The publisher may block access from other websites (CORS), or a network problem may have interrupted the request.' : 'Your browser could not connect to the feed service.';
   return error.message.slice(0, 180);
 }
 
 export async function loadFeed(feed, proxy, {fetchImpl = fetch, timeout = 22000, signal} = {}) {
+  // Validate even when called outside the catalog loader. Service routes always
+  // carry one catalog ID, never a caller-controlled destination URL.
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(feed.id)) throw new Error('The source has an invalid feed ID.');
+  const publisherUrl = httpsUrl(feed.feed, 'feed address');
+  const serviceUrl = proxy ? feedServiceUrl(proxy) : '';
   async function attempt(url, direct) {
     const deadline = AbortSignal.timeout(timeout);
     const response = await fetchImpl(url, {signal: signal ? AbortSignal.any([signal, deadline]) : deadline, mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer'});
@@ -45,12 +52,12 @@ export async function loadFeed(feed, proxy, {fetchImpl = fetch, timeout = 22000,
     catch (error) {throw new Error(`The reader could not read the feed: ${error.message}`);}
   }
   let proxyFailure;
-  try {return await attempt(`${proxy}/feed/${feed.id}`, false);}
-  catch (error) {proxyFailure = failure(error, false);}
+  if (serviceUrl) {
+    try {return await attempt(`${serviceUrl}/feed/${feed.id}`, false);}
+    catch (error) {proxyFailure = failure(error, false);}
+  }
   signal?.throwIfAborted();
   try {
-    const url = safeUrl(feed.feed);
-    if (!url || new URL(url).protocol !== 'https:') throw new Error('The reader requires an HTTPS address to load a feed directly.');
-    return await attempt(url, true);
-  } catch (error) {throw new Error(`Through Cloudflare: ${proxyFailure} Direct from the publisher: ${failure(error, true)}`);}
+    return await attempt(publisherUrl, true);
+  } catch (error) {throw new Error(`${serviceUrl ? `Through the feed service: ${proxyFailure} ` : ''}Direct from the publisher: ${failure(error, true)}`);}
 }

@@ -1,8 +1,12 @@
 /* Radix Colors: Sand and Jade (MIT, WorkOS).
  * https://www.radix-ui.com/colors — license in third-party/radix-colors-license.txt.
  */
-:root {color-scheme:light;--paper:#f9f9f8;--surface:#fdfdfc;--ink:#21201c;--muted:#63635e;--line:#dad9d6;--border:#8d8d86;--wash:#f1f0ef;--accent:#208368}
+:root {color-scheme:light;--paper:#f9f9f8;--surface:#fdfdfc;--ink:#21201c;--muted:#63635e;--line:#dad9d6;--border:#8d8d86;--wash:#f1f0ef;--accent:#187357}
 :root[data-theme=dark] {color-scheme:dark;--paper:#191918;--surface:#111110;--ink:#eeeeec;--muted:#b5b3ad;--line:#3b3a37;--border:#6f6d66;--wash:#222221;--accent:#1fd8a4}
 @media(prefers-color-scheme:dark) {
   :root:not([data-theme=light]) {color-scheme:dark;--paper:#191918;--surface:#111110;--ink:#eeeeec;--muted:#b5b3ad;--line:#3b3a37;--border:#6f6d66;--wash:#222221;--accent:#1fd8a4}
 }
+/* Alternative free Radix Slate / Blue palette. The light jade accent above is
+ * slightly darkened so small hovered text also reaches WCAG AA contrast. */
+:root[data-palette=blue][data-theme=light] {--paper:#f9f9fb;--surface:#fcfcfd;--ink:#1c2024;--muted:#60646c;--line:#d9d9e0;--border:#8b8d98;--wash:#f0f0f3;--accent:#0966b8}
+:root[data-palette=blue][data-theme=dark] {--paper:#18191b;--surface:#111113;--ink:#edeef0;--muted:#b0b4ba;--line:#363a3f;--border:#696e77;--wash:#212225;--accent:#70b8ff}

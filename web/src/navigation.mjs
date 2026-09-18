@@ -52,11 +52,14 @@ export function readerNavigation({normalize, apply, preferredView = () => 'unrea
     current = next;
     apply(current, y);
   }
+  const previousScrollRestoration = history.scrollRestoration;
   history.scrollRestoration = 'manual';
-  window.addEventListener('popstate', event => restore(event.state));
+  const onPopState = event => restore(event.state);
+  const onScroll = () => positions.set(entryKey, window.scrollY);
+  window.addEventListener('popstate', onPopState);
   // Save position before reloads, external links, or the browser's Back button.
   // In-memory positions avoid replaceState on every scroll event (browser rate limits).
-  window.addEventListener('scroll', () => positions.set(entryKey, window.scrollY), {passive: true});
+  window.addEventListener('scroll', onScroll, {passive: true});
   window.addEventListener('pagehide', remember);
   return {
     get current() {return current;},
@@ -67,6 +70,12 @@ export function readerNavigation({normalize, apply, preferredView = () => 'unrea
       go({...defaults, ...previous?.route, mode, view: preferredView(), unavailableOnly: false}, {scroll: previous?.y || 0});
     },
     endSearch() {searching = false;},
+    destroy() {
+      window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('pagehide', remember);
+      history.scrollRestoration = previousScrollRestoration;
+    },
     close() {
       if (history.state?.overlay) history.back();
       else go({article: '', about: false, feedList: false, filters: false, limit: current.limit}, {replace: true, keepScroll: true});

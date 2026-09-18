@@ -2,7 +2,24 @@
   "base": "/",
   "url": "https://soundandstate.com/",
   "name": "Sound & State",
+  "homeLabel": "Sound and State home",
+  "tagline": "a Greater Seattle area news reader",
   "title": "Sound & State — Greater Seattle News Reader",
   "description": "Read articles from Greater Seattle news publications and local Bluesky posts. Browse the curated feed list and save items in your browser.",
-  "proxy": "https://awesome-seattle-feed-proxy.bmenesini.workers.dev"
+  "proxy": "https://awesome-seattle-feed-proxy.bmenesini.workers.dev",
+  "repository": "https://github.com/sayhiben/awesome-seattle-news-feeds",
+  "catalog": "../data/feeds.json",
+  "storageNamespace": "sound-and-state",
+  "theme": "jade",
+  "categoryLabels": {"regional": "Seattle & regional", "transport": "Transit & urbanism", "official": "Official information", "commentary": "Commentary & advocacy", "satire": "Satire", "bluesky": "Bluesky"},
+  "assets": {"logo": "./favicon.svg", "socialImage": "./social-card.png"},
+  "capabilities": {"articles": true, "posts": true, "archive": true, "backups": true},
+  "about": {
+    "purpose": "Sound & State brings together articles from Greater Seattle publications and posts from local accounts so you can follow familiar sources and discover new ones.",
+    "hosting": "GitHub Pages hosts this reader. Cloudflare runs the feed service. Both receive your IP address and request information when your browser contacts them.",
+    "serviceDetails": "The maintainer disables stored request logs and tracing for the feed service. The service uses your IP address to limit repeated requests. Cloudflare and GitHub may still keep service and security records under their own policies. These settings do not guarantee that those companies retain no information about your visits.",
+    "delivery": "Your browser loads feeds through Cloudflare. If Cloudflare cannot get a feed from the publisher, it tries a previously saved copy, when one is available. If Cloudflare still cannot provide the feed, your browser tries to load it directly from the publisher.",
+    "cache": "Cloudflare keeps copies of feeds for up to 15 minutes so it can reuse them across requests. It keeps them for less time when the publisher requires it, and it does not store error responses or content the publisher marks as private.",
+    "snapshots": "GitHub also runs a scheduled task to collect backup copies of the KING 5, KREM 2, and MyNorthwest feeds. The task runs every 15 minutes, though GitHub may delay it. Cloudflare stops using each backup within 6 hours, or sooner if the publisher requires it. Browse publications to see when the task collected a copy. The task does not send your information to publishers."
+  }
 }

@@ -1,16 +1,18 @@
-export const feedMode = feed => feed.category === 'bluesky' ? 'posts' : 'articles';
+export const feedMode = feed => ['articles', 'posts'].includes(feed.kind) ? feed.kind : feed.category === 'bluesky' ? 'posts' : 'articles';
 
 export function itemMode(item, feedMap) {
+  if (['articles', 'posts'].includes(item.kind)) return item.kind;
   // Stable IDs also identify saved posts whose account has left the catalog.
-  return item.feedIds.some(id => feedMap.get(id)?.category === 'bluesky' || id.startsWith('bluesky-')) || item.id.startsWith('at://') ? 'posts' : 'articles';
+  return item.feedIds.some(id => (feedMap.has(id) && feedMode(feedMap.get(id)) === 'posts') || id.startsWith('bluesky-')) || item.id.startsWith('at://') ? 'posts' : 'articles';
 }
 
 export function normalizeRoute(route, feedMap, categoryMap) {
   const view = ['all', 'unread', 'saved', 'sources', 'excluded'].includes(route.view) ? route.view : 'unread';
-  const legacyPosts = route.category === 'bluesky' || feedMap.get(route.source)?.category === 'bluesky';
+  const legacyPosts = feedMap.has(route.source) ? feedMode(feedMap.get(route.source)) === 'posts' : route.category === 'bluesky';
   const mode = route.mode === 'posts' || (!route.mode && legacyPosts) ? 'posts' : 'articles';
   const source = view !== 'saved' && feedMap.has(route.source) && feedMode(feedMap.get(route.source)) === mode ? route.source : '';
-  const category = view !== 'saved' && mode === 'articles' && route.category !== 'bluesky' && categoryMap.has(route.category) ? route.category : '';
+  const legacyCategory = route.category === 'bluesky' && !route.mode;
+  const category = view !== 'saved' && !legacyCategory && categoryMap.has(route.category) && [...feedMap.values()].some(feed => feed.category === route.category && feedMode(feed) === mode) ? route.category : '';
   const article = String(route.article || '').slice(0, 4096);
   return {...route, mode, view, source, category, query: String(route.query || '').slice(0, 500),
     savedKind: ['articles', 'posts'].includes(route.savedKind) ? route.savedKind : 'all',
