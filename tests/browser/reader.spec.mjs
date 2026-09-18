@@ -221,7 +221,7 @@ test('legacy Bluesky links resolve to Posts with a scoped account picker',async(
 test('CSV includes all saved types regardless of filters; About explains cookies and storage',async({page})=>{
   await load(page);await expect(page.locator('#export-saved')).toBeDisabled();await page.locator('.save-button').first().click();await page.locator('[data-mode="posts"]').click();await expect(page.locator('.post')).toHaveCount(socialCount);await page.locator('.save-button').first().click();await search(page,'nothing matches');
   const promise=page.waitForEvent('download');await page.locator('#saved-button').click();await page.locator('#export-saved').click();const download=await promise,csv=await readFile(await download.path(),'utf8');expect(csv).toContain('"Title","Source","Published","URL","Content","Read"');expect(csv).toContain('https://publisher.example/');expect(csv).toContain('https://bsky.app/profile/');expect(csv.split('\r\n').filter(Boolean)).toHaveLength(3);
-  await openMenu(page);await page.locator('#about-button').click();await expect(page.locator('.about-content')).toContainText('does not set or read cookies');await expect(page.locator('.about-content')).toContainText('It does not upload or sync them.');
+  await openMenu(page);await page.locator('#about-button').click();await expect(page.locator('.about-content')).toContainText('does not set or read cookies');await expect(page.locator('.about-content')).toContainText('sync them between devices');
 });
 
 test('older libraries remain readable if no catalog has been cached yet',async({page})=>{

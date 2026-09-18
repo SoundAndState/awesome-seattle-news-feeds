@@ -179,6 +179,10 @@ JSON field mappings are not part of this contract; produce one of these two
 documented JSON formats upstream.
 
 Saved items carry their content kind even if the source leaves the catalog.
-Legacy Sound & State backups remain readable. Changing a site's namespace
-creates a separate library; export a reading backup before intentionally moving
-an existing reader to another namespace or origin.
+Legacy Sound & State backups remain readable in the original collection.
+Backups with a collection identifier restore only into that same namespace.
+Keep the namespace stable when rebranding or moving a collection to another
+origin; export its backup before the move, then restore it under the same
+namespace. Changing the namespace creates a separate collection and requires an
+explicit migration plan rather than an ordinary backup restore. See
+[persistence and compatibility](reader-persistence.md).

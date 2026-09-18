@@ -6,9 +6,11 @@ boundary introduced after the React migration. The product roadmap and original
 audit remain in [reader-refactor.md](reader-refactor.md); deployment inputs are
 documented in [reader-configuration.md](reader-configuration.md).
 
-The next increment defines [reader items and source adapters](reader-item-contract.md).
-It moves format interpretation, identity, item bounds, and duplicate merging
+The [reader items and source adapters](reader-item-contract.md) increment
+moves format interpretation, identity, item bounds, and duplicate merging
 behind shared contracts used by delivery, the store, and backup restoration.
+The [persistence contract](reader-persistence.md) defines transactions, collection
+ownership, cross-tab behavior, and schema evolution.
 
 ## Composition and ownership
 
@@ -44,7 +46,9 @@ runtime plugin registry. Tests can supply services directly without replacing
 | --- | --- |
 | `library.openLibrary(onWarning)` | Resolve arrays named `articles`, `state`, `feeds`, and `settings`. Report persistent-storage failure to this reader's warning callback and preserve operation in memory. |
 | `library.save(table, items)` | Resolve when the write has settled in persistent storage or the in-memory fallback. Preserve invocation order with reads and removals from the same library. |
-| `library.removeArticles(ids)` | Remove those item bodies without discarding their read/saved marks. Resolve after persistent storage or fallback has settled. |
+| `library.updateStates(changes, {articles})` | Patch the requested flags against current stored records and insert missing saved bodies in one transaction; return resulting and previous marks. |
+| `library.importItems({states, articles})` | Atomically combine imported true marks and missing bodies with current storage; return resulting records and the number of inserted bodies. |
+| `library.removeArticles(ids)` | Check current saved marks and remove only unsaved bodies atomically. Return the IDs actually removed. |
 | `loadCatalog({signal})` | Return catalog data that the store normalizes before use. The browser implementation resolves the configured base path, checks HTTP responses, and verifies matching OPML when configured. |
 | `loadFeed(feed, {signal})` | Resolve `{items, transport, fetchedAt, stale}` using the existing normalized item and provenance contract. The browser service binds the configured proxy; the store does not construct service URLs. |
 | `cleanText(value)` | Return safe plain text for item titles, excerpts, backups, and exports. The browser composition supplies the existing DOMPurify implementation. |
@@ -77,17 +81,20 @@ instances deliberately using the same namespace still address the same
 persistent database. Namespaces prevent accidental mixing; they do not create a
 security boundary between applications on the same origin.
 
-Persistent reads, saves, and removals run in invocation order. The memory copy
-updates before a write is attempted, so a write failure retains the accepted
-intent for this visit. Successful reads replace each fallback snapshot, including
+Persistent reads, saves, and removals run in invocation order. Transactions
+commit to disk before publishing their fallback snapshot. A failed transaction
+rolls back disk and completes the whole accepted intent in memory for this visit.
+Successful reads replace each fallback snapshot, including
 deletions made by another tab. An older pending read cannot later overwrite a
 newer save in that fallback. A storage failure affects only its library instance,
 and the warning mentions backups only when that collection enables them.
 
-This queue orders one instance's operations; it is not a cross-tab transaction
-or a new synchronization protocol. Refresh retains the existing namespaced Web
-Lock and rereads persistent freshness after acquiring it. Broader cross-tab
-conflict handling and multi-table atomic backup imports remain separate work.
+The queue orders one instance's operations; IndexedDB transactions serialize
+conflicting operations across connections. Read/saved changes patch only their
+requested flags, and imports and cleanup check current stored records. The store
+reconciles marks on returning to a tab and on visible one-minute ticks. Refresh
+retains its separate namespaced Web Lock and rereads persisted freshness after
+acquiring it. See the persistence contract for conflict and fallback limits.
 
 ## Lifecycle and cancellation
 
@@ -128,5 +135,5 @@ formats or destinations.
   the alternate-brand build through the production composition.
 
 Run `npm test`, `npm run build:web`, and `npm run test:browser` from the repository
-root with Node 24 or newer. This change does not introduce a database migration,
-package dependency, UI redesign, or new feed-service capability.
+root with Node 24 or newer. Persistence tests add an IndexedDB test dependency;
+the browser runtime dependencies and released database schema are unchanged.

@@ -121,5 +121,5 @@ after a source leaves the catalog. Database schemas and backup version 1 remain.
 
 No component or state-orchestration change is needed for a format satisfying
 this contract. New item kinds, changed identity rules, or wider stored limits
-require a separate compatibility decision. Cross-collection backup policy,
-atomic import writes, and schema migrations remain the next architecture work.
+require a separate compatibility decision. Collection ownership, atomic imports,
+and schema evolution are defined in [reader persistence](reader-persistence.md).

@@ -23,11 +23,26 @@ function harness(t, {items = [], statuses, loadFeed = async feed => ({items: [ar
   const saves = [], navigations = [];
   let navigationCreated = 0, navigationDestroyed = 0;
   const library = () => Object.fromEntries(Object.entries(records).map(([key, value]) => [key, [...value.values()]]));
+  const save = async (name, values) => {if (!values.length) return; saves.push({name, values}); await beforeSave?.(name, values); for (const value of values) records[name].set(value.id, value);};
+  const updateStates = async (changes, {articles = [], combine = false} = {}) => {
+    const previous = changes.map(item => records.state.get(item.id)).filter(Boolean);
+    const states = changes.map(change => {
+      const current = records.state.get(change.id), next = {...current, ...change};
+      if (combine) for (const key of ['read', 'saved']) next[key] = Boolean(current?.[key] || change[key]);
+      return next;
+    });
+    const candidates = articles.filter(item => states.some(mark => mark.id === item.id && mark.saved));
+    const added = candidates.filter(item => !records.articles.has(item.id));
+    await save('articles', added);
+    await save('state', states.filter(item => {const current = records.state.get(item.id); return item.read !== current?.read || item.saved !== current?.saved;}));
+    return {states, articles: states.filter(item => item.saved).map(item => records.articles.get(item.id)).filter(Boolean), previous, added: added.length};
+  };
   const store = createReaderStore(configuration, {
     library: {
       openLibrary: readLibrary || (async () => library()),
-      async save(name, values) {saves.push({name, values}); await beforeSave?.(name, values); for (const value of values) records[name].set(value.id, value);},
-      async removeArticles(ids) {await beforeRemove?.(ids); for (const id of ids) records.articles.delete(id);},
+      save, updateStates,
+      importItems: data => updateStates(data.states, {articles: data.articles, combine: true}),
+      async removeArticles(ids) {await beforeRemove?.(ids); const removed = ids.filter(id => !records.state.get(id)?.saved); for (const id of removed) records.articles.delete(id); return removed;},
     },
     runtime, loadCatalog, loadFeed, cleanText: value => String(value || ''),
     createNavigation({normalize, apply}) {
@@ -291,7 +306,7 @@ test('backup restoration never overwrites current content on disk or in the acti
   const {store, records} = harness(t, {items: [current]});
   await store.getState().start();
   const older = {...current, title: 'Outdated story'};
-  const backup = {format: 'sound-and-state', version: 1, state: [{id: current.id, saved: true}, {id: current.id, read: true}], savedArticles: [older]};
+  const backup = {format: 'sound-and-state', version: 1, collection: site.storageNamespace, state: [{id: current.id, saved: true}, {id: current.id, read: true}], savedArticles: [older]};
   await store.getState().importBackup({size: 500, text: async () => JSON.stringify(backup)});
   assert.equal(store.getState().articles.get(current.id).title, 'Current story');
   assert.equal(records.articles.get(current.id).title, 'Current story');
@@ -310,6 +325,92 @@ test('backup validation is atomic and preserved post kind survives a removed sou
   assert.throws(() => restoreReadingBackup({...backup, savedArticles: [item, {id: 'invalid'}]}, current, String));
   assert.equal(current.states.size, 0);
   assert.equal(current.articles.size, 0);
+});
+
+test('field patches and backup imports cannot resurrect another tab’s removed save from stale local marks', async t => {
+  const body = article('cross-tab');
+  const {store, records} = harness(t, {items: [body]});
+  await store.getState().start();
+  await store.getState().toggleSaved(body.id);
+  records.state.set(body.id, {id: body.id, saved: false, read: false});
+  await store.getState().markScrolled([body.id]);
+  assert.equal(records.state.get(body.id).saved, false);
+  store.setState({states: new Map([[body.id, {id: body.id, saved: true, read: true}]])});
+  const backup = {format: 'sound-and-state', version: 1, collection: site.storageNamespace, state: [{id: body.id, read: true}], savedArticles: []};
+  await store.getState().importBackup({size: 100, text: async () => JSON.stringify(backup)});
+  assert.equal(records.state.get(body.id).saved, false);
+  assert.equal(store.getState().states.get(body.id).saved, false);
+  records.articles.set(body.id, {...body, title: 'Content from the other tab'});
+  store.setState({articles: new Map()});
+  await store.getState().importBackup({size: 100, text: async () => JSON.stringify({...backup, state: [{id: body.id, saved: true}]})});
+  assert.equal(store.getState().articles.get(body.id).title, 'Content from the other tab');
+});
+
+test('Saved reconciles other tabs on visibility and exports current stored marks without waiting for a feed refresh', async t => {
+  const body = article('remote-save');
+  const {store, records, runtime} = harness(t, {items: [body]});
+  await store.getState().start();
+  store.getState().navigate({view: 'saved'});
+  records.state.set(body.id, {id: body.id, read: true, saved: true});
+  runtime.setVisible(false); runtime.setVisible(true);
+  await waitUntil(() => store.getState().states.get(body.id)?.saved);
+  assert.equal(selectItems(store.getState()).length, 1);
+  records.state.set(body.id, {id: body.id, read: false, saved: false});
+  const exported = JSON.parse((await store.getState().exportBackup()).content);
+  assert.deepEqual(exported.savedArticles, []);
+  assert.equal(exported.state[0].saved, false);
+  runtime.advance(60000);
+  await waitUntil(() => !store.getState().states.get(body.id)?.saved);
+  assert.equal(selectItems(store.getState()).length, 0);
+});
+
+test('export waits for accepted saves and rejected collections never write imported records', async t => {
+  let release;
+  const body = article('export-after-save');
+  const {store, records, saves} = harness(t, {items: [body], beforeSave: async name => {
+    if (name === 'state') await new Promise(resolve => {release = resolve;});
+  }});
+  await store.getState().start();
+  const saving = store.getState().toggleSaved(body.id);
+  await waitUntil(() => release);
+  let exported = false;
+  const exporting = store.getState().exportBackup().then(result => {exported = true; return result;});
+  await Promise.resolve();
+  assert.equal(exported, false);
+  release(); await saving;
+  const backup = JSON.parse((await exporting).content);
+  assert.equal(backup.savedArticles[0].id, body.id);
+  const before = saves.length;
+  await store.getState().importBackup({size: 100, text: async () => JSON.stringify({...backup, collection: 'different-reader'})});
+  assert.equal(saves.length, before);
+  assert.match(store.getState().backupStatus, /another collection/);
+  assert.equal(records.state.get(body.id).saved, true);
+});
+
+test('a reconciliation snapshot cannot replace fresher feed content or publish after destruction', async t => {
+  const body = article('saved-refresh');
+  let snapshot, entered, release, blocked = false;
+  const {store, records, library} = harness(t, {items: [body], readLibrary: async () => {
+    const value = snapshot();
+    if (blocked) {entered.resolve(); await release.promise;}
+    return value;
+  }});
+  snapshot = library;
+  await store.getState().start();
+  records.state.set(body.id, {id: body.id, saved: true});
+  blocked = true; entered = Promise.withResolvers(); release = Promise.withResolvers();
+  const syncing = store.getState().syncLibrary();
+  await entered.promise;
+  store.setState({articles: new Map([[body.id, {...body, title: 'Fresh response'}]])});
+  release.resolve(); await syncing;
+  assert.equal(store.getState().articles.get(body.id).title, 'Fresh response');
+  entered = Promise.withResolvers(); release = Promise.withResolvers();
+  const late = store.getState().syncLibrary();
+  await entered.promise;
+  store.getState().destroy();
+  const stopped = store.getState();
+  release.resolve(); await late;
+  assert.equal(store.getState(), stopped);
 });
 
 test('two stores use independent clocks, connectivity, subscriptions, and libraries', async t => {

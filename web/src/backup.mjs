@@ -1,17 +1,23 @@
 import {validItemId, validateItem, prepareItem} from './item-model.mjs';
 
+export const BACKUP_VERSION = 1;
+const LEGACY_COLLECTION = 'sound-and-state';
+
 export function readingBackup({states, articles}, site, now = new Date()) {
   return {
-    format: 'sound-and-state', version: 1, collection: site.storageNamespace,
-    exportedAt: now.toISOString(), state: [...states.values()],
+    format: 'sound-and-state', version: BACKUP_VERSION, collection: site.storageNamespace,
+    exportedAt: now.toISOString(), state: [...states.values()].map(({id, read, saved}) => ({id, read, saved})),
     savedArticles: [...articles.values()].filter(item => states.get(item.id)?.saved),
   };
 }
 
 // Validate the entire file before applying any part of it to the library.
-export function restoreReadingBackup(data, {states, articles}, normalizeText) {
-  if (!data || data.format !== 'sound-and-state' || data.version !== 1 || !Array.isArray(data.state) || !Array.isArray(data.savedArticles) || data.state.length > 100000 || data.savedArticles.length > 5000) {
+export function restoreReadingBackup(data, {states, articles}, normalizeText, site = {storageNamespace: LEGACY_COLLECTION}) {
+  if (!data || data.format !== 'sound-and-state' || data.version !== BACKUP_VERSION || !Array.isArray(data.state) || !Array.isArray(data.savedArticles) || data.state.length > 100000 || data.savedArticles.length > 5000) {
     throw new Error('The reader cannot restore this file. Choose a JSON backup from Export reading backup.');
+  }
+  if ((data.collection === undefined ? LEGACY_COLLECTION : data.collection) !== site.storageNamespace) {
+    throw new Error('This backup belongs to another collection. Restore it in the reader where you exported it. Your library has not changed.');
   }
   const mergedStates = new Map();
   for (const item of data.state) {

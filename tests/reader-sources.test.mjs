@@ -95,7 +95,7 @@ test('canonical and linkless item identities fit the backup contract at its boun
     const [item] = normalizeFeed(postsJson([post]), source);
     assert.equal(item.id.length, 4096);
     const data = readingBackup({states: new Map([[item.id, {id: item.id, saved: true}]]), articles: new Map([[item.id, {...item, sourceName: source.name}]])}, site);
-    const restored = restoreReadingBackup(data, {states: new Map(), articles: new Map()}, String);
+    const restored = restoreReadingBackup(data, {states: new Map(), articles: new Map()}, String, site);
     assert.equal(restored.articles[0].id, item.id);
     const oversized = post.url ? {...post, url: `${post.url}x`} : {...post, id: `${post.id}x`};
     assert.throws(() => normalizeFeed(postsJson([oversized]), source), /identity exceeds/);

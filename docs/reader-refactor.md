@@ -262,10 +262,12 @@ Continue in this order:
    identities, malformed inputs, bounds, duplicates, and backup round-trips;
    browser tests exercise sanitization and durable saves for every format. See
    [the item contract and adapter procedure](reader-item-contract.md).
-3. **Persistence and schema evolution:** define collection compatibility for
-   imports, versioned migration policy, and failure behavior for multi-table
-   operations. Exercise interrupted imports and cross-tab conflicts using
-   fictional libraries before changing stored records or backup versions.
+3. **Persistence and schema evolution (implemented):** collection-bound backups,
+   transactional saves/imports, field-level read/saved updates, guarded cleanup,
+   consistent exports, and local tab reconciliation. Legacy upgrade and newer
+   database protection are tested without changing released schema versions.
+   See [persistence and compatibility](reader-persistence.md) for failure behavior,
+   concurrency decisions, and the procedure for future migrations.
 4. **Build and delivery guarantees:** keep default and alternate configurations
    reproducible, verify generated connection policies and service-format
    compatibility, and establish measured bundle/runtime baselines. Introduce
