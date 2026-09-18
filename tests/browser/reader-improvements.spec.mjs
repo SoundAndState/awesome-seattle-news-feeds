@@ -17,7 +17,15 @@ test('Unread and scroll marking are defaults; Latest and an opt-out survive relo
   await page.goto('./');
   await expect(page.locator('[data-view="all"]')).toHaveAttribute('aria-pressed', 'true');
   await page.locator('[data-view="unread"]').click();
+  // Reload after the browser finishes persisting the preference, not just after
+  // the click updates the selected control.
+  await expect.poll(()=>page.evaluate(async()=>{
+    const db=await new Promise((resolve,reject)=>{const request=indexedDB.open('sound-and-state');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+    try {return await new Promise((resolve,reject)=>{const request=db.transaction('settings').objectStore('settings').get('listView');request.onsuccess=()=>resolve(request.result?.value);request.onerror=()=>reject(request.error);});}
+    finally {db.close();}
+  })).toBe('unread');
   await page.goto('./');
+  await expect(page.locator('.story').first()).toBeVisible();
   await expect(page.locator('[data-view="unread"]')).toHaveAttribute('aria-pressed', 'true');
 });
 
