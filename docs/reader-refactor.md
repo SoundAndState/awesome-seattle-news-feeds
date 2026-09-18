@@ -1,9 +1,14 @@
 # A portable reader for curated communities
 
 Review date: 2026-09-17. This document records the live-reader audit, the boundaries
-for the React migration, and the product work that remains after that migration.
+for the React migration, and the architecture and product work that remain after that migration.
 It is an engineering and product plan, not a claim of accessibility conformance
 or a production deployment record.
+
+The current priority is architecture before further end-user UX iteration.
+Phase 1 is deployed. Phase 2 now strengthens the application service boundaries,
+then the item/source contracts and persistence guarantees. Discovery work is
+deferred until those increments are complete and verified.
 
 ## Product direction
 
@@ -89,10 +94,11 @@ editorial schema and publication workflow intact.
 
 ## Migration boundaries
 
-Phase 1 is the implementation scope of this change. The discovery redesign,
+Phase 1 describes the completed React migration. The architecture follow-up is
+Phase 2; its current service boundaries are documented in
+[reader-architecture.md](reader-architecture.md). The discovery redesign,
 taxonomy expansion, measured performance work, and manual screen-reader review
-remain follow-up work. Passing a React build alone does not complete any of
-those product goals. Local verification outcomes are recorded below.
+remain follow-up work. Passing a React build alone does not complete those goals.
 
 | Boundary | Responsibility | Guardrail |
 | --- | --- | --- |
@@ -120,7 +126,10 @@ flowchart TD
 
 | Module | Delivered responsibility |
 | --- | --- |
-| `web/src/main.jsx` | Create the reader store once and mount React. |
+| `web/src/main.jsx` | Compose browser services, create the reader store once, and mount React. |
+| `web/src/reader-services.mjs` | Bind storage, delivery, runtime, sanitization, and navigation to the selected site configuration. |
+| `web/src/browser-runtime.mjs` | Own browser connectivity, visibility, clock, lock, and subscription access. |
+| `web/src/storage.mjs` | Create instance-owned browser libraries with ordered persistence and independent memory fallback. |
 | `web/src/app.jsx` | Compose the header, reading controls, status, and active list. |
 | `web/src/components/items.jsx` | Reuse item metadata, attribution, actions, and sanitized preview content. |
 | `web/src/components/dialogs.jsx` | Own native dialog lifecycle and source/section filters. |
@@ -142,7 +151,7 @@ darkened to `#187357` to correct the measured hover contrast failure. The existi
 editorial typography, native dialogs, and automatic/light/dark appearances remain.
 Jade and blue use free Radix-based semantic palettes. The progress/status layout
 and its “Wait to start reading” behavior are preserved in this migration; their
-redesign remains Phase 2 work rather than an implied completed improvement.
+redesign remains Phase 3 work rather than an implied completed improvement.
 
 Apply SOLID where it clarifies those boundaries: components have a presentation
 responsibility, adapters share a normalized output contract, and orchestration
@@ -232,7 +241,41 @@ Acceptance requires:
 | Privacy and delivery | Mocked requests verify omitted credentials/referrers and approved endpoints; no unrequested publisher asset loads; Worker policy remains separately enforced. |
 | Operational readiness | Production build, license notices, local documentation references, relevant guidance checks, and clean whitespace validation. |
 
-### Phase 2: make curated discovery visible
+### Phase 2: strengthen architecture before further UX iteration
+
+Deliver focused increments with the current reading experience as the regression
+contract. The first increment introduces explicit service composition,
+instance-owned libraries, injectable browser lifecycle and time, cancelable
+catalog delivery, and deterministic isolation/cancellation tests. See the
+[service contracts and ownership decisions](reader-architecture.md).
+
+Continue in this order:
+
+1. **Application boundaries and lifecycle:** complete the service-boundary
+   increment and verify it in the existing five-browser matrix and alternate
+   collection build. Keep browser globals and default-brand selection out of
+   the state coordinator. Preserve accepted saves when background work stops.
+2. **Normalized item and source contracts:** separate format parsing, item
+   identity/provenance, merge policy, and refresh scheduling where these still
+   share modules. Make adapter and backup compatibility explicit through common
+   contract tests, including duplicate coverage across kinds, malformed inputs,
+   missing dates, source removal, and content safety. Add platform adapters only
+   for concrete source formats.
+3. **Persistence and schema evolution:** define collection compatibility for
+   imports, versioned migration policy, and failure behavior for multi-table
+   operations. Exercise interrupted imports and cross-tab conflicts using
+   fictional libraries before changing stored records or backup versions.
+4. **Build and delivery guarantees:** keep default and alternate configurations
+   reproducible, verify generated connection policies and service-format
+   compatibility, and establish measured bundle/runtime baselines. Introduce
+   performance changes only where measurements identify a useful improvement.
+
+Each increment requires behavior-focused tests, a production build, appropriate
+browser coverage, and updated architecture documentation. Preserve existing
+libraries and deep links throughout. These changes do not require new accounts,
+administration UI, an extensible plugin framework, or a new application backend.
+
+### Phase 3: make curated discovery visible
 
 Design and test a visible collection overview and clear locale/topic paths.
 Explain the curator, source scope, and ordering. Combine freshness/progress/error
@@ -252,7 +295,7 @@ must be able to identify the collection and find a relevant source without
 knowing the term “feed.” Clear filters and return to chronological reading must
 remain easy to find.
 
-### Phase 3: prove accessibility and operational quality
+### Phase 4: prove accessibility and operational quality
 
 The existing suite covers focus, responsive overflow, long text, forced colors,
 theme contrast, dialogs, and storage limits. The new
@@ -303,7 +346,7 @@ a performance baseline. Profile before introducing virtualization, workers, or
 additional cache libraries. Pagination may be preferable to virtualization
 because headings, browser search, focus, and scroll marking remain simpler.
 
-### Phase 4: adopt a second real collection
+### Phase 5: adopt a second real collection
 
 Choose one concrete additional locale or topic and validate the configuration
 boundary with its curator. Document which formats and hosting/service choices it

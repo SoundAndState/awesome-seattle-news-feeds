@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createReaderStore, selectItems} from '../web/src/reader-store.mjs';
 import {readingBackup, restoreReadingBackup} from '../web/src/backup.mjs';
 import {makeCatalog, makeSource} from './fixtures/catalog.mjs';
+import {makeReaderRuntime} from './fixtures/reader-runtime.mjs';
 
 const news = makeSource();
 const posts = makeSource({id: 'bluesky-reporter', category: 'bluesky'});
@@ -17,20 +18,18 @@ const waitUntil = async predicate => {
   assert.fail('The expected asynchronous state did not arrive.');
 };
 
-function harness(t, {items = [], statuses, loadFeed = async feed => ({items: [article(feed.id, feed)], transport: 'direct'}), locks, readLibrary, beforeSave, beforeRemove, configuration = site, initialMode = 'articles'} = {}) {
-  const originals = new Map(['window', 'document', 'navigator'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
-  Object.defineProperty(globalThis, 'window', {configurable: true, value: new EventTarget()});
-  Object.defineProperty(globalThis, 'document', {configurable: true, value: Object.assign(new EventTarget(), {hidden: false})});
-  Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {onLine: true, locks}});
+function harness(t, {items = [], statuses, loadFeed = async feed => ({items: [article(feed.id, feed)], transport: 'direct'}), locks, runtime = makeReaderRuntime({now: Date.now(), locks}), loadCatalog = async () => catalog, readLibrary, beforeSave, beforeRemove, configuration = site, initialMode = 'articles'} = {}) {
   const records = {articles: new Map(items.map(item => [item.id, item])), state: new Map(), feeds: new Map((statuses ?? catalog.feeds.map(feed => ({id: feed.id, nextCheck: Date.now() + 1000000}))).map(item => [item.id, item])), settings: new Map()};
   const saves = [], navigations = [];
   let navigationCreated = 0, navigationDestroyed = 0;
   const library = () => Object.fromEntries(Object.entries(records).map(([key, value]) => [key, [...value.values()]]));
   const store = createReaderStore(configuration, {
-    openLibrary: readLibrary || (async () => library()),
-    async save(name, values) {saves.push({name, values}); await beforeSave?.(name, values); for (const value of values) records[name].set(value.id, value);},
-    async removeArticles(ids) {await beforeRemove?.(ids); for (const id of ids) records.articles.delete(id);},
-    loadCatalog: async () => catalog, loadFeed, cleanText: value => String(value || ''),
+    library: {
+      openLibrary: readLibrary || (async () => library()),
+      async save(name, values) {saves.push({name, values}); await beforeSave?.(name, values); for (const value of values) records[name].set(value.id, value);},
+      async removeArticles(ids) {await beforeRemove?.(ids); for (const id of ids) records.articles.delete(id);},
+    },
+    runtime, loadCatalog, loadFeed, cleanText: value => String(value || ''),
     createNavigation({normalize, apply}) {
       navigationCreated++;
       let current = normalize({view: 'unread', mode: initialMode});
@@ -43,11 +42,8 @@ function harness(t, {items = [], statuses, loadFeed = async feed => ({items: [ar
       };
     },
   });
-  t.after(() => {
-    store.getState().destroy();
-    for (const [key, descriptor] of originals) {if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key];}
-  });
-  return {store, records, saves, navigations, library, lifecycle: () => ({created: navigationCreated, destroyed: navigationDestroyed})};
+  t.after(() => store.getState().destroy());
+  return {store, records, saves, navigations, library, runtime, lifecycle: () => ({created: navigationCreated, destroyed: navigationDestroyed})};
 }
 
 test('scroll marking replaces immutable snapshots and retains rows until the selection changes', async t => {
@@ -177,7 +173,7 @@ test('saving a visible item while pruning writes its removal restores its conten
 test('a late response from a canceled mode cannot add items or record a feed failure', async t => {
   const requests = [];
   let releaseArticles;
-  const {store} = harness(t, {statuses: [], loadFeed: async (feed, proxy, {signal}) => {
+  const {store} = harness(t, {statuses: [], loadFeed: async (feed, {signal}) => {
     requests.push({id: feed.id, signal});
     if (feed.id === news.id) await new Promise(resolve => {releaseArticles = resolve;});
     return {items: [article(feed.id, feed)], transport: 'direct'};
@@ -314,4 +310,112 @@ test('backup validation is atomic and preserved post kind survives a removed sou
   assert.throws(() => restoreReadingBackup({...backup, savedArticles: [item, {id: 'invalid'}]}, current, String));
   assert.equal(current.states.size, 0);
   assert.equal(current.articles.size, 0);
+});
+
+test('two stores use independent clocks, connectivity, subscriptions, and libraries', async t => {
+  const online = makeReaderRuntime(), offline = makeReaderRuntime({online: false});
+  const first = harness(t, {runtime: online, statuses: []});
+  const second = harness(t, {runtime: offline, statuses: [], configuration: {...site, storageNamespace: 'second-reader'}});
+  assert.equal(online.subscriptions(), 0);
+  await Promise.all([first.store.getState().start(), second.store.getState().start()]);
+  await waitUntil(() => first.store.getState().health.has(news.id) && !first.store.getState().session);
+  assert.equal(second.store.getState().articles.size, 0);
+  assert.equal(first.store.getState().health.get(news.id).lastSuccess, online.now());
+  assert.equal(first.store.getState().health.get(news.id).nextCheck, online.now() + 15 * 60000);
+  online.advance(60000);
+  assert.notEqual(first.store.getState().now, second.store.getState().now);
+  offline.setOnline(true);
+  await waitUntil(() => second.store.getState().health.has(news.id) && !second.store.getState().session);
+  await first.store.getState().toggleSaved(news.id);
+  assert.equal(second.store.getState().states.size, 0);
+  first.store.getState().destroy();
+  assert.equal(online.subscriptions(), 0);
+  assert.equal(offline.subscriptions(), 1);
+  const destroyed = first.store.getState();
+  online.advance(60000);
+  await destroyed.refresh();
+  assert.equal(first.store.getState(), destroyed);
+});
+
+test('visibility cancels refresh and showing the reader resumes it using the injected clock', async t => {
+  const runtime = makeReaderRuntime(), requests = [];
+  const {store} = harness(t, {runtime, statuses: [], loadFeed: async (feed, {signal}) => {
+    const completion = Promise.withResolvers(); requests.push({signal, completion});
+    return completion.promise;
+  }});
+  await store.getState().start();
+  await waitUntil(() => requests.length === 1);
+  runtime.setVisible(false);
+  assert.equal(requests[0].signal.aborted, true);
+  runtime.advance(60000);
+  assert.equal(requests.length, 1);
+  const pausedTime = store.getState().now;
+  runtime.setVisible(true);
+  requests[0].completion.resolve({items: [article('canceled')], transport: 'direct'});
+  await waitUntil(() => requests.length === 2);
+  requests[1].completion.resolve({items: [article('resumed')], transport: 'direct'});
+  await waitUntil(() => !store.getState().session);
+  assert.equal(store.getState().articles.has('canceled'), false);
+  assert.equal(store.getState().articles.has('resumed'), true);
+  assert.equal(store.getState().health.get(news.id).lastSuccess, pausedTime + 60000);
+});
+
+test('destroy aborts catalog loading and its late completion cannot replace a restarted reader', async t => {
+  const requests = [];
+  const {store, runtime} = harness(t, {loadCatalog: ({signal}) => {
+    const completion = Promise.withResolvers(); requests.push({signal, completion}); return completion.promise;
+  }});
+  const first = store.getState().start();
+  await waitUntil(() => requests.length === 1);
+  store.getState().destroy();
+  assert.equal(requests[0].signal.aborted, true);
+  const second = store.getState().start();
+  await waitUntil(() => requests.length === 2);
+  requests[1].completion.resolve(catalog);
+  await second;
+  const current = store.getState().catalog;
+  requests[0].completion.resolve(makeCatalog({feeds: [makeSource({id: 'obsolete'})]}));
+  await first;
+  assert.equal(store.getState().catalog, current);
+  assert.equal(runtime.subscriptions(), 1);
+});
+
+test('cancellation while content is saving cannot mark the feed fresh or change a restarted session', async t => {
+  const entered = Promise.withResolvers(), release = Promise.withResolvers();
+  const {store, records, saves} = harness(t, {statuses: [], beforeSave: async name => {
+    if (name === 'articles') {entered.resolve(); await release.promise;}
+  }});
+  await store.getState().start();
+  await entered.promise;
+  store.getState().destroy();
+  for (const feed of catalog.feeds) records.feeds.set(feed.id, {id: feed.id, nextCheck: Date.now() + 1000000});
+  await store.getState().start();
+  const restarted = store.getState();
+  release.resolve();
+  await waitUntil(() => records.articles.has(news.id));
+  // Drain the promise continuations of the canceled refresh.
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(store.getState().health.get(news.id).lastSuccess, undefined);
+  assert.equal(saves.some(write => write.name === 'feeds'), false);
+  assert.equal(store.getState().session, null);
+  assert.equal(store.getState(), restarted);
+});
+
+test('restart waits for accepted save intents before restoring the library', async t => {
+  const entered = Promise.withResolvers(), release = Promise.withResolvers();
+  const item = article('save-before-restart');
+  const {store, records, runtime} = harness(t, {items: [item], beforeSave: async name => {
+    if (name === 'state') {entered.resolve(); await release.promise;}
+  }});
+  await store.getState().start();
+  const saving = store.getState().toggleSaved(item.id);
+  await entered.promise;
+  store.getState().destroy();
+  const restarting = store.getState().start();
+  assert.equal(store.getState().ready, false);
+  release.resolve();
+  await Promise.all([saving, restarting]);
+  assert.equal(store.getState().states.get(item.id).saved, true);
+  assert.equal(records.state.get(item.id).saved, true);
+  assert.equal(runtime.subscriptions(), 1);
 });

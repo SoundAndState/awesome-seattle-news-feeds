@@ -25,6 +25,10 @@ the production catalog.
 - [`json-feeds.mjs`](json-feeds.mjs) exports `jsonFeed(items)` and
   `postsJson(posts)` for the portable JSON adapters. Use these builders
   for alternate-brand browser checks as well as normalization tests.
+- [`reader-runtime.mjs`](reader-runtime.mjs) exports `makeReaderRuntime` for
+  store tests. It supplies an independent clock, online/visibility state,
+  optional locks, and event subscriptions without replacing browser globals.
+  Use `advance`, `setOnline`, and `setVisible` to drive lifecycle transitions.
 
 For example, a unit test can supply an update-only article without another XML
 file:

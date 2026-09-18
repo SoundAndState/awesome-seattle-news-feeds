@@ -1,12 +1,51 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {loadFeed} from '../web/src/network.mjs';
+import {loadCatalog, loadFeed} from '../web/src/network.mjs';
 import {articlesCsv} from '../web/src/export.mjs';
-import {makeSource} from './fixtures/catalog.mjs';
+import {makeCatalog, makeSource} from './fixtures/catalog.mjs';
+import {renderOpml} from '../scripts/render.mjs';
 import {rss as xml} from './fixtures/feeds.mjs';
 
 const feed = makeSource();
 const proxy = 'https://proxy.example';
+
+test('catalog delivery resolves the configured base and verifies OPML without credentials or referrers', async () => {
+  const catalog = makeCatalog(), requests = [];
+  const result = await loadCatalog({base: '/community/', opmlUrl: 'feeds.opml'}, {pageUrl: 'https://reader.example/community/#view=saved', fetchImpl: async (url, options) => {
+    requests.push(url);
+    assert.equal(options.credentials, 'omit'); assert.equal(options.referrerPolicy, 'no-referrer');
+    assert.ok(options.signal instanceof AbortSignal);
+    return new Response(url.endsWith('.json') ? JSON.stringify(catalog) : renderOpml(catalog));
+  }});
+  assert.deepEqual(requests, ['https://reader.example/community/catalog.json', 'https://reader.example/community/feeds.opml']);
+  assert.equal(result.feeds.length, catalog.feeds.length);
+});
+
+test('catalogs without OPML make one request and invalid or mismatched catalogs reject', async () => {
+  const catalog = makeCatalog(); let calls = 0;
+  const result = await loadCatalog({base: '/', opmlUrl: null}, {pageUrl: 'https://reader.example/', fetchImpl: async () => {calls++; return Response.json(catalog);}});
+  assert.equal(calls, 1); assert.equal(result.feeds.length, catalog.feeds.length);
+  for (const response of [() => new Response('', {status: 503}), () => Response.json({feeds: 'invalid'})]) {
+    await assert.rejects(loadCatalog({base: '/'}, {pageUrl: 'https://reader.example/', fetchImpl: async () => response()}));
+  }
+  await assert.rejects(loadCatalog({base: '/', opmlUrl: 'feeds.opml'}, {pageUrl: 'https://reader.example/', fetchImpl: async url => new Response(url.endsWith('.json') ? JSON.stringify(catalog) : renderOpml(makeCatalog({feeds: [feed]})))}), /do not match/);
+});
+
+test('catalog cancellation aborts all requests and rejects late responses', async () => {
+  const controller = new AbortController(), entered = Promise.withResolvers(), release = Promise.withResolvers();
+  const signals = [], catalog = makeCatalog();
+  const loading = loadCatalog({base: '/', opmlUrl: 'feeds.opml'}, {pageUrl: 'https://reader.example/', signal: controller.signal, fetchImpl: async (url, {signal}) => {
+    signals.push(signal); if (signals.length === 2) entered.resolve();
+    await release.promise;
+    return new Response(url.endsWith('.json') ? JSON.stringify(catalog) : renderOpml(catalog));
+  }});
+  await entered.promise;
+  controller.abort();
+  assert.ok(signals.every(signal => signal.aborted));
+  release.resolve();
+  await assert.rejects(loading, {name: 'AbortError'});
+  await assert.rejects(loadCatalog({base: '/'}, {pageUrl: 'https://reader.example/', signal: controller.signal, fetchImpl: () => assert.fail('Canceled request started')}), {name: 'AbortError'});
+});
 
 test('successful proxy requests never contact the publisher directly', async () => {
   const urls=[];
