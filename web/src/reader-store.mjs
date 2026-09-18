@@ -1,11 +1,7 @@
 import {createStore} from 'zustand/vanilla';
-import {openLibrary as openStoredLibrary, save as saveStored, removeArticles as removeStoredArticles} from './storage.mjs';
 import {normalizeCatalog} from './catalog.mjs';
-import {loadFeed as loadRemoteFeed} from './network.mjs';
-import {verifyOpml, inBatches, nextRefresh} from './feeds.mjs';
-import {cleanText as sanitizeText} from './content.mjs';
+import {inBatches, nextRefresh} from './feeds.mjs';
 import {feedMode, itemMode, normalizeRoute, matchesItem} from './reader-state.mjs';
-import {readerNavigation} from './navigation.mjs';
 import {articlesCsv} from './export.mjs';
 import {readingBackup, restoreReadingBackup} from './backup.mjs';
 
@@ -30,12 +26,14 @@ export function selectItems(state, {retainRead = true} = {}) {
     && (!query || `${item.title} ${item.author || ''} ${item.excerpt || ''} ${sourceName(item, state)}`.toLocaleLowerCase().includes(query))).sort(sortItems);
 }
 
-export function createReaderStore(site, {
-  openLibrary = openStoredLibrary, save = saveStored, removeArticles = removeStoredArticles,
-  loadFeed = loadRemoteFeed, cleanText = sanitizeText, loadCatalog,
-  createNavigation = readerNavigation,
-} = {}) {
-  let navigation, queuedNavigation, activeRun, loadingRun, retryAgain, interval, started = false, epoch = 0;
+/**
+ * Coordinate reader state using explicit services. See reader-services.mjs for
+ * browser composition and docs/reader-architecture.md for the service contract.
+ * No browser connection, listener, or timer is created by constructing a store.
+ */
+export function createReaderStore(site, {library, loadFeed, cleanText, loadCatalog, createNavigation, runtime}) {
+  const {openLibrary, save, removeArticles} = library;
+  let navigation, queuedNavigation, activeRun, loadingRun, retryAgain, startupController, started = false, epoch = 0;
   let stateWrites = Promise.resolve();
   const stateVersions = new Map();
   let onNavigate = () => {}, removeListeners = () => {};
@@ -93,11 +91,12 @@ export function createReaderStore(site, {
         commitStates([item], {retainedRead, ...restored});
       });
     };
-    async function prune() {
+    async function prune(isCurrent = () => true) {
       return queueStateWrite(async () => {
+        if (!isCurrent()) return;
         const state = get();
         if (state.catalogFallback) return;
-        const kept = new Map(), remove = [], cutoff = Date.now() - 30 * 86400000;
+        const kept = new Map(), remove = [], cutoff = runtime.now() - 30 * 86400000;
         for (const item of [...state.articles.values(), ...state.pending.values()].sort((a, b) => b.firstSeen - a.firstSeen)) {
           if (state.states.get(item.id)?.saved) continue;
           const ids = item.feedIds.filter(id => state.feedMap.has(id));
@@ -106,6 +105,7 @@ export function createReaderStore(site, {
         }
         if (!remove.length) return;
         await removeArticles(remove);
+        if (!isCurrent()) return;
         const articles = new Map(get().articles), pending = new Map(get().pending);
         for (const id of remove) {articles.delete(id); pending.delete(id);}
         set({articles, pending});
@@ -114,7 +114,7 @@ export function createReaderStore(site, {
     async function fetchSource(feed, run) {
       const previous = get().health.get(feed.id) || {id: feed.id};
       try {
-        const {items, transport, fetchedAt, stale} = await loadFeed(feed, site.proxy, {signal: run.controller.signal});
+        const {items, transport, fetchedAt, stale} = await loadFeed(feed, {signal: run.controller.signal});
         if (run.controller.signal.aborted) return;
         const state = get(), articles = new Map(state.articles), pending = new Map(state.pending);
         const merged = items.map(item => {
@@ -136,38 +136,41 @@ export function createReaderStore(site, {
         });
         set({articles, pending});
         await save('articles', merged);
-        const status = {id: feed.id, lastAttempt: Date.now(), lastSuccess: Date.now(), nextCheck: nextRefresh(), failures: 0, items: items.length, transport, fetchedAt, stale};
+        if (run.controller.signal.aborted) return;
+        const now = runtime.now();
+        const status = {id: feed.id, lastAttempt: now, lastSuccess: now, nextCheck: nextRefresh(0, now), failures: 0, items: items.length, transport, fetchedAt, stale};
         set(state => ({health: new Map(state.health).set(feed.id, status)}));
         await save('feeds', [status]);
       } catch (error) {
         if (run.controller.signal.aborted) return;
         const failures = (previous.failures || 0) + 1;
-        const status = {...previous, id: feed.id, lastAttempt: Date.now(), failures, nextCheck: nextRefresh(failures), error: error.message.slice(0, 420)};
+        const now = runtime.now();
+        const status = {...previous, id: feed.id, lastAttempt: now, failures, nextCheck: nextRefresh(failures, now), error: error.message.slice(0, 420)};
         set(state => ({health: new Map(state.health).set(feed.id, status)}));
         await save('feeds', [status]);
       } finally {
         if (!run.controller.signal.aborted) run.done++;
-        publishRun();
+        if (activeRun === run) publishRun();
       }
     }
     async function refresh({retryFailed = false, only = ''} = {}) {
       const state = get();
-      if (!state.catalog || ['saved', 'excluded'].includes(state.route.view) || document.hidden) return;
+      if (!started || !state.catalog || ['saved', 'excluded'].includes(state.route.view) || !runtime.isVisible()) return;
       if (activeRun) {retryAgain = {retryFailed, only}; return;}
-      if (!navigator.onLine) {notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.'); return;}
-      const due = feed => (retryFailed && get().health.get(feed.id)?.error) || !get().health.get(feed.id)?.nextCheck || get().health.get(feed.id).nextCheck <= Date.now();
+      if (!runtime.isOnline()) {notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.'); return;}
+      const due = feed => (retryFailed && get().health.get(feed.id)?.error) || !get().health.get(feed.id)?.nextCheck || get().health.get(feed.id).nextCheck <= runtime.now();
       const queue = selectSources(state).filter(feed => (!state.excluded.has(feed.id) || state.route.source === feed.id || only === feed.id || state.route.view === 'sources') && (!only || feed.id === only) && due(feed));
       if (!queue.length) return;
       const run = {mode: state.route.mode, controller: new AbortController(), done: 0, total: queue.length, buffer: [...state.articles.values()].some(item => itemMode(item, state.feedMap) === state.route.mode)};
       activeRun = run; publishRun();
       const work = async () => {
         const beforeVersions = new Map(stateVersions);
-        const library = await openLibrary(notice);
+        const stored = await openLibrary(notice);
         if (run.controller.signal.aborted) return;
         const current = get(), states = new Map(current.states), articles = new Map(current.articles), pending = new Map(current.pending), health = new Map(current.health);
-        for (const item of library.state) if (stateVersions.get(item.id) === beforeVersions.get(item.id)) states.set(item.id, item);
-        for (const item of library.articles) if (!articles.has(item.id) && !pending.has(item.id)) (run.buffer ? pending : articles).set(item.id, item);
-        for (const item of library.feeds) if ((item.nextCheck || 0) > (health.get(item.id)?.nextCheck || 0)) health.set(item.id, item);
+        for (const item of stored.state) if (stateVersions.get(item.id) === beforeVersions.get(item.id)) states.set(item.id, item);
+        for (const item of stored.articles) if (!articles.has(item.id) && !pending.has(item.id)) (run.buffer ? pending : articles).set(item.id, item);
+        for (const item of stored.feeds) if ((item.nextCheck || 0) > (health.get(item.id)?.nextCheck || 0)) health.set(item.id, item);
         set({states, articles, pending, health});
         const remaining = queue.filter(due);
         if (!remaining.length) return;
@@ -176,36 +179,34 @@ export function createReaderStore(site, {
         await inBatches(remaining, async feed => {if (!run.controller.signal.aborted) await fetchSource(feed, run);});
       };
       try {
-        if (navigator.locks) await navigator.locks.request(`${site.storageNamespace}-refresh`, {signal: run.controller.signal}, work);
-        else await work();
-        if (!run.controller.signal.aborted) await prune();
+        await runtime.withLock(`${site.storageNamespace}-refresh`, run.controller.signal, work);
+        if (!run.controller.signal.aborted) await prune(() => !run.controller.signal.aborted);
       } catch (error) {
         if (!run.controller.signal.aborted) notice('The reader could not finish checking for new items. You can still read your library. Choose Refresh to try again.');
       } finally {
         run.finished = true; run.completed = !run.controller.signal.aborted && run.done === run.total;
-        if (activeRun === run) activeRun = null;
-        publishRun();
-        if (!run.controller.signal.aborted && run.mode === get().route.mode && get().route.view !== 'saved') announce(run.completed ? 'Feed check complete.' : 'Feed check paused.');
-        if (retryAgain && started) {const next = retryAgain; retryAgain = null; refresh(next);}
+        if (activeRun === run) {
+          activeRun = null;
+          publishRun();
+          if (!run.controller.signal.aborted && run.mode === get().route.mode && get().route.view !== 'saved') announce(run.completed ? 'Feed check complete.' : 'Feed check paused.');
+          if (retryAgain && started) {const next = retryAgain; retryAgain = null; refresh(next);}
+        }
       }
-    }
-    async function remoteCatalog() {
-      if (loadCatalog) return normalizeCatalog(await loadCatalog());
-      const resolve = path => new URL(path, new URL(site.base || './', location.href)).href;
-      const urls = [site.catalogUrl || 'catalog.json', ...(site.opmlUrl ? [site.opmlUrl] : [])];
-      const responses = await Promise.all(urls.map(path => fetch(resolve(path), {signal: AbortSignal.timeout(10000), credentials: 'omit', referrerPolicy: 'no-referrer'})));
-      if (responses.some(response => !response.ok)) throw new Error('The reader could not download the feed list. Check your connection and reload the page.');
-      const catalog = normalizeCatalog(await responses[0].json());
-      return responses[1] ? verifyOpml(await responses[1].text(), catalog) : catalog;
     }
     async function start(callbacks = {}) {
       if (started) return;
       started = true;
       const generation = ++epoch;
+      const controller = new AbortController();
+      startupController = controller;
+      const isCurrent = () => started && epoch === generation;
       set({ready: false, failed: false, session: null, loadingRun: null});
       onNavigate = callbacks.onNavigate || (() => {});
       try {
-        const remotePromise = remoteCatalog().then(value => ({value}), error => ({error}));
+        const remotePromise = Promise.resolve().then(() => loadCatalog({signal: controller.signal})).then(value => ({value: normalizeCatalog(value)})).catch(error => ({error}));
+        // A restart opens the library after already accepted read/save intents.
+        await stateWrites;
+        if (!isCurrent()) return;
         const library = await openLibrary(notice);
         if (!started || epoch !== generation) return;
         const cachedValue = library.settings.find(item => item.id === 'catalog')?.value;
@@ -231,7 +232,7 @@ export function createReaderStore(site, {
         };
         set({catalog, catalogFallback, feedMap: new Map(catalog.feeds.map(feed => [feed.id, feed])), categoryMap: new Map(catalog.categories.map(category => [category.id, {...category, shortTitle: site.categoryLabels?.[category.id] || category.title}])),
           articles: new Map(library.articles.map(item => [item.id, item])), states: new Map(library.state.map(item => [item.id, item])), health: new Map(library.feeds.map(item => [item.id, item])), ...preferences});
-        await prune();
+        await prune(isCurrent);
         if (!started || epoch !== generation) return;
         const normalize = route => {
           const normalized = normalizeRoute(route, get().feedMap, get().categoryMap);
@@ -268,19 +269,17 @@ export function createReaderStore(site, {
         });
         const offline = () => {activeRun?.controller.abort(); publishRun(); notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.');};
         const online = () => {notice('You’re back online. The reader can check for new items again.'); refresh();};
-        const visibility = () => {if (document.hidden) {activeRun?.controller.abort(); publishRun();} else refresh();};
-        window.addEventListener('offline', offline); window.addEventListener('online', online); document.addEventListener('visibilitychange', visibility);
-        removeListeners = () => {window.removeEventListener('offline', offline); window.removeEventListener('online', online); document.removeEventListener('visibilitychange', visibility);};
-        interval = setInterval(() => {if (!document.hidden) {set({now: Date.now()}); refresh();}}, 60000);
+        const visibility = () => {if (!runtime.isVisible()) {activeRun?.controller.abort(); publishRun();} else refresh();};
+        removeListeners = runtime.subscribe({offline, online, visibility, tick: () => {if (runtime.isVisible()) {set({now: runtime.now()}); refresh();}}});
         refresh();
       } catch (error) {if (started && epoch === generation) set({failed: true, notice: error.message});}
     }
     return {
       articles: new Map(), states: new Map(), health: new Map(), pending: new Map(), catalog: null, feedMap: new Map(), categoryMap: new Map(), route: {...emptyRoute},
       preferredView: 'unread', excluded: new Set(), theme: 'auto', markReadOnScroll: true,
-      retainedRead: new Set(), expandedPosts: new Set(), undoRead: [], notice: '', announcement: '', backupStatus: '', session: null, loadingRun: null, ready: false, failed: false, catalogFallback: false, now: Date.now(),
+      retainedRead: new Set(), expandedPosts: new Set(), undoRead: [], notice: '', announcement: '', backupStatus: '', session: null, loadingRun: null, ready: false, failed: false, catalogFallback: false, now: runtime.now(),
       start, refresh, announce, setNotice: notice, setItemState,
-      destroy() {started = false; epoch++; retryAgain = null; activeRun?.controller.abort(); activeRun = null; loadingRun = null; clearInterval(interval); removeListeners(); navigation?.destroy(); navigation = null; onNavigate = () => {};},
+      destroy() {started = false; epoch++; retryAgain = null; startupController?.abort(); activeRun?.controller.abort(); activeRun = null; loadingRun = null; removeListeners(); removeListeners = () => {}; navigation?.destroy(); navigation = null; onNavigate = () => {}; set({ready: false, session: null, loadingRun: null});},
       navigate,
       switchMode(mode) {if (navigation) navigation.switchMode(mode); else navigate({mode});},
       closeDialog() {if (navigation) navigation.close(); else {queuedNavigation = null; set(state => ({route: {...state.route, article: '', about: false, filters: false, feedList: false}}));}},
@@ -324,11 +323,11 @@ export function createReaderStore(site, {
       rememberReading() {if (!['saved', 'sources'].includes(get().route.view)) readingStarted.add(get().route.mode);},
       toggleExpanded(id) {const expandedPosts = new Set(get().expandedPosts); if (expandedPosts.has(id)) expandedPosts.delete(id); else expandedPosts.add(id); set({expandedPosts});},
       dismissLoading() {loadingRun = null; publishRun();},
-      exportBackup() {set({backupStatus: 'Check your browser’s downloads for a backup of your saved items and which items you have read.'}); return {content: JSON.stringify(readingBackup(get(), site)), type: 'application/json', filename: `${site.storageNamespace}-${new Date().toISOString().slice(0, 10)}.json`};},
+      exportBackup() {set({backupStatus: 'Check your browser’s downloads for a backup of your saved items and which items you have read.'}); const now = new Date(runtime.now()); return {content: JSON.stringify(readingBackup(get(), site, now)), type: 'application/json', filename: `${site.storageNamespace}-${now.toISOString().slice(0, 10)}.json`};},
       exportSaved() {
         const state = get();
         const rows = [...state.articles.values()].filter(item => state.states.get(item.id)?.saved).sort(sortItems).map(item => ({title: item.title, source: sourceName(item, state), published: item.published, publishedDateOnly: item.publishedDateOnly, updated: item.updated, updatedDateOnly: item.updatedDateOnly, url: item.url, content: cleanText(item.html), read: state.states.get(item.id)?.read}));
-        return {content: articlesCsv(rows), type: 'text/csv;charset=utf-8', filename: `${site.storageNamespace}-saved-${new Date().toISOString().slice(0, 10)}.csv`};
+        return {content: articlesCsv(rows), type: 'text/csv;charset=utf-8', filename: `${site.storageNamespace}-saved-${new Date(runtime.now()).toISOString().slice(0, 10)}.csv`};
       },
       async importBackup(file) {
         if (!file) return;

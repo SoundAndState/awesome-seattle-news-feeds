@@ -1,4 +1,3 @@
-import {cleanText} from './content.mjs';
 import {safeUrl, MAX_ITEM_ID_LENGTH} from './feeds.mjs';
 import {validTimestamp} from './dates.mjs';
 
@@ -11,7 +10,7 @@ export function readingBackup({states, articles}, site, now = new Date()) {
 }
 
 // Validate the entire file before applying any part of it to the library.
-export function restoreReadingBackup(data, {states, articles}, normalizeText = cleanText) {
+export function restoreReadingBackup(data, {states, articles}, normalizeText) {
   if (!data || data.format !== 'sound-and-state' || data.version !== 1 || !Array.isArray(data.state) || !Array.isArray(data.savedArticles) || data.state.length > 100000 || data.savedArticles.length > 5000) {
     throw new Error('The reader cannot restore this file. Choose a JSON backup from Export reading backup.');
   }

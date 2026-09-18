@@ -13,7 +13,8 @@ Use these entry points selectively; a label change does not require reading ever
 
 | Affected behavior | Entry points |
 | --- | --- |
-| Startup, reader shell, loading messages | [main.jsx](../../../web/src/main.jsx), [app.jsx](../../../web/src/app.jsx), [reader-store.mjs](../../../web/src/reader-store.mjs) |
+| Startup, reader shell, loading messages | [main.jsx](../../../web/src/main.jsx), [reader-services.mjs](../../../web/src/reader-services.mjs), [app.jsx](../../../web/src/app.jsx), [reader-store.mjs](../../../web/src/reader-store.mjs) |
+| Service boundaries, browser lifecycle, clock, cancellation | [reader-architecture.md](../../../docs/reader-architecture.md), [browser-runtime.mjs](../../../web/src/browser-runtime.mjs), [reader-store.mjs](../../../web/src/reader-store.mjs) |
 | Item cards, previews, dialogs, About and feed-list help | [items.jsx](../../../web/src/components/items.jsx), [dialogs.jsx](../../../web/src/components/dialogs.jsx), [reader-help.jsx](../../../web/src/components/reader-help.jsx) |
 | Layout, themes, typography | [style.css](../../../web/src/style.css), [themes.css](../../../web/src/themes.css), [typography.css](../../../web/src/typography.css) |
 | Articles, Posts, shared Saved, routes | [reader-store.mjs](../../../web/src/reader-store.mjs), [reader-state.mjs](../../../web/src/reader-state.mjs), [navigation.mjs](../../../web/src/navigation.mjs) |

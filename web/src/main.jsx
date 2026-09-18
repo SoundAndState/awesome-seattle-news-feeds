@@ -2,6 +2,7 @@ import {Component, StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {App} from './app.jsx';
 import {createReaderStore} from './reader-store.mjs';
+import {createBrowserReaderServices} from './reader-services.mjs';
 import {site} from './site-config.mjs';
 import './style.css';
 import './loading.css';
@@ -14,7 +15,7 @@ class ReaderErrorBoundary extends Component {
   }
 }
 
-const store = createReaderStore(site);
+const store = createReaderStore(site, createBrowserReaderServices(site));
 const navigationPosition = {current: null};
 const root = createRoot(document.querySelector('#root'));
 root.render(<StrictMode><ReaderErrorBoundary><App store={store} site={site} navigationPosition={navigationPosition}/></ReaderErrorBoundary></StrictMode>);

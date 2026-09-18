@@ -1,5 +1,19 @@
-import {normalizeFeed} from './feeds.mjs';
-import {httpsUrl, feedServiceUrl} from './catalog.mjs';
+import {normalizeFeed, verifyOpml} from './feeds.mjs';
+import {normalizeCatalog, httpsUrl, feedServiceUrl} from './catalog.mjs';
+
+export async function loadCatalog(site, {pageUrl, fetchImpl = fetch, timeout = 10000, signal} = {}) {
+  const resolve = path => new URL(path, new URL(site.base || './', pageUrl)).href;
+  const paths = [site.catalogUrl || 'catalog.json', ...(site.opmlUrl ? [site.opmlUrl] : [])];
+  const deadline = AbortSignal.timeout(timeout);
+  const requestSignal = signal ? AbortSignal.any([signal, deadline]) : deadline;
+  requestSignal.throwIfAborted();
+  const responses = await Promise.all(paths.map(path => fetchImpl(resolve(path), {signal: requestSignal, credentials: 'omit', referrerPolicy: 'no-referrer'})));
+  if (responses.some(response => !response.ok)) throw new Error('The reader could not download the feed list. Check your connection and reload the page.');
+  const catalog = normalizeCatalog(await responses[0].json());
+  const result = responses[1] ? verifyOpml(await responses[1].text(), catalog) : catalog;
+  requestSignal.throwIfAborted();
+  return result;
+}
 
 const MAX_BYTES = 5 * 1024 * 1024;
 async function feedText(response) {
