@@ -1,6 +1,7 @@
 import {createStore} from 'zustand/vanilla';
 import {normalizeCatalog} from './catalog.mjs';
-import {inBatches, nextRefresh} from './feeds.mjs';
+import {inBatches, nextRefresh} from './refresh-policy.mjs';
+import {mergeSourceItem} from './item-model.mjs';
 import {feedMode, itemMode, normalizeRoute, matchesItem} from './reader-state.mjs';
 import {articlesCsv} from './export.mjs';
 import {readingBackup, restoreReadingBackup} from './backup.mjs';
@@ -119,17 +120,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         const state = get(), articles = new Map(state.articles), pending = new Map(state.pending);
         const merged = items.map(item => {
           const existing = articles.get(item.id) || pending.get(item.id);
-          const mixedKinds = existing && itemMode(existing, state.feedMap) !== itemMode(item, state.feedMap);
-          const keepArticle = mixedKinds && itemMode(existing, state.feedMap) === 'articles';
-          const feedIds = [...new Set([...(mixedKinds && !keepArticle ? [feed.id] : []), ...(existing?.feedIds || []), ...(item.feedIds || []), feed.id])];
-          // Canonical identity remains shared across kinds. Once reporting is
-          // available, a post linking to it adds provenance without replacing
-          // the article's content or its primary publisher.
-          const article = keepArticle ? {...existing, kind: 'articles', feedIds} : {
-            ...item, firstSeen: existing?.firstSeen || item.firstSeen, feedIds,
-            sourceName: mixedKinds ? feed.name : existing?.sourceName || feed.name,
-            title: cleanText(item.title), excerpt: cleanText(item.html).slice(0, 260),
-          };
+          const article = mergeSourceItem(existing, item, feed, state.feedMap, cleanText);
           if (!articles.has(item.id) && item.id !== get().route.article && (run.buffer || readingStarted.has(run.mode))) pending.set(item.id, article);
           else articles.set(item.id, article);
           return article;

@@ -6,6 +6,10 @@ boundary introduced after the React migration. The product roadmap and original
 audit remain in [reader-refactor.md](reader-refactor.md); deployment inputs are
 documented in [reader-configuration.md](reader-configuration.md).
 
+The next increment defines [reader items and source adapters](reader-item-contract.md).
+It moves format interpretation, identity, item bounds, and duplicate merging
+behind shared contracts used by delivery, the store, and backup restoration.
+
 ## Composition and ownership
 
 [`main.jsx`](../web/src/main.jsx) selects the validated site configuration and
@@ -53,6 +57,11 @@ runtime plugin registry. Tests can supply services directly without replacing
 Custom services must preserve these semantics, including sanitization, ordered
 persistence, and cancellation. Network and storage failures are separate: a
 publisher failure must not imply that the browser cannot save an item.
+
+Feed results contain structurally validated source items. The store's shared
+`mergeSourceItem` boundary prepares their plain-text fields and attribution
+before storing them as reader items; the store contains no format-specific
+parsing or duplicate policy. Publisher HTML remains untrusted until display.
 
 ## Library isolation and compatibility
 

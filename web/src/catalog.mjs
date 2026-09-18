@@ -1,5 +1,7 @@
+import {SOURCE_FORMATS} from './source-model.mjs';
+
 const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const FORMATS = new Set(['auto', 'rss', 'atom', 'json-feed', 'posts-json']);
+const FORMATS = new Set(SOURCE_FORMATS);
 
 function text(value, label, max = 2000) {
   if (typeof value !== 'string' || !value.trim() || value.length > max) throw new Error(`The feed list has an invalid ${label}.`);

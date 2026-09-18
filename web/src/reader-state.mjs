@@ -1,10 +1,6 @@
-export const feedMode = feed => ['articles', 'posts'].includes(feed.kind) ? feed.kind : feed.category === 'bluesky' ? 'posts' : 'articles';
-
-export function itemMode(item, feedMap) {
-  if (['articles', 'posts'].includes(item.kind)) return item.kind;
-  // Stable IDs also identify saved posts whose account has left the catalog.
-  return item.feedIds.some(id => (feedMap.has(id) && feedMode(feedMap.get(id)) === 'posts') || id.startsWith('bluesky-')) || item.id.startsWith('at://') ? 'posts' : 'articles';
-}
+import {feedMode} from './source-model.mjs';
+import {itemMode, MAX_ITEM_ID_LENGTH} from './item-model.mjs';
+export {feedMode, itemMode};
 
 export function normalizeRoute(route, feedMap, categoryMap) {
   const view = ['all', 'unread', 'saved', 'sources', 'excluded'].includes(route.view) ? route.view : 'unread';
@@ -13,7 +9,7 @@ export function normalizeRoute(route, feedMap, categoryMap) {
   const source = view !== 'saved' && feedMap.has(route.source) && feedMode(feedMap.get(route.source)) === mode ? route.source : '';
   const legacyCategory = route.category === 'bluesky' && !route.mode;
   const category = view !== 'saved' && !legacyCategory && categoryMap.has(route.category) && [...feedMap.values()].some(feed => feed.category === route.category && feedMode(feed) === mode) ? route.category : '';
-  const article = String(route.article || '').slice(0, 4096);
+  const article = String(route.article || '').slice(0, MAX_ITEM_ID_LENGTH);
   return {...route, mode, view, source, category, query: String(route.query || '').slice(0, 500),
     savedKind: ['articles', 'posts'].includes(route.savedKind) ? route.savedKind : 'all',
     limit: Math.max(60, Math.min(20000, Number(route.limit) || 60)), article,

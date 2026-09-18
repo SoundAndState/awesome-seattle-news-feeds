@@ -251,16 +251,17 @@ catalog delivery, and deterministic isolation/cancellation tests. See the
 
 Continue in this order:
 
-1. **Application boundaries and lifecycle:** complete the service-boundary
-   increment and verify it in the existing five-browser matrix and alternate
+1. **Application boundaries and lifecycle (implemented):** compose explicit
+   services and verify them in the existing five-browser matrix and alternate
    collection build. Keep browser globals and default-brand selection out of
    the state coordinator. Preserve accepted saves when background work stops.
-2. **Normalized item and source contracts:** separate format parsing, item
-   identity/provenance, merge policy, and refresh scheduling where these still
-   share modules. Make adapter and backup compatibility explicit through common
-   contract tests, including duplicate coverage across kinds, malformed inputs,
-   missing dates, source removal, and content safety. Add platform adapters only
-   for concrete source formats.
+2. **Normalized item and source contracts (implemented):** dedicated adapters
+   translate formats into a shared item model; identity, bounds, preparation,
+   and merging live outside state orchestration. Scheduling and safe links have
+   independent modules. Shared contract tests cover every format's dates,
+   identities, malformed inputs, bounds, duplicates, and backup round-trips;
+   browser tests exercise sanitization and durable saves for every format. See
+   [the item contract and adapter procedure](reader-item-contract.md).
 3. **Persistence and schema evolution:** define collection compatibility for
    imports, versioned migration policy, and failure behavior for multi-table
    operations. Exercise interrupted imports and cross-tab conflicts using
