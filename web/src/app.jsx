@@ -2,7 +2,7 @@ import {Component, useEffect, useLayoutEffect, useMemo, useRef, useState} from '
 import {useStore} from 'zustand';
 import {flushSync} from 'react-dom';
 import {selectItems, selectSources} from './reader-store.mjs';
-import {itemMode, matchesItem} from './reader-state.mjs';
+import {itemMode} from './reader-state.mjs';
 import {dateLabel} from './dates.mjs';
 import {scrollReader} from './scroll-read.mjs';
 import {containDialogTouch, download, focusedItem, focusControl} from './ui-effects.mjs';
@@ -43,7 +43,7 @@ class ReadingViewport extends Component {
 }
 function pickBounds(node) {const {top, bottom} = node.getBoundingClientRect(); return {top, bottom};}
 
-function Header({state, site, menuOpen, setMenuOpen, compact}) {
+function Header({state, site, menuOpen, setMenuOpen, compact, children}) {
   const {mode, view, query} = state.route;
   const current = [...state.articles.values()].filter(item => itemMode(item, state.feedMap) === mode);
   const savedCount = [...state.articles.keys()].filter(id => state.states.get(id)?.saved).length;
@@ -72,12 +72,13 @@ function Header({state, site, menuOpen, setMenuOpen, compact}) {
     <div className="mode-bar"><nav aria-label="Reading mode" className="mode-switch">{['articles', 'posts'].filter(kind => site.capabilities[kind]).map(kind => <button key={kind} data-mode={kind} aria-pressed={['all', 'unread'].includes(view) && mode === kind} onClick={() => state.switchMode(kind)}>{kind === 'articles' ? 'Articles' : 'Posts'}</button>)}</nav><button id="saved-button" data-view="saved" aria-pressed={view === 'saved'} onClick={() => navigate({view: 'saved', savedKind: 'all', source: '', category: '', query: '', unavailableOnly: false})}>Saved <span id="saved-count" className="count">{savedCount}</span></button></div>
     <div className="header-tools"><nav id="library-views" className="view-nav" aria-label={mode === 'posts' ? 'Post view' : 'Article view'}>{[['all', 'Latest', current.length], ['unread', 'Unread', current.filter(item => !state.states.get(item.id)?.read).length]].map(([kind, label, count]) => <button key={kind} data-view={kind} aria-pressed={view === kind} onClick={() => navigate({view: kind, unavailableOnly: false})}>{label} <span id={`${kind}-count`} className="count sr-only">{count}</span></button>)}</nav>
       <div id="search-panel"><div className="search"><span className="sr-only" id="search-label">{searchLabel}</span><input id="search" type="search" placeholder={`${searchLabel}…`} aria-labelledby="search-label" aria-describedby="search-help" value={query} onChange={event => navigate({query: event.target.value}, {search: true})} onBlur={state.endSearch}/><button id="clear-search" type="button" aria-label="Clear search" hidden={!query} onClick={() => {navigate({query: ''}); document.querySelector('#search').focus(); state.announce('Search cleared.');}}>×</button></div><p id="search-help" className="sr-only">{view === 'excluded' ? 'Search the sources you have excluded.' : view === 'sources' ? `Search the ${mode === 'posts' ? 'accounts' : 'publications'} in this list.` : 'Search the items this reader has loaded in your current view.'}</p></div>
-      <button id="filter-button" className="text-button" aria-haspopup="dialog" hidden={['saved', 'excluded'].includes(view)} onClick={() => open('filters')}>Filters</button>
+      <button id="filter-button" className="icon-button" aria-label="Filters" title="Filters" aria-haspopup="dialog" hidden={['saved', 'excluded'].includes(view)} onClick={() => open('filters')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg></button>
     </div>
+    <div className="header-status">{children}</div>
   </div>;
 }
 
-function FeedStatus({state}) {
+function FeedStatus({state, children}) {
   const {view, mode} = state.route, run = state.loadingRun;
   const visible = Boolean(run && run.mode === mode && view !== 'saved');
   const active = visible && !run.finished && !run.controller.signal.aborted;
@@ -94,9 +95,9 @@ function FeedStatus({state}) {
       <progress id="loading-bar" max={run?.total || 1} value={run?.done || 0} aria-label={active ? view === 'sources' ? 'Checking sources' : `Loading ${mode}` : run?.completed ? 'Feed check complete' : 'Feed check paused'} aria-valuetext={`${run?.done || 0} of ${run?.total || 0} feeds checked`} aria-describedby={active ? 'loading-guidance' : 'loading-result'}/>
     </div>
     <div className="status-row"><div id="feed-progress" className="feed-progress">{view === 'saved' ? <span>Your saved articles and posts</span> : <>
-      {!checking && <span hidden={visible}>{attempts.length ? `The reader last checked feeds ${dateLabel(Math.max(...attempts), true)}` : 'The reader has not checked feeds yet.'}</span>}
+      {!checking && <span hidden={visible}>{attempts.length ? `Checked ${dateLabel(Math.max(...attempts), true)}` : 'Feeds not checked yet.'}</span>}
       {failures.length > 0 && <button className="text-button status-link" onClick={() => state.navigate({view: 'sources', unavailableOnly: true, source: '', category: '', query: ''})}>{failures.length} unavailable</button>}
-    </>}</div><button id="refresh" className="text-button" aria-label="Refresh" hidden={['saved', 'excluded'].includes(view)} disabled={checking} onClick={() => state.refresh({retryFailed: true})}>{checking ? '↻ Checking' : '↻ Refresh'}</button></div>
+    </>}</div>{children}<button id="refresh" className="text-button" aria-label="Refresh" hidden={['saved', 'excluded'].includes(view)} disabled={checking} onClick={() => state.refresh({retryFailed: true, resetList: true})}>{checking ? '↻ Checking' : '↻ Refresh'}</button></div>
   </>;
 }
 
@@ -123,7 +124,7 @@ export function App({store, site, navigationPosition}) {
   const items = useMemo(() => selectItems(state), [state.articles, state.states, state.route, state.feedMap, state.excluded, state.retainedRead]);
   const sourceView = ['sources', 'excluded'].includes(route.view);
   const sources = (route.view === 'excluded' ? [...state.excluded].map(id => state.feedMap.get(id) || {id, name: id, description: 'This source is no longer in the catalog.'}) : selectSources(state)).filter(feed => (!route.unavailableOnly || state.health.get(feed.id)?.error) && (!route.query || `${feed.name} ${feed.description}`.toLocaleLowerCase().includes(route.query.trim().toLocaleLowerCase()))).sort((a, b) => a.name.localeCompare(b.name));
-  const pendingCount = ['saved', 'sources'].includes(route.view) ? 0 : [...state.pending.values()].filter(item => matchesItem(item, route, state.feedMap, state.excluded)).length;
+  const pendingCount = ['all', 'unread'].includes(route.view) ? selectItems({...state, articles: state.pending}, {retainRead: false}).length : 0;
   const unread = items.filter(item => !state.states.get(item.id)?.read).length;
   const savedCount = [...state.articles.keys()].filter(id => state.states.get(id)?.saved).length;
   const result = state.failed ? 'The reader could not open your library.' : !state.ready ? 'The reader is opening your library…' : sourceView ? counted(sources.length, `${route.unavailableOnly ? 'unavailable ' : ''}sources`) : `${counted(items.length, route.view === 'saved' ? 'saved items' : route.mode)} · Newest first`;
@@ -183,7 +184,10 @@ export function App({store, site, navigationPosition}) {
   const filterActive = route.category || route.source || route.query;
   return <>
     <a className="skip-link" href="#main" onClick={event => {event.preventDefault(); document.querySelector('#main').focus();}}>Skip to stories</a>
-    <Header state={state} site={site} menuOpen={menuOpen} setMenuOpen={setMenuOpen} compact={scrollState.compact}/>
+    <Header state={state} site={site} menuOpen={menuOpen} setMenuOpen={setMenuOpen} compact={scrollState.compact}>
+      <FeedStatus state={state}><details id="reading-options" hidden={['sources', 'saved', 'excluded'].includes(route.view)}><summary>Reading options</summary><div className="options-content"><label className="scroll-read-control"><input id="scroll-read" type="checkbox" checked={state.markReadOnScroll} onChange={event => state.setMarkReadOnScroll(event.target.checked)}/>Mark items read as I scroll past them</label><button id="mark-read" className="secondary-button" disabled={!unread} onClick={async () => {await state.bulkRead(); document.querySelector('#reading-options').open = false; document.querySelector('#undo-read').focus({preventScroll: true});}}>Mark {unread.toLocaleString()} matching {route.mode} read</button><p className="hint">Mark every item that matches your filters and search as read, including items you have not scrolled to or opened with Show more.</p></div></details></FeedStatus>
+      <button id="new-items" className="new-items" hidden={!pendingCount} onClick={() => {flushSync(() => state.revealPending()); window.scrollTo({top: 0, behavior: 'instant'}); scrolling.current?.sync(); document.querySelector('#heading').focus({preventScroll: true});}}>Show {pendingCount} new {route.mode}</button>
+    </Header>
     <ReadingViewport state={state}><main id="main" tabIndex={-1}>
       <section id="page-heading" className={`page-heading${!['saved', 'sources', 'excluded'].includes(route.view) ? ' sr-only' : ''}`}><h1 id="heading" tabIndex={-1}>{heading}</h1><p id="description" hidden/></section>
       <nav id="saved-kinds" className="view-nav" aria-label="Saved item type" hidden={route.view !== 'saved'}>{['all', 'articles', 'posts'].map(kind => <button key={kind} data-kind={kind} aria-pressed={route.savedKind === kind} onClick={() => state.navigate({savedKind: kind})}>{kind === 'all' ? 'All' : kind === 'articles' ? 'Articles' : 'Posts'}</button>)}</nav>
@@ -194,13 +198,11 @@ export function App({store, site, navigationPosition}) {
         {filterActive && <button className="text-button" onClick={() => state.navigate({category: '', source: '', query: ''})}>Clear all</button>}
       </div>
       {route.query && !sourceView && <p className="hint search-scope">Searching items already loaded in this view.</p>}
-      <FeedStatus state={state}/>
-      <div className="reading-utility"><details id="reading-options" hidden={['sources', 'saved', 'excluded'].includes(route.view)}><summary>Reading options</summary><div className="options-content"><label className="scroll-read-control"><input id="scroll-read" type="checkbox" checked={state.markReadOnScroll} onChange={event => state.setMarkReadOnScroll(event.target.checked)}/>Mark items read as I scroll past them</label><button id="mark-read" className="secondary-button" disabled={!unread} onClick={async () => {await state.bulkRead(); document.querySelector('#reading-options').open = false; document.querySelector('#undo-read').focus({preventScroll: true});}}>Mark {unread.toLocaleString()} matching {route.mode} read</button><p className="hint">Mark every item that matches your filters and search as read, including items you have not scrolled to or opened with Show more.</p></div></details><button id="export-saved" className="text-button download-link" hidden={route.view !== 'saved'} disabled={!savedCount} aria-label="Export all saved items as CSV" onClick={async () => download(await state.exportSaved())}>Export saved items as CSV</button></div>
+      <div className="reading-utility" hidden={route.view !== 'saved'}><button id="export-saved" className="text-button download-link" hidden={route.view !== 'saved'} disabled={!savedCount} aria-label="Export all saved items as CSV" onClick={async () => download(await state.exportSaved())}>Export saved items as CSV</button></div>
       <div className="reading-bar"><span id="result-label" className="sr-only">{result}</span><button id="show-all-sources" className="text-button" hidden={route.view !== 'sources' || !route.unavailableOnly} onClick={() => state.navigate({unavailableOnly: false, category: '', source: '', query: ''})}>Show all sources</button></div>
       <div id="notice" className="notice" role="status" hidden={!state.notice}>{state.notice}</div>
       <div id="undo-bar" className="notice" hidden={!state.undoRead.length}><span id="undo-message" role="status">The reader marked {state.undoRead.length} {route.mode} as read. </span><button id="undo-read" className="text-button" onClick={async () => {await state.undo(); document.querySelector('#heading').focus({preventScroll: true});}}>Undo</button></div>
       <p id="announcement" className="sr-only" role="status" aria-live="polite">{state.announcement}</p>
-      <button id="new-items" className="new-items" hidden={!pendingCount} onClick={() => {state.revealPending(); window.scrollTo({top: 0, behavior: 'instant'}); scrolling.current?.sync(); document.querySelector('#heading').focus({preventScroll: true});}}>Show {pendingCount} new {route.mode}</button>
       <section id="stories" ref={stories} className={sourceView ? 'source-grid' : ''} aria-label={route.view === 'saved' ? 'Saved items' : sourceView ? 'Sources' : route.mode === 'posts' ? 'Posts' : 'Articles'} aria-busy={active} aria-describedby={active ? 'loading-guidance' : undefined} onPointerDown={state.rememberReading} onKeyDown={state.rememberReading}><ListContent state={state} site={site} items={items} sources={sources}/></section>
       <button id="load-more" className="load-more" hidden={sourceView || items.length <= route.limit} onClick={() => state.navigate({limit: route.limit + 60}, {replace: true, keepScroll: true})}>Show more ↓</button>
       <footer className="reader-footer">{site.repository && <a href={site.repository}>{state.catalog?.title || site.name} on GitHub</a>}</footer>

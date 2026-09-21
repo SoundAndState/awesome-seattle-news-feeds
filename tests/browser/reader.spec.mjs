@@ -67,7 +67,7 @@ test('failed refresh preserves cached content, explains failures and retries onl
   await load(page);await expireFeeds(page);await page.unroute(proxyRoute);
   const failed=catalog.feeds.filter(f=>f.category!=='bluesky').slice(0,2),ids=failed.map(f=>f.id);
   await page.route(proxyRoute,r=>{const id=r.request().url().split('/').pop();return r.fulfill({status:ids.includes(id)?502:200,contentType:ids.includes(id)?'application/json':'application/xml',body:ids.includes(id)?'{"error":"Publisher returned HTTP 403."}':fixture(id)});});
-  await page.reload();await expect(page.getByRole('button',{name:'2 unavailable',exact:true})).toBeVisible();await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds');await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));
+  await page.reload();await expect(page.getByRole('button',{name:'2 unavailable',exact:true})).toBeVisible();await expect(page.locator('#feed-progress')).toContainText('Checked ');await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));
   await search(page,'nothing matches');await page.getByRole('button',{name:'2 unavailable',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(2);
   for(const card of await page.locator('.source-card').all()){await expect(card).toContainText('Using an earlier copy');await expect(card).toContainText('A server refused the feed request');await card.locator('summary').click();await expect(card.locator('details')).toContainText('HTTP 403');}
   const requests=[];page.on('request',r=>{if(r.url().startsWith(proxyFeedUrl('')))requests.push(r.url().split('/').pop());});await page.locator('#refresh').click();await expect(page.locator('#refresh')).toBeEnabled();expect(requests.sort()).toEqual(ids.sort());
@@ -177,16 +177,16 @@ test('direct fallback omits credentials and source errors explain both attempts'
   await page.route(allowed.feed,r=>{requests.push(r.request());return r.fulfill({contentType:'application/xml',headers:{'access-control-allow-origin':'*'},body:fixture(allowed.id)});});
   await page.route(blocked.feed,r=>r.fulfill({contentType:'application/xml',headers:{'access-control-allow-origin':'https://other.example'},body:fixture(blocked.id)}));
   await page.route(proxyRoute,r=>{const id=r.request().url().split('/').pop(),fail=[allowed.id,blocked.id].includes(id);return r.fulfill({status:fail?502:200,contentType:fail?'application/json':'application/xml',body:fail?'{"error":"Publisher denied proxy request."}':fixture(id)});});
-  await page.goto('./');await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds');await expect(page.locator('#all-count')).toHaveText(String(newsCount-1));await expect(page.locator('#refresh')).toBeEnabled();expect(requests).toHaveLength(1);expect(requests[0].headers()).not.toHaveProperty('cookie');expect(requests[0].headers()).not.toHaveProperty('referer');
+  await page.goto('./');await expect(page.locator('#feed-progress')).toContainText('Checked ');await expect(page.locator('#all-count')).toHaveText(String(newsCount-1));await expect(page.locator('#refresh')).toBeEnabled();expect(requests).toHaveLength(1);expect(requests[0].headers()).not.toHaveProperty('cookie');expect(requests[0].headers()).not.toHaveProperty('referer');
   await page.getByRole('button',{name:'1 unavailable',exact:true}).click();await expect(page.locator('.source-card')).toHaveCount(1);await page.locator('.source-card summary').click();await expect(page.locator('.source-card details')).toContainText('Through the feed service: Publisher denied proxy request. Direct from the publisher: Your browser could not load the feed directly.');
   await page.getByRole('button',{name:'Show all sources',exact:true}).click();await expect(page.locator('.source-card').filter({has:page.getByRole('heading',{name:allowed.name,exact:true})})).toContainText('Your browser connected directly to the publisher.');
 });
 
 test('scroll marking is on by default, can be disabled, persists and does not move the Unread list',async({page})=>{
-  await load(page);await page.locator('[data-view="unread"]').click();const first=page.locator('.story').first();const past=()=>page.evaluate(()=>scrollBy(0,document.querySelector('.story').getBoundingClientRect().bottom+2));
+  await load(page);await page.locator('[data-view="unread"]').click();const first=page.locator('.story').first();const past=()=>page.evaluate(()=>scrollBy(0,document.querySelector('.story h2').getBoundingClientRect().bottom-document.querySelector('#reader-header').getBoundingClientRect().bottom+2));
   await expect(page.locator('#scroll-read')).toBeChecked();await page.locator('#reading-options summary').click();await page.locator('#scroll-read').uncheck();await page.locator('#reading-options summary').click();await past();await page.evaluate(()=>new Promise(requestAnimationFrame));await expect(first).not.toHaveClass(/is-read/);
   await page.evaluate(()=>scrollTo(0,0));await page.locator('#reading-options summary').click();await page.locator('#scroll-read').check();await page.locator('#reading-options summary').click();
-  const y=await first.evaluate(n=>scrollY+n.getBoundingClientRect().bottom+2);await past();await expect(first).toHaveClass(/is-read/);expect(Math.abs(await page.evaluate(()=>scrollY)-y)).toBeLessThan(1);await expect(page.locator('.story')).toHaveCount(newsCount);await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));
+  const y=await first.evaluate(n=>scrollY+n.querySelector('h2').getBoundingClientRect().bottom-document.querySelector('#reader-header').getBoundingClientRect().bottom+2);await past();await expect(first).toHaveClass(/is-read/);expect(Math.abs(await page.evaluate(()=>scrollY)-y)).toBeLessThan(1);await expect(page.locator('.story')).toHaveCount(newsCount);await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));
   await page.reload();await expect(page.locator('#scroll-read')).toBeChecked();await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));
 });
 
@@ -197,8 +197,8 @@ test('bulk read states its full scope and Undo preserves previously read and sav
   await page.locator('#undo-read').click();await expect(page.locator('#unread-count')).toHaveText(String(newsCount-1));await page.locator('#saved-button').click();await expect(page.locator('.story')).toHaveAttribute('data-article',id);await expect(page.locator('.story')).toHaveClass(/is-read/);
 });
 
-test('removing a focused unread or saved item moves focus to the next item',async({page})=>{
-  await load(page);await page.locator('[data-view="unread"]').click();const secondId=await page.locator('.story').nth(1).getAttribute('data-article');await page.locator('.read-button').first().focus();await page.keyboard.press('Enter');await expect(page.locator(`.story[data-article="${secondId}"] [data-story]`)).toBeFocused();
+test('marking an unread item keeps its focus; removing a saved item focuses the next item',async({page})=>{
+  await load(page);await page.locator('[data-view="unread"]').click();await page.locator('.read-button').first().focus();await page.keyboard.press('Enter');await expect(page.locator('.read-button').first()).toBeFocused();await expect(page.locator('.story')).toHaveCount(newsCount);
   await page.locator('.save-button').nth(0).click();await page.locator('.save-button').nth(1).click();await page.locator('#saved-button').click();await page.locator('.save-button').first().focus();await page.keyboard.press('Enter');await expect(page.locator('.story')).toHaveCount(1);await expect(page.locator('.story [data-story]')).toBeFocused();
 });
 
@@ -208,7 +208,7 @@ test('catalog outage preserves access to the cached saved library',async({page})
 
 test('automatic due refresh buffers new items until accepted and never fetches the inactive mode',async({page})=>{
   let revision=0;const requests=[];await page.route(proxyRoute,r=>{const id=r.request().url().split('/').pop();requests.push(id);return r.fulfill({contentType:'application/xml',body:revision?fixture(id).replaceAll(`https://publisher.example/${id}?`,`https://publisher.example/${id}-new?`):fixture(id)});});
-  await page.goto('./');await expect(page.locator('#feed-progress')).toContainText('The reader last checked feeds');await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('#refresh')).toBeEnabled();const firstId=await page.locator('.story').first().getAttribute('data-article');revision=1;
+  await page.goto('./');await expect(page.locator('#feed-progress')).toContainText('Checked ');await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('#refresh')).toBeEnabled();const firstId=await page.locator('.story').first().getAttribute('data-article');revision=1;
   await page.clock.fastForward(16*60*1000);await expect(page.locator('#new-items')).toContainText(`${newsCount} new articles`);await expect(page.locator('#refresh')).toBeEnabled();await expect(page.locator('#all-count')).toHaveText(String(newsCount));await expect(page.locator('.story').first()).toHaveAttribute('data-article',firstId);
   expect(requests).toHaveLength(newsCount*2);expect(requests.some(id=>id.startsWith('bluesky-'))).toBe(false);await page.locator('#new-items').click();await expect(page.locator('#all-count')).toHaveText(String(newsCount*2));await expect(page.locator('#new-items')).toBeHidden();
 });

@@ -3,7 +3,7 @@ export function scrollReader(container, onRead) {
   let enabled = false, lastY = window.scrollY, lastHeaderHeight = headerHeight(), positions = new Map(), frame;
   function snapshot() {
     return new Map([...container.querySelectorAll('.story')].map(card => {
-      const {top, bottom} = card.getBoundingClientRect();
+      const {top, bottom} = (card.querySelector('h2, .post-text') || card).getBoundingClientRect();
       return [card.dataset.article, {card, top, bottom}];
     }));
   }
@@ -16,8 +16,9 @@ export function scrollReader(container, onRead) {
     if (delta > 0 && !document.hidden && !document.querySelector('dialog[open]')) {
       for (const [id, now] of current) {
         const before = positions.get(id);
-        // Only mark cards that were visible and crossed the top through scrolling, not a layout change.
-        if (before && before.top < innerHeight && before.bottom > 0 && now.bottom <= 0 && Math.abs(before.bottom - delta + headerDelta - now.bottom) < 2 && !now.card.classList.contains('is-read')) ids.push(id);
+        // A title (or post text) must cross the visible reading edge through
+        // scrolling. Header resizing and unrelated layout changes do not count.
+        if (before && before.top < innerHeight && before.bottom > lastHeaderHeight && now.bottom <= height && Math.abs(before.bottom - delta + headerDelta - now.bottom) < 2 && !now.card.classList.contains('is-read')) ids.push(id);
       }
     }
     positions = current; lastY = window.scrollY; lastHeaderHeight = height;
