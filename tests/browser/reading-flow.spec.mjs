@@ -86,8 +86,10 @@ test('scroll marking waits for the title to pass the header while the rest of th
 
 test('header controls stay available, filters follow search, and showing new articles returns to the top', async ({page}, testInfo) => {
   let revision = 0;
+  const failed = new Set(catalog.feeds.filter(feed => feed.category !== 'bluesky').slice(0, 2).map(feed => feed.id));
   await page.route(proxyRoute, route => {
     const id = route.request().url().split('/').pop();
+    if (failed.has(id)) return route.fulfill({status: 502, json: {error: 'Publisher unavailable'}});
     const body = defaultFeed(id);
     return route.fulfill({contentType: 'application/xml', body: revision ? body.replaceAll(`https://publisher.example/${id}?`, `https://publisher.example/${id}-new?`) : body});
   });
@@ -96,7 +98,7 @@ test('header controls stay available, filters follow search, and showing new art
   await page.evaluate(() => scrollTo(0, 1200));
   revision++;
   await page.clock.fastForward(16 * 60 * 1000);
-  const newsCount = catalog.feeds.filter(feed => feed.category !== 'bluesky').length;
+  const newsCount = catalog.feeds.filter(feed => feed.category !== 'bluesky').length - failed.size;
   await expect(page.locator('#new-items')).toContainText(`${newsCount} new articles`);
   for (const selector of ['#search', '#filter-button', '#feed-loading', '#refresh', '#reading-options', '#new-items']) {
     await expect(page.locator(`#reader-header ${selector}`)).toBeInViewport();
@@ -110,6 +112,23 @@ test('header controls stay available, filters follow search, and showing new art
   await expect(page.locator('#new-items')).toBeHidden();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await expect(page.locator('.story').first()).not.toHaveClass(/is-read/);
+  await page.getByRole('button', {name: 'Dismiss feed status'}).click();
+  if (page.viewportSize().width <= 760) {
+    for (const width of [320, 390, 430]) {
+      await page.setViewportSize({width, height: 844});
+      const controls = await page.locator('.checked-at, .status-link, #reading-options summary, #refresh').evaluateAll(nodes => nodes.map(node => {
+        const {x, y, width, height} = node.getBoundingClientRect();
+        return {x, y, width, height, clipped: node.scrollWidth > node.clientWidth};
+      }));
+      const centers = controls.map(box => box.y + box.height / 2);
+      expect(Math.max(...centers) - Math.min(...centers)).toBeLessThan(2);
+      expect(controls.every(box => !box.clipped && box.x >= 0 && box.x + box.width <= width)).toBe(true);
+      for (const box of controls.slice(-2)) {expect(box.width).toBeGreaterThanOrEqual(44); expect(box.height).toBeGreaterThanOrEqual(44);}
+      await page.screenshot({path: testInfo.outputPath(`header-status-${width}.png`)});
+    }
+  }
+  await expect(page.locator('#reading-options summary')).toHaveAccessibleName('Reading options');
+  await expect(page.locator('#refresh')).toHaveAccessibleName('Refresh');
   await page.locator('#reading-options summary').click();
   await expect(page.locator('#mark-read')).toBeInViewport();
   const options = await page.locator('.options-content').boundingBox();

@@ -315,6 +315,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .header-status .feed-loading {margin:0;padding:0 8px 4px;background:none}
 .header-status .status-row {gap:12px;flex-wrap:wrap}
 .header-status .feed-progress {flex:1;font-size:12px;gap:8px}
+.status-compact,.status-icon {display:none}
 .header-status #reading-options {margin-left:auto}
 .header-status summary {font-size:13px;white-space:nowrap}
 .header-status .options-content {left:auto;right:0;max-height:calc(100dvh - 300px);overflow:auto}
@@ -377,7 +378,18 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
   .mode-switch button {font-size:16px;padding:8px 4px}
   .header-tools {gap:8px;flex-wrap:wrap;padding-top:4px;padding-bottom:8px}
   .header-tools .view-nav {order:1;flex-basis:100%}
-  .header-status #reading-options {position:static}
+  .header-status .status-row {flex-wrap:nowrap;gap:4px}
+  .header-status .feed-progress {flex-wrap:nowrap;gap:8px}
+  .header-status .checked-at {min-width:0}
+  .header-status .status-compact {display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .header-status .status-full {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .header-status .status-link {font-size:12px;flex-shrink:0}
+  .header-status #reading-options {position:static;flex-shrink:0}
+  .header-status #reading-options summary,.header-status #refresh {display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;flex-shrink:0;list-style:none}
+  .header-status #reading-options summary::-webkit-details-marker {display:none}
+  .header-status .status-action-label {display:none}
+  .header-status .status-icon {display:block;width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+  .header-status .refresh-symbol {font-size:24px;line-height:1}
   .header-status .options-content {right:20px;width:min(330px,calc(100vw - 40px))}
   #filter-button {order:3}
   #search-panel {order:2}

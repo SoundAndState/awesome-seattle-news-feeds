@@ -14,6 +14,8 @@ function headingFor({view, mode, unavailableOnly}) {
 }
 
 const counted = (count, plural) => `${count.toLocaleString()} ${count === 1 ? plural.slice(0, -1) : plural}`;
+const checkedTime = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: '2-digit'});
+const checkedDay = new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric'});
 
 // Capture browser geometry immediately before React changes the list. Stable keys
 // preserve controls; when a row disappears, restore focus to its next neighbour.
@@ -85,6 +87,9 @@ function FeedStatus({state, children}) {
   const checking = Boolean(state.session && state.session.mode === mode && !state.session.controller.signal.aborted && view !== 'saved');
   const feeds = selectSources(state, true), failures = feeds.filter(feed => state.health.get(feed.id)?.error);
   const attempts = feeds.map(feed => state.health.get(feed.id)?.lastAttempt || state.health.get(feed.id)?.lastSuccess || 0).filter(Boolean);
+  const lastChecked = attempts.length ? Math.max(...attempts) : 0;
+  const checkedLabel = lastChecked ? `Checked ${dateLabel(lastChecked, true)}` : 'Feeds not checked yet.';
+  const compactChecked = lastChecked ? `Checked ${(new Date(lastChecked).toDateString() === new Date(state.now).toDateString() ? checkedTime : checkedDay).format(lastChecked)}` : 'Not checked';
   const label = view === 'sources' ? 'Sources' : mode === 'posts' ? 'Posts' : 'Articles';
   return <>
     <div id="feed-loading" className="feed-loading" hidden={!visible} data-state={active ? 'loading' : 'finished'}>
@@ -95,9 +100,9 @@ function FeedStatus({state, children}) {
       <progress id="loading-bar" max={run?.total || 1} value={run?.done || 0} aria-label={active ? view === 'sources' ? 'Checking sources' : `Loading ${mode}` : run?.completed ? 'Feed check complete' : 'Feed check paused'} aria-valuetext={`${run?.done || 0} of ${run?.total || 0} feeds checked`} aria-describedby={active ? 'loading-guidance' : 'loading-result'}/>
     </div>
     <div className="status-row"><div id="feed-progress" className="feed-progress">{view === 'saved' ? <span>Your saved articles and posts</span> : <>
-      {!checking && <span hidden={visible}>{attempts.length ? `Checked ${dateLabel(Math.max(...attempts), true)}` : 'Feeds not checked yet.'}</span>}
+      {!checking && <span className="checked-at" hidden={visible} title={checkedLabel}><span className="status-full">{checkedLabel}</span><span className="status-compact" aria-hidden="true">{compactChecked}</span></span>}
       {failures.length > 0 && <button className="text-button status-link" onClick={() => state.navigate({view: 'sources', unavailableOnly: true, source: '', category: '', query: ''})}>{failures.length} unavailable</button>}
-    </>}</div>{children}<button id="refresh" className="text-button" aria-label="Refresh" hidden={['saved', 'excluded'].includes(view)} disabled={checking} onClick={() => state.refresh({retryFailed: true, resetList: true})}>{checking ? '↻ Checking' : '↻ Refresh'}</button></div>
+    </>}</div>{children}<button id="refresh" className="text-button" aria-label="Refresh" title={checking ? 'Checking feeds' : 'Refresh'} aria-busy={checking} hidden={['saved', 'excluded'].includes(view)} disabled={checking} onClick={() => state.refresh({retryFailed: true, resetList: true})}><span className="refresh-symbol" aria-hidden="true">↻</span><span className="status-action-label">{checking ? ' Checking' : ' Refresh'}</span></button></div>
   </>;
 }
 
@@ -185,7 +190,7 @@ export function App({store, site, navigationPosition}) {
   return <>
     <a className="skip-link" href="#main" onClick={event => {event.preventDefault(); document.querySelector('#main').focus();}}>Skip to stories</a>
     <Header state={state} site={site} menuOpen={menuOpen} setMenuOpen={setMenuOpen} compact={scrollState.compact}>
-      <FeedStatus state={state}><details id="reading-options" hidden={['sources', 'saved', 'excluded'].includes(route.view)}><summary>Reading options</summary><div className="options-content"><label className="scroll-read-control"><input id="scroll-read" type="checkbox" checked={state.markReadOnScroll} onChange={event => state.setMarkReadOnScroll(event.target.checked)}/>Mark items read as I scroll past them</label><button id="mark-read" className="secondary-button" disabled={!unread} onClick={async () => {await state.bulkRead(); document.querySelector('#reading-options').open = false; document.querySelector('#undo-read').focus({preventScroll: true});}}>Mark {unread.toLocaleString()} matching {route.mode} read</button><p className="hint">Mark every item that matches your filters and search as read, including items you have not scrolled to or opened with Show more.</p></div></details></FeedStatus>
+      <FeedStatus state={state}><details id="reading-options" hidden={['sources', 'saved', 'excluded'].includes(route.view)}><summary aria-label="Reading options" title="Reading options"><svg className="status-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4m4 0h10M3 17h10m4 0h4"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg><span className="status-action-label">Reading options</span></summary><div className="options-content"><label className="scroll-read-control"><input id="scroll-read" type="checkbox" checked={state.markReadOnScroll} onChange={event => state.setMarkReadOnScroll(event.target.checked)}/>Mark items read as I scroll past them</label><button id="mark-read" className="secondary-button" disabled={!unread} onClick={async () => {await state.bulkRead(); document.querySelector('#reading-options').open = false; document.querySelector('#undo-read').focus({preventScroll: true});}}>Mark {unread.toLocaleString()} matching {route.mode} read</button><p className="hint">Mark every item that matches your filters and search as read, including items you have not scrolled to or opened with Show more.</p></div></details></FeedStatus>
       <button id="new-items" className="new-items" hidden={!pendingCount} onClick={() => {flushSync(() => state.revealPending()); window.scrollTo({top: 0, behavior: 'instant'}); scrolling.current?.sync(); document.querySelector('#heading').focus({preventScroll: true});}}>Show {pendingCount} new {route.mode}</button>
     </Header>
     <ReadingViewport state={state}><main id="main" tabIndex={-1}>
