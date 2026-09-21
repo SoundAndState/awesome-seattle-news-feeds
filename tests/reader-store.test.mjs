@@ -166,6 +166,55 @@ test('a 200-item feed with five saves does not repeatedly buffer its 45 pruned i
   }
 });
 
+test('repeated feed checks never announce entries older than the combined stored window, even during loading', async t => {
+  const now = Date.now();
+  const items = Array.from({length: 195}, (_, i) => ({...article(`window-${i}`), published: now - i * 1000, firstSeen: now}));
+  // The feed omits 45 newer cached stories and still includes 45 older ones.
+  // Its own 150-item limit cannot determine what the library will retain.
+  let incoming = items.slice(45);
+  const {store, records} = harness(t, {items: items.slice(0, 150), loadFeed: async () => ({items: incoming, transport: 'direct'})});
+  await store.getState().start();
+  const counts = [];
+  const unsubscribe = store.subscribe(state => counts.push(state.pending.size));
+  t.after(unsubscribe);
+  const refresh = async () => {
+    const status = {id: news.id, nextCheck: 0};
+    records.feeds.set(news.id, status);
+    store.setState(state => ({health: new Map(state.health).set(news.id, status)}));
+    await store.getState().refresh();
+  };
+  await refresh();
+  await refresh();
+  assert.equal(Math.max(...counts), 0, 'discarded articles must never reach the notification');
+  assert.equal(records.articles.size, 150);
+  const fresh = {...article('genuinely-new'), published: now + 1000};
+  incoming = [fresh, ...incoming];
+  await refresh();
+  assert.deepEqual([...store.getState().pending.keys()], [fresh.id]);
+  store.getState().revealPending();
+  counts.length = 0;
+  await refresh();
+  assert.equal(Math.max(...counts), 0);
+  assert.equal(selectItems(store.getState()).some(item => item.id === fresh.id), true);
+});
+
+test('long undated feeds keep a stable response window instead of cycling their discarded tail', async t => {
+  const now = Date.now();
+  const items = Array.from({length: 200}, (_, i) => ({...article(`undated-${String(i).padStart(3, '0')}`), published: 0, firstSeen: now}));
+  const {store, records} = harness(t, {items: items.slice(0, 150), loadFeed: async () => ({items: items.map(item => ({...item, firstSeen: now + 60000})), transport: 'direct'})});
+  await store.getState().start();
+  const counts = [];
+  t.after(store.subscribe(state => counts.push(state.pending.size)));
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const status = {id: news.id, nextCheck: 0};
+    records.feeds.set(news.id, status);
+    store.setState(state => ({health: new Map(state.health).set(news.id, status)}));
+    await store.getState().refresh();
+  }
+  assert.equal(Math.max(...counts), 0);
+  assert.deepEqual([...store.getState().articles.keys()], items.slice(0, 150).map(item => item.id));
+});
+
 test('returning items with remembered read marks are not announced as new after their bodies expire', async t => {
   const old = {...article('old-read'), firstSeen: Date.now() - 31 * 86400000};
   const fresh = article('new-unread');

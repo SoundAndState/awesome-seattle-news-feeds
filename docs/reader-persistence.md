@@ -83,6 +83,14 @@ This is local reconciliation, not instant synchronization or cross-device sync.
 Settings retain record-level last-write behavior and apply from storage on
 reload. The existing namespaced feed-refresh lock remains independent.
 
+Feed responses use the same retention rules as cleanup before adding items to
+the new-items notification. The reader combines incoming items with stored and
+pending items before selecting the newest 150 unsaved items per source, with a
+30-day limit measured from first receipt. Saved items remain exempt. A feed can
+omit newer stories that are still stored locally; its own response length does
+not determine which older entries the reader can retain. Discarded entries must
+not appear in the notification, even while other feeds are still loading.
+
 ## Schema evolution and deployment
 
 [`library-schema.mjs`](../web/src/library-schema.mjs) is the append-only schema

@@ -1,5 +1,34 @@
-import {test, expect, catalog, proxyRoute, loadReader} from './fixtures.mjs';
-import {defaultFeed} from '../fixtures/feeds.mjs';
+import {test, expect, catalog, proxyRoute, loadReader, browserCatalog, mockCatalog, readStoredLibrary} from './fixtures.mjs';
+import {defaultFeed, articleItem, rssFeed, NOW} from '../fixtures/feeds.mjs';
+import {makeSource} from '../fixtures/catalog.mjs';
+
+test('discarded old articles do not flash a new-articles notification while another feed is loading', async ({page}) => {
+  const selected = browserCatalog({feeds: [makeSource(), makeSource({id: 'slow-news'})]});
+  const items = Array.from({length: 195}, (_, i) => articleItem(`window-${i}`, {published: new Date(Date.parse(NOW) - i * 60000).toUTCString()}));
+  let revision = 0, waiting;
+  await mockCatalog(page, selected);
+  await page.route(proxyRoute, route => {
+    const id = route.request().url().split('/').pop();
+    if (id === 'slow-news' && revision) {waiting = route; return;}
+    const body = id === 'slow-news' ? defaultFeed(id) : rssFeed(revision ? items.slice(45) : items.slice(0, 150));
+    return route.fulfill({contentType: 'application/xml', body});
+  });
+  await page.goto('./');
+  await expect(page.locator('#loading-bar')).toHaveAccessibleName('Feed check complete');
+  await expect(page.locator('#all-count')).toHaveText('151');
+  for (let attempt = 0; attempt < 2; attempt++) {
+    revision++;
+    await page.clock.fastForward(16 * 60 * 1000);
+    await expect(page.locator('#loading-count-value')).toHaveText('1 / 2');
+    await expect(page.locator('#new-items')).toBeHidden();
+    await expect.poll(() => Boolean(waiting)).toBe(true);
+    await waiting.fulfill({contentType: 'application/xml', body: defaultFeed('slow-news')});
+    waiting = undefined;
+    await expect(page.locator('#loading-bar')).toHaveAccessibleName('Feed check complete');
+    await expect(page.locator('#new-items')).toBeHidden();
+    expect((await readStoredLibrary(page)).articles).toHaveLength(151);
+  }
+});
 
 test('Unread keeps opened and manually read rows in place until the view or list is refreshed', async ({page}) => {
   await loadReader(page);

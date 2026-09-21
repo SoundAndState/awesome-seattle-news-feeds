@@ -9,6 +9,17 @@ import {readingBackup, restoreReadingBackup} from './backup.mjs';
 const emptyRoute = {mode: 'articles', view: 'unread', category: '', source: '', query: '', savedKind: 'all', unavailableOnly: false, limit: 60, article: '', about: false, feedList: false, filters: false};
 const sortItems = (a, b) => (b.published || b.updated || 0) - (a.published || a.updated || 0) || b.firstSeen - a.firstSeen || a.id.localeCompare(b.id);
 
+function prunableItems(items, states, feedMap, now) {
+  const kept = new Map(), remove = [], cutoff = now - 30 * 86400000;
+  for (const item of [...items].sort(sortItems)) {
+    if (states.get(item.id)?.saved) continue;
+    const ids = item.feedIds.filter(id => feedMap.has(id));
+    if (item.firstSeen < cutoff || !ids.length || ids.every(id => (kept.get(id) || 0) >= 150)) remove.push(item.id);
+    else for (const id of ids) kept.set(id, (kept.get(id) || 0) + 1);
+  }
+  return remove;
+}
+
 export function sourceName(item, state) {
   return state.feedMap.get(item.feedIds[0])?.name || item.sourceName || 'Previously saved source';
 }
@@ -104,13 +115,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         if (!isCurrent()) return;
         const state = get();
         if (state.catalogFallback) return;
-        const kept = new Map(), remove = [], cutoff = runtime.now() - 30 * 86400000;
-        for (const item of [...state.articles.values(), ...state.pending.values()].sort(sortItems)) {
-          if (state.states.get(item.id)?.saved) continue;
-          const ids = item.feedIds.filter(id => state.feedMap.has(id));
-          if (item.firstSeen < cutoff || !ids.length || ids.every(id => (kept.get(id) || 0) >= 150)) remove.push(item.id);
-          else for (const id of ids) kept.set(id, (kept.get(id) || 0) + 1);
-        }
+        const remove = prunableItems([...state.articles.values(), ...state.pending.values()], state.states, state.feedMap, runtime.now());
         if (!remove.length) return;
         const removed = await removeArticles(remove);
         if (!isCurrent()) return;
@@ -154,19 +159,27 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         const {items, transport, fetchedAt, stale} = await loadFeed(feed, {signal: run.controller.signal});
         if (run.controller.signal.aborted) return;
         const state = get(), articles = new Map(state.articles), pending = new Map(state.pending);
-        // Apply the same per-feed window before buffering as when pruning.
-        // Otherwise long feeds repeatedly announce their discarded tail as new.
+        // Bound the response first so an undated feed's discarded tail cannot
+        // jump ahead of stored entries just because it was received again.
         let unsaved = 0;
-        const retained = [...items].sort(sortItems).filter(item => state.states.get(item.id)?.saved || unsaved++ < 150);
-        const merged = retained.map(item => {
-          const existing = articles.get(item.id) || pending.get(item.id);
-          const article = mergeSourceItem(existing, item, feed, state.feedMap, cleanText);
-          if (!articles.has(item.id) && !state.states.has(item.id) && item.id !== get().route.article && (run.buffer || readingStarted.has(run.mode))) pending.set(item.id, article);
-          else {articles.set(item.id, article); pending.delete(item.id);}
+        const incoming = [...items].sort(sortItems).filter(item => state.states.get(item.id)?.saved || unsaved++ < 150);
+        // Also account for newer stored stories absent from this response.
+        // Never announce bodies cleanup will discard.
+        const candidates = new Map([...articles, ...pending]);
+        const merged = incoming.map(item => {
+          const article = mergeSourceItem(candidates.get(item.id), item, feed, state.feedMap, cleanText);
+          candidates.set(item.id, article);
           return article;
         });
+        const discarded = new Set(prunableItems(candidates.values(), state.states, state.feedMap, runtime.now()));
+        const retained = merged.filter(item => !discarded.has(item.id));
+        for (const article of retained) {
+          const {id} = article;
+          if (!articles.has(id) && !state.states.has(id) && id !== state.route.article && (run.buffer || readingStarted.has(run.mode))) pending.set(id, article);
+          else {articles.set(id, article); pending.delete(id);}
+        }
         set({articles, pending});
-        await save('articles', merged);
+        await save('articles', retained);
         if (run.controller.signal.aborted) return;
         const now = runtime.now();
         const status = {id: feed.id, lastAttempt: now, lastSuccess: now, nextCheck: nextRefresh(0, now), failures: 0, items: items.length, transport, fetchedAt, stale};
