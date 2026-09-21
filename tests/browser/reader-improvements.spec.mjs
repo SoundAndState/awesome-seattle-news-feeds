@@ -160,12 +160,11 @@ test('the mobile menu closes with Escape and compact-header filters restore focu
   await expect(page.locator('#resource-menu')).toBeHidden();
   await page.evaluate(() => scrollTo(0, 1000));
   await expect(page.locator('#reader-header')).toHaveClass(/compact/);
-  await openMenu(page);
-  await page.locator('#menu-filter-button').click();
+  await page.locator('#filter-button').click();
   await expect(page.locator('#filter-dialog')).toBeVisible();
   await page.goBack();
   await expect(page.locator('#filter-dialog')).toBeHidden();
-  await expect(page.locator('#menu-toggle')).toBeFocused();
+  await expect(page.locator('#filter-button')).toBeFocused();
   await page.keyboard.press('Escape');
   await page.keyboard.press('Tab');
   await page.locator('#saved-button').focus();

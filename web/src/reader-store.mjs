@@ -36,6 +36,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
   const {openLibrary, save, updateStates, importItems, removeArticles} = library;
   let navigation, queuedNavigation, activeRun, loadingRun, retryAgain, startupController, started = false, epoch = 0;
   let stateWrites = Promise.resolve();
+  let selectionVersion = 0;
   const stateVersions = new Map();
   let onNavigate = () => {}, removeListeners = () => {};
   const readingStarted = new Set();
@@ -43,6 +44,8 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
     const notice = message => set({notice: message});
     const announce = message => set({announcement: message});
     const navigate = (changes, options) => {
+      // Selecting the current view is also an explicit request to rebuild it.
+      if (Object.hasOwn(changes, 'view') && !changes.filters) resetSelection();
       if (navigation) navigation.go(changes, options);
       else {
         queuedNavigation = {changes: {...queuedNavigation?.changes, ...changes}, options};
@@ -62,18 +65,29 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       stateWrites = result.catch(() => {});
       return result;
     };
-    const commitStates = (updates, patch = {}) => {
+    const resetSelection = () => {selectionVersion++; set({retainedRead: new Set()});};
+    const retainVisible = (updates, version = selectionVersion) => {
+      const state = get(), retainedRead = new Set(state.retainedRead);
+      if (version === selectionVersion && state.route.view === 'unread') {
+        const visible = new Set(selectItems(state).map(item => item.id));
+        for (const item of updates) if (item.read && visible.has(item.id)) retainedRead.add(item.id);
+      }
+      return retainedRead;
+    };
+    const commitStates = (updates, patch = {}, version = selectionVersion) => {
+      const retainedRead = retainVisible(updates, version);
       const states = new Map(get().states);
       for (const item of updates) {
         states.set(item.id, item);
         stateVersions.set(item.id, (stateVersions.get(item.id) || 0) + 1);
       }
-      set({states, ...patch});
+      set({states, retainedRead, ...patch});
     };
-    const setItemState = (id, changes, {retain = false} = {}) => {
+    const setItemState = (id, changes) => {
       // Capture a displayed item before queuing: pruning may already be writing
       // its removal when the reader chooses Save on the still-visible card.
       const displayedItem = get().articles.get(id) || get().pending.get(id);
+      const version = selectionVersion;
       return queueStateWrite(async () => {
         const current = get().states.get(id);
         const change = typeof changes === 'function' ? changes(current) : changes;
@@ -81,10 +95,8 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         const result = await updateStates([{id, ...change}], {articles: article ? [article] : []});
         const item = result.states[0];
         const storedArticle = result.articles[0] || article;
-        const retainedRead = new Set(get().retainedRead);
-        if (!retain) retainedRead.delete(id);
         const restored = item.saved && storedArticle && !get().articles.has(id) && !get().pending.has(id) ? {articles: new Map(get().articles).set(id, storedArticle)} : {};
-        commitStates([item], {retainedRead, ...restored});
+        commitStates([item], restored, version);
       });
     };
     async function prune(isCurrent = () => true) {
@@ -93,7 +105,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         const state = get();
         if (state.catalogFallback) return;
         const kept = new Map(), remove = [], cutoff = runtime.now() - 30 * 86400000;
-        for (const item of [...state.articles.values(), ...state.pending.values()].sort((a, b) => b.firstSeen - a.firstSeen)) {
+        for (const item of [...state.articles.values(), ...state.pending.values()].sort(sortItems)) {
           if (state.states.get(item.id)?.saved) continue;
           const ids = item.feedIds.filter(id => state.feedMap.has(id));
           if (item.firstSeen < cutoff || !ids.length || ids.every(id => (kept.get(id) || 0) >= 150)) remove.push(item.id);
@@ -126,10 +138,10 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
             articles.set(item.id, local && local !== previous ? local : item);
             pending.delete(item.id);
           }
-          else if (!articles.has(item.id) && !pending.has(item.id)) pending.set(item.id, item);
+          else if (!articles.has(item.id) && !pending.has(item.id)) (states.has(item.id) ? articles : pending).set(item.id, item);
         }
         for (const id of new Set([...get().states.keys(), ...states.keys()])) stateVersions.set(id, (stateVersions.get(id) || 0) + 1);
-        set({states, articles, pending});
+        set({states, articles, pending, retainedRead: retainVisible([...states.values()])});
       });
     }
     const exportSnapshot = () => queueStateWrite(async () => {
@@ -142,11 +154,15 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         const {items, transport, fetchedAt, stale} = await loadFeed(feed, {signal: run.controller.signal});
         if (run.controller.signal.aborted) return;
         const state = get(), articles = new Map(state.articles), pending = new Map(state.pending);
-        const merged = items.map(item => {
+        // Apply the same per-feed window before buffering as when pruning.
+        // Otherwise long feeds repeatedly announce their discarded tail as new.
+        let unsaved = 0;
+        const retained = [...items].sort(sortItems).filter(item => state.states.get(item.id)?.saved || unsaved++ < 150);
+        const merged = retained.map(item => {
           const existing = articles.get(item.id) || pending.get(item.id);
           const article = mergeSourceItem(existing, item, feed, state.feedMap, cleanText);
-          if (!articles.has(item.id) && item.id !== get().route.article && (run.buffer || readingStarted.has(run.mode))) pending.set(item.id, article);
-          else articles.set(item.id, article);
+          if (!articles.has(item.id) && !state.states.has(item.id) && item.id !== get().route.article && (run.buffer || readingStarted.has(run.mode))) pending.set(item.id, article);
+          else {articles.set(item.id, article); pending.delete(item.id);}
           return article;
         });
         set({articles, pending});
@@ -168,7 +184,8 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         if (activeRun === run) publishRun();
       }
     }
-    async function refresh({retryFailed = false, only = ''} = {}) {
+    async function refresh({retryFailed = false, only = '', resetList = false} = {}) {
+      if (resetList) get().revealPending();
       const state = get();
       if (!started || !state.catalog || ['saved', 'excluded'].includes(state.route.view) || !runtime.isVisible()) return;
       if (activeRun) {retryAgain = {retryFailed, only}; return;}
@@ -184,9 +201,9 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         if (run.controller.signal.aborted) return;
         const current = get(), states = new Map(current.states), articles = new Map(current.articles), pending = new Map(current.pending), health = new Map(current.health);
         for (const item of stored.state) if (stateVersions.get(item.id) === beforeVersions.get(item.id)) states.set(item.id, item);
-        for (const item of stored.articles) if (!articles.has(item.id) && !pending.has(item.id)) (run.buffer ? pending : articles).set(item.id, item);
+        for (const item of stored.articles) if (!articles.has(item.id) && !pending.has(item.id)) (run.buffer && !states.has(item.id) ? pending : articles).set(item.id, item);
         for (const item of stored.feeds) if ((item.nextCheck || 0) > (health.get(item.id)?.nextCheck || 0)) health.set(item.id, item);
-        set({states, articles, pending, health});
+        set({states, articles, pending, health, retainedRead: retainVisible([...states.values()])});
         const remaining = queue.filter(due);
         if (!remaining.length) return;
         run.total = remaining.length; loadingRun = run; publishRun();
@@ -259,14 +276,15 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
           const changed = ['mode', 'view', 'category', 'source'].some(key => previous[key] !== route[key]);
           const selectionChanged = ['mode', 'view', 'category', 'source', 'query', 'savedKind', 'unavailableOnly'].some(key => previous[key] !== route[key]);
           if (changed) {activeRun?.controller.abort(); loadingRun = null; publishRun();}
-          set({route, ...(selectionChanged ? {retainedRead: new Set()} : {})});
+          if (selectionChanged) resetSelection();
+          set({route});
           if (['all', 'unread'].includes(route.view) && get().preferredView !== route.view) setPreference('preferredView', route.view, {id: 'listView', value: route.view});
           onNavigate(route, y);
           if (route.article) {
             const item = get().articles.get(route.article);
             if (item && itemMode(item, get().feedMap) === 'posts') {
               navigation?.go({article: '', mode: 'posts', view: route.view === 'saved' ? 'saved' : 'all', savedKind: route.view === 'saved' ? 'posts' : route.savedKind}, {replace: true, keepScroll: true});
-            } else if (item) setItemState(item.id, {read: true}, {retain: true});
+            } else if (item) setItemState(item.id, {read: true});
           }
           if (get().ready && changed && !['saved', 'excluded'].includes(route.view)) refresh();
         }});
@@ -302,30 +320,29 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       endSearch() {navigation?.endSearch();},
       async toggleSaved(id) {await setItemState(id, current => ({saved: !current?.saved})); announce(get().states.get(id)?.saved ? 'The reader saved this item.' : 'The reader removed this item from Saved.');},
       async toggleRead(id) {await setItemState(id, current => ({read: !current?.read})); announce(get().states.get(id)?.read ? 'The reader marked this item as read.' : 'The reader marked this item as unread.');},
-      markScrolled(ids) {return queueStateWrite(async () => {
-        const state = get(), retainedRead = new Set(state.retainedRead);
+      markScrolled(ids) {const version = selectionVersion; return queueStateWrite(async () => {
+        const state = get();
         const {states: updates} = await updateStates(ids.filter(id => state.articles.has(id)).map(id => ({id, read: true})));
-        // Navigation while a write is pending starts a new visible selection.
-        if (get().route === state.route) for (const item of updates) retainedRead.add(item.id);
-        commitStates(updates, {retainedRead: get().route === state.route ? retainedRead : get().retainedRead});
+        commitStates(updates, {}, version);
       });},
-      bulkRead() {return queueStateWrite(async () => {
+      bulkRead() {const version = selectionVersion; return queueStateWrite(async () => {
         const state = get();
         const result = await updateStates(selectItems(state).filter(item => !state.states.get(item.id)?.read).map(({id}) => ({id, read: true})));
         const previous = new Map(result.previous.map(item => [item.id, item]));
         const updates = result.states;
         const undoRead = updates.filter(item => !previous.get(item.id)?.read).map(({id}) => ({id, read: false}));
-        commitStates(updates, {undoRead, retainedRead: new Set()});
+        commitStates(updates, {undoRead}, version);
       });},
       undo() {return queueStateWrite(async () => {
         const {states: updates} = await updateStates(get().undoRead);
-        commitStates(updates, {undoRead: [], retainedRead: new Set()});
+        commitStates(updates, {undoRead: []});
         announce('The reader restored each item’s previous read or unread mark.');
       });},
       revealPending() {
+        resetSelection();
         const state = get(), articles = new Map(state.articles), pending = new Map(state.pending);
         for (const [id, item] of pending) if (itemMode(item, state.feedMap) === state.route.mode) {articles.set(id, item); pending.delete(id);}
-        set({articles, pending}); announce('The reader added new items to the list.');
+        set({articles, pending}); announce(pending.size < state.pending.size ? 'The reader added new items to the list.' : 'The reader refreshed the list.');
       },
       async toggleExcluded(id) {
         const excluded = new Set(get().excluded);

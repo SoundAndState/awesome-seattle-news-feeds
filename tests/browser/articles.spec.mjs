@@ -222,6 +222,9 @@ test('article fonts load locally with real italics and external destinations wai
 test('font failure and forced colors retain readable articles and explicit states', async ({page}) => {
   await page.route('**/*.woff2', route => route.abort());
   await load(page);
+  await page.locator('#reading-options summary').click();
+  await page.locator('#scroll-read').uncheck();
+  await page.locator('#reading-options summary').click();
   await page.emulateMedia({forcedColors:'active', reducedMotion:'reduce'});
   await page.setViewportSize({width:320,height:568});
   await noHorizontalOverflow(page, 'html');

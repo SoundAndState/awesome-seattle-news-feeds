@@ -286,7 +286,7 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 
 /* Persistent navigation uses the same centered measure as the feed. */
 .reader-header {position:sticky;top:0;z-index:10;background:var(--paper);border-bottom:1px solid var(--line)}
-.masthead,.mode-bar,.header-tools,main {max-width:880px}
+.masthead,.mode-bar,.header-tools,.header-status,main {max-width:880px}
 .masthead {padding:18px 28px 8px;justify-content:space-between;gap:12px}
 .brand-copy,.brand-name,.wordmark small,.brand-icon {top:auto}
 .wordmark {gap:8px;min-height:54px}
@@ -310,7 +310,16 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .search input {min-height:42px}
 .search input::-webkit-search-cancel-button {-webkit-appearance:none}
 #clear-search {flex-shrink:0;width:44px;background:none;font-size:24px;padding:0}
-#filter-button {padding:6px 4px}
+#filter-button {padding:10px;flex-shrink:0}
+.header-status {position:relative;margin:auto;padding:0 28px 8px}
+.header-status .feed-loading {margin:0;padding:0 8px 4px;background:none}
+.header-status .status-row {gap:12px;flex-wrap:wrap}
+.header-status .feed-progress {flex:1;font-size:12px;gap:8px}
+.header-status #reading-options {margin-left:auto}
+.header-status summary {font-size:13px;white-space:nowrap}
+.header-status .options-content {left:auto;right:0;max-height:calc(100dvh - 300px);overflow:auto}
+.header-status .new-items {margin:4px 0 0;padding:6px 10px}
+.reader-header :is(button,input,summary) {scroll-margin:0}
 #saved-button {padding:6px 8px}
 #back-to-top {position:fixed;bottom:20px;right:20px;z-index:9;background:var(--surface);box-shadow:0 2px 12px #0002}
 .story-title {width:100%}
@@ -347,9 +356,11 @@ html {scroll-padding-top:240px;overflow-anchor:none}
 dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
 @media(min-width:761px) {
   .masthead nav {font-size:14px}
+  .header-status {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 16px;align-items:center}
+  .header-status:has(.feed-loading[hidden]) .status-row,.header-status .new-items {grid-column:1/-1}
 }
 @media(max-width:760px) {
-  .masthead,.mode-bar,.header-tools,main {padding-inline:20px}
+  .masthead,.mode-bar,.header-tools,.header-status,main {padding-inline:20px}
   .masthead {padding-block:12px 4px;align-items:center;flex-wrap:nowrap}
   .wordmark {gap:6px;min-height:52px}
   .brand-icon {width:44px;height:44px}
@@ -365,9 +376,11 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
   .mode-switch {gap:20px}
   .mode-switch button {font-size:16px;padding:8px 4px}
   .header-tools {gap:8px;flex-wrap:wrap;padding-top:4px;padding-bottom:8px}
-  .header-tools .view-nav {order:1}
-  #filter-button {order:2;margin-left:auto}
-  #search-panel {flex-basis:100%;order:3}
+  .header-tools .view-nav {order:1;flex-basis:100%}
+  .header-status #reading-options {position:static}
+  .header-status .options-content {right:20px;width:min(330px,calc(100vw - 40px))}
+  #filter-button {order:3}
+  #search-panel {order:2}
   .compact .brand-name {font-size:22px}
   .compact .brand-icon {width:30px;height:30px}
   .compact .wordmark {min-height:36px}
@@ -375,8 +388,8 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
   .compact .masthead {padding-block:4px}
   .compact .masthead #resource-menu {top:52px}
   .compact .header-tools {flex-wrap:nowrap}
+  .compact .header-tools .view-nav {flex-basis:auto}
   .compact #search-panel {order:2;flex-basis:auto}
-  .compact #filter-button {display:none}
   .compact .header-tools .view-nav button {padding-inline:6px}
   .compact #clear-search {width:32px;min-width:32px}
   .story {padding-block:0}
@@ -387,7 +400,7 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
   #back-to-top {bottom:12px;right:12px}
 }
 @media(max-width:360px) {
-  .masthead,.mode-bar,.header-tools,main {padding-inline:16px}
+  .masthead,.mode-bar,.header-tools,.header-status,main {padding-inline:16px}
   .brand-name {font-size:24px}
   .brand-icon {width:36px;height:36px}
   .wordmark small {font-size:9px}

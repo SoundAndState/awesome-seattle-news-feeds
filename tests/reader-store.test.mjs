@@ -105,6 +105,85 @@ test('saved confirmation waits for storage and concurrent save, read, and scroll
   assert.equal(store.getState().retainedRead.has(item.id), true);
 });
 
+test('preview, manual, bulk, and external read marks keep Unread rows until an explicit list action', async t => {
+  const items = ['preview', 'manual', 'external', 'bulk'].map(id => article(id));
+  const {store, records} = harness(t, {items});
+  await store.getState().start();
+  const original = selectItems(store.getState()).map(item => item.id);
+  store.getState().navigate({article: 'preview'});
+  await waitUntil(() => store.getState().states.get('preview')?.read);
+  store.getState().closeDialog();
+  await store.getState().toggleRead('manual');
+  await store.getState().toggleSaved('manual');
+  records.state.set('external', {id: 'external', read: true});
+  await store.getState().syncLibrary();
+  assert.deepEqual(selectItems(store.getState()).map(item => item.id), original);
+  store.getState().navigate({view: 'unread', filters: true});
+  store.getState().closeDialog();
+  assert.deepEqual(selectItems(store.getState()).map(item => item.id), original);
+  await store.getState().bulkRead();
+  assert.deepEqual(selectItems(store.getState()).map(item => item.id), original);
+  await store.getState().undo();
+  assert.deepEqual(selectItems(store.getState()).map(item => item.id), original);
+  store.getState().navigate({view: 'unread'});
+  assert.deepEqual(selectItems(store.getState()).map(item => item.id), ['bulk']);
+  await store.getState().toggleRead('bulk');
+  assert.equal(selectItems(store.getState()).length, 1);
+  await store.getState().refresh({resetList: true});
+  assert.equal(selectItems(store.getState()).length, 0);
+});
+
+test('a read write completing after a list reset does not retain an obsolete row', async t => {
+  let release;
+  const {store} = harness(t, {items: [article('slow')], beforeSave: async name => {
+    if (name === 'state') await new Promise(resolve => {release = resolve;});
+  }});
+  await store.getState().start();
+  const marking = store.getState().toggleRead('slow');
+  await waitUntil(() => release);
+  store.getState().navigate({view: 'unread'});
+  release(); await marking;
+  assert.equal(selectItems(store.getState()).length, 0);
+});
+
+test('a 200-item feed with five saves does not repeatedly buffer its 45 pruned items', async t => {
+  const now = Date.now();
+  const items = Array.from({length: 200}, (_, i) => ({...article(`item-${i}`), published: now - i * 1000, firstSeen: now}));
+  const {store, records} = harness(t, {items, loadFeed: async () => ({items: [...items].reverse().map(item => ({...item, updated: now + 60000, firstSeen: now + 60000})), transport: 'direct'})});
+  for (const item of items.slice(150)) records.state.set(item.id, {id: item.id, read: true, saved: items.indexOf(item) >= 195});
+  await store.getState().start();
+  assert.equal(store.getState().articles.size, 155);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const status = {id: news.id, nextCheck: 0};
+    records.feeds.set(news.id, status);
+    store.setState(state => ({health: new Map(state.health).set(news.id, status)}));
+    await store.getState().refresh();
+    assert.equal(store.getState().pending.size, 0);
+    assert.equal(store.getState().articles.size, 155);
+    assert.equal(records.articles.size, 155);
+    assert.equal(store.getState().health.get(news.id).items, 200);
+    for (const item of items.slice(195)) assert.equal(store.getState().states.get(item.id).saved, true);
+  }
+});
+
+test('returning items with remembered read marks are not announced as new after their bodies expire', async t => {
+  const old = {...article('old-read'), firstSeen: Date.now() - 31 * 86400000};
+  const fresh = article('new-unread');
+  const {store, records} = harness(t, {items: [old, article('current')], loadFeed: async () => ({items: [{...old, firstSeen: Date.now()}, fresh], transport: 'direct'})});
+  records.state.set(old.id, {id: old.id, read: true});
+  await store.getState().start();
+  assert.equal(store.getState().articles.has(old.id), false);
+  const status = {id: news.id, nextCheck: 0};
+  records.feeds.set(news.id, status);
+  store.setState(state => ({health: new Map(state.health).set(news.id, status)}));
+  await store.getState().refresh();
+  assert.deepEqual([...store.getState().pending.keys()], [fresh.id]);
+  assert.equal(store.getState().states.get(old.id).read, true);
+  store.getState().revealPending();
+  assert.equal(selectItems(store.getState()).some(item => item.id === fresh.id), true);
+  assert.equal(selectItems(store.getState()).some(item => item.id === old.id), false);
+});
+
 test('bulk read and undo join pending saves without discarding saved marks', async t => {
   let releaseSave, blocked = false;
   const item = article('bulk');
