@@ -212,6 +212,26 @@ test('opening the library and catalog does not show feed progress, including an 
   await expect(page.locator('#stories')).toContainText('reload the page');
 });
 
+test('a stalled article feed and direct retry finish within fifteen seconds while available articles remain readable', async ({page}) => {
+  const finish = await prepare(page);
+  let direct;
+  await page.route(news[2].feed, route => {direct = route;});
+  await page.goto('./');
+  await finish(news[0]); await finish(news[1]);
+  await expect(page.locator('#loading-bar')).toHaveAttribute('value', '2');
+  await page.clock.fastForward(10000);
+  await expect.poll(() => Boolean(direct)).toBe(true);
+  await expect(page.locator('#refresh')).toBeDisabled();
+  await page.clock.fastForward(5000);
+  await expect(page.locator('#loading-bar')).toHaveAccessibleName('Feed check complete');
+  await expect(page.locator('#loading-bar')).toHaveAttribute('value', '3');
+  await expect(page.locator('#refresh')).toBeEnabled();
+  await expect(page.getByRole('button', {name:'1 unavailable', exact:true})).toBeVisible();
+  await expect(page.locator('.story')).toHaveCount(2);
+  await direct.fulfill({contentType:'application/xml', body:fixture(news[2].id)});
+  await finish.release([news[2]]);
+});
+
 test('changing views clears progress while going offline preserves a dismissible paused status', async ({page}) => {
   const finish = await prepare(page);
   await page.goto('./');

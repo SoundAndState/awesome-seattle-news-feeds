@@ -103,3 +103,69 @@ test('canceling an inactive mode stops fetching without a direct publisher retry
   }}),{name:'AbortError'});
   assert.equal(calls,1);
 });
+
+const nextTurn = () => new Promise(resolve => setImmediate(resolve));
+
+test('the 15-second feed deadline includes the service attempt and direct retry', async t => {
+  t.mock.timers.enable({apis:['setTimeout']});
+  const requests = [];
+  const checked = assert.rejects(loadFeed(feed, proxy, {fetchImpl: (url, {signal}) => {
+    requests.push({url, signal});
+    return new Promise(() => {});
+  }}), /Through the feed service: .*in time\. Direct from the publisher: .*in time\./);
+  await nextTurn();
+  t.mock.timers.tick(9999); await nextTurn();
+  assert.equal(requests.length, 1); assert.equal(requests[0].signal.aborted, false);
+  t.mock.timers.tick(1); await nextTurn();
+  assert.equal(requests.length, 2); assert.equal(requests[0].signal.aborted, true);
+  assert.equal(requests[1].url, feed.feed);
+  t.mock.timers.tick(4999); await nextTurn();
+  assert.equal(requests[1].signal.aborted, false);
+  t.mock.timers.tick(1);
+  await checked;
+  assert.equal(requests[1].signal.aborted, true);
+});
+
+test('stalled feed and error bodies are canceled before the direct retry', async t => {
+  t.mock.timers.enable({apis:['setTimeout']});
+  for (const status of [200, 502]) {
+    let requests = 0, canceled = false;
+    const checked = loadFeed(feed, proxy, {fetchImpl: async () => {
+      if (++requests === 2) return new Response(xml);
+      return new Response(new ReadableStream({
+        start(controller) {controller.enqueue(new TextEncoder().encode(status === 200 ? '<rss>' : '{'));},
+        cancel() {canceled = true; return new Promise(() => {});},
+      }), {status});
+    }});
+    await nextTurn();
+    t.mock.timers.tick(10000);
+    const result = await checked;
+    assert.equal(requests, 2); assert.equal(canceled, true);
+    assert.equal(result.transport, 'direct'); assert.equal(result.items.length, 1);
+  }
+});
+
+test('a direct-only feed also stops waiting for a stalled body at the total deadline', async t => {
+  t.mock.timers.enable({apis:['setTimeout']});
+  let canceled = false;
+  const checked = assert.rejects(loadFeed(feed, '', {fetchImpl: async () => new Response(new ReadableStream({
+    start(controller) {controller.enqueue(new TextEncoder().encode('<rss>'));},
+    cancel() {canceled = true; return new Promise(() => {});},
+  }))}), /Direct from the publisher: .*in time/);
+  await nextTurn();
+  t.mock.timers.tick(15000);
+  await checked;
+  assert.equal(canceled, true);
+});
+
+test('caller cancellation settles an uncooperative fetch and discards its late response', async () => {
+  const controller = new AbortController(), response = Promise.withResolvers();
+  let calls = 0, canceled = false;
+  const checked = assert.rejects(loadFeed(feed, proxy, {signal:controller.signal, fetchImpl: () => {calls++; return response.promise;}}), {name:'AbortError'});
+  controller.abort();
+  await checked;
+  response.resolve(new Response(new ReadableStream({cancel() {canceled = true;}})));
+  await nextTurn();
+  assert.equal(calls, 1); assert.equal(canceled, true);
+  await assert.rejects(loadFeed(feed, proxy, {signal:controller.signal, fetchImpl: () => assert.fail('Canceled request started')}), {name:'AbortError'});
+});

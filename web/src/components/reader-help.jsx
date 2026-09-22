@@ -44,6 +44,7 @@ export function AboutHelp({site, state}) {
 </details>
 <details><summary>How the reader refreshes and stores items</summary>
 <p>While you view Articles or Posts, the reader checks the feeds that match your filters. It pauses those checks when you leave the tab and checks again when you return. After a feed loads successfully, the reader waits at least 15 minutes before checking it again. If a feed fails, the reader waits longer between attempts. Choose Refresh to retry failed feeds immediately.</p>
+<p>The reader waits up to 15 seconds for each feed, including any direct retry at the publisher. If a feed takes too long, the reader stops waiting and keeps its stored items available. Choose Refresh to try again.</p>
 <p>When the reader finds new items while you are reading, it shows their count alongside feed progress in the header. The button stays disabled while feeds are still being checked. Choose Show new articles or Show new posts to add the items, close the status panel, and return to the top of the list.</p>
 <p>The reader checks your browser’s stored feeds before showing a progress bar. The bar counts completed checks, including feeds the reader could not load. It does not estimate how much time remains. If there are no new items, choose Dismiss feed status to close the finished panel.</p>
 <p>The reader keeps unsaved items for up to 30 days and up to 150 items per feed. It keeps saved items until you remove them or clear this site's browser data.</p>

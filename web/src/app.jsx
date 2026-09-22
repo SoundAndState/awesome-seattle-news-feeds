@@ -31,21 +31,24 @@ class ReadingViewport extends Component {
     const selection = route => JSON.stringify([route.mode, route.view, route.category, route.source, route.query, route.savedKind, route.unavailableOnly]);
     const same = selection(previous.state.route) === selection(state.route);
     const anchor = same && scrollY > 0 ? [...document.querySelectorAll('#stories .story')].map(card => ({id: card.dataset.article, ...pickBounds(card)})).find(card => card.bottom > 60 && card.top < innerHeight && (state.route.view !== 'unread' || !state.states.get(card.id)?.read)) : null;
-    return {focus: focusedItem(), anchor};
+    return {focus: focusedItem(), focusedElement: document.activeElement, anchor};
   }
   componentDidUpdate(previous, previousState, snapshot) {
     if (!snapshot) return;
-    if (snapshot.focus && !document.querySelector('dialog[open]')) focusControl(snapshot.focus);
+    if (snapshot.focus && snapshot.focusedElement !== document.activeElement && !document.querySelector('dialog[open]')) focusControl(snapshot.focus);
     if (snapshot.anchor) {
       const card = [...document.querySelectorAll('#stories .story')].find(card => card.dataset.article === snapshot.anchor.id);
-      if (card) window.scrollBy(0, card.getBoundingClientRect().top - snapshot.anchor.top);
+      const delta = card ? card.getBoundingClientRect().top - snapshot.anchor.top : 0;
+      // Even scrollBy(0, 0) interrupts native momentum scrolling on phones.
+      // Read marks keep rows in place, so only compensate for a real shift.
+      if (Math.abs(delta) >= 1) window.scrollBy(0, delta);
     }
   }
   render() {return this.props.children;}
 }
 function pickBounds(node) {const {top, bottom} = node.getBoundingClientRect(); return {top, bottom};}
 
-function Header({state, site, menuOpen, setMenuOpen, compact, children}) {
+function Header({state, site, menuOpen, setMenuOpen, compact, onSearch, children}) {
   const header = useRef(null);
   useLayoutEffect(() => {
     const views = header.current.querySelector('#library-views');
@@ -81,7 +84,7 @@ function Header({state, site, menuOpen, setMenuOpen, compact, children}) {
     </header>
     <div className="mode-bar"><nav aria-label="Reading mode" className="mode-switch">{['articles', 'posts'].filter(kind => site.capabilities[kind]).map(kind => <button key={kind} data-mode={kind} aria-pressed={['all', 'unread'].includes(view) && mode === kind} onClick={() => state.switchMode(kind)}>{kind === 'articles' ? 'Articles' : 'Posts'}</button>)}</nav><button id="saved-button" data-view="saved" aria-pressed={view === 'saved'} onClick={() => navigate({view: 'saved', savedKind: 'all', source: '', category: '', query: '', unavailableOnly: false})}>Saved <span id="saved-count" className="count">{savedCount}</span></button></div>
     <div className="header-tools"><nav id="library-views" className="view-nav" aria-label={mode === 'posts' ? 'Post view' : 'Article view'}>{[['all', 'Latest', current.length], ['unread', 'Unread', current.filter(item => !state.states.get(item.id)?.read).length]].map(([kind, label, count]) => <button key={kind} data-view={kind} aria-pressed={view === kind} onClick={() => navigate({view: kind, unavailableOnly: false})}>{label} <span id={`${kind}-count`} className="count sr-only">{count}</span></button>)}</nav>
-      <div id="search-panel"><div className="search"><span className="sr-only" id="search-label">{searchLabel}</span><input id="search" type="search" placeholder={`${searchLabel}…`} aria-labelledby="search-label" aria-describedby="search-help" value={query} onChange={event => navigate({query: event.target.value}, {search: true})} onBlur={state.endSearch}/><button id="clear-search" type="button" aria-label="Clear search" hidden={!query} onClick={() => {navigate({query: ''}); document.querySelector('#search').focus(); state.announce('Search cleared.');}}>×</button></div><p id="search-help" className="sr-only">{view === 'excluded' ? 'Search the sources you have excluded.' : view === 'sources' ? `Search the ${mode === 'posts' ? 'accounts' : 'publications'} in this list.` : 'Search the items this reader has loaded in your current view.'}</p></div>
+      <div id="search-panel"><div className="search"><span className="sr-only" id="search-label">{searchLabel}</span><input id="search" type="search" placeholder={`${searchLabel}…`} aria-labelledby="search-label" aria-describedby="search-help" value={query} onChange={event => onSearch(event.target.value, {search: true})} onKeyDown={event => {if (event.key === 'Enter' && !event.nativeEvent.isComposing) {event.preventDefault(); onSearch(query, {search: true});}}} onBlur={state.endSearch}/><button id="clear-search" type="button" aria-label="Clear search" hidden={!query} onClick={() => {onSearch(''); document.querySelector('#search').focus({preventScroll: true}); state.announce('Search cleared.');}}>×</button></div><p id="search-help" className="sr-only">{view === 'excluded' ? 'Search the sources you have excluded.' : view === 'sources' ? `Search the ${mode === 'posts' ? 'accounts' : 'publications'} in this list.` : 'Search the items this reader has loaded in your current view.'}</p></div>
       <button id="filter-button" className="icon-button" aria-label="Filters" title="Filters" aria-haspopup="dialog" hidden={['saved', 'excluded'].includes(view)} onClick={() => open('filters')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg></button>
     </div>
     <div className="header-status">{children}</div>
@@ -221,10 +224,14 @@ export function App({store, site, navigationPosition}) {
     backToTop();
     document.querySelector('#heading').focus({preventScroll: true});
   };
+  const search = (query, options) => {
+    flushSync(() => state.navigate({query}, options));
+    backToTop();
+  };
   const filterActive = route.category || route.source || route.query;
   return <>
     <a className="skip-link" href="#main" onClick={event => {event.preventDefault(); document.querySelector('#main').focus();}}>Skip to stories</a>
-    <Header state={state} site={site} menuOpen={menuOpen} setMenuOpen={setMenuOpen} compact={scrollState.compact}>
+    <Header state={state} site={site} menuOpen={menuOpen} setMenuOpen={setMenuOpen} compact={scrollState.compact} onSearch={search}>
       <FeedStatus state={state} pendingCount={pendingCount} onReveal={revealNew}><details id="reading-options" hidden={['sources', 'saved', 'excluded'].includes(route.view)}><summary aria-label="Reading options" title="Reading options"><svg className="status-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4m4 0h10M3 17h10m4 0h4"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg><span className="status-action-label">Reading options</span></summary><div className="options-content"><label className="scroll-read-control"><input id="scroll-read" type="checkbox" checked={state.markReadOnScroll} onChange={event => state.setMarkReadOnScroll(event.target.checked)}/>Mark items read as I scroll past them</label><button id="mark-read" className="secondary-button" disabled={!unread} onClick={async () => {await state.bulkRead(); document.querySelector('#reading-options').open = false; document.querySelector('#undo-read').focus({preventScroll: true});}}>Mark {unread.toLocaleString()} matching {route.mode} read</button><p className="hint">Mark every item that matches your filters and search as read, including items you have not scrolled to or opened with Show more.</p></div></details></FeedStatus>
     </Header>
     <ReadingViewport state={state}><main id="main" tabIndex={-1}>
