@@ -347,6 +347,14 @@ dialog::backdrop,.article-preview::backdrop {background:#111110b8;backdrop-filte
 .about-content,.feed-list-content,.filter-content {font-family:var(--article-sans)}
 .feed-list-actions {position:static;flex-shrink:0;padding:16px 28px;background:var(--surface)}
 .article-preview {background:var(--surface)}
+.preview-drag-handle {display:none}
+.article-preview[data-swipe] {transform:translateY(var(--preview-swipe-y,0px))}
+.article-preview[data-swipe=settling] {transition:transform 180ms ease-out}
+@media(max-width:760px),(pointer:coarse) {
+  .article-preview .article-dialog-actions {position:relative}
+  .preview-drag-handle {display:block;position:absolute;top:5px;left:50%;width:32px;height:4px;border-radius:2px;background:var(--muted);transform:translateX(-50%);pointer-events:none}
+}
+@media(prefers-reduced-motion:reduce) {.article-preview[data-swipe] {transform:none;transition:none}}
 .article-preview .article-content,.about-content p,.about-content li {color:var(--ink)}
 .article-preview .article-title {font-size:2rem}
 html.pointer-navigation :is(button,a,summary,[tabindex]):focus-visible {outline:none}
