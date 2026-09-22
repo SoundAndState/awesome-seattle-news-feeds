@@ -1,4 +1,4 @@
-import {test, expect, expectResourceFocus, openMenu, catalog, browserCatalog, proxyRoute, proxyFeedUrl, loadReader as load} from './fixtures.mjs';
+import {test, expect, expectResourceFocus, openMenu, catalog, browserCatalog, proxyRoute, proxyFeedUrl, loadReader as load, waitForHeaderTransitions} from './fixtures.mjs';
 import {readFile} from 'node:fs/promises';
 import {rssFeed, articleItem, defaultFeed as fixture, unsafeHtml} from '../fixtures/feeds.mjs';
 
@@ -39,7 +39,9 @@ test('Back and Forward restore filters, searches, source directory and reloads',
 });
 
 test('preview history restores scroll and keyboard focus; direct links close locally',async({page})=>{
-  await load(page);const story=page.locator('.story-title').nth(8);await story.scrollIntoViewIfNeeded();const y=await page.evaluate(()=>scrollY),id=await story.getAttribute('data-story');
+  await load(page);const story=page.locator('.story-title').nth(8);await story.scrollIntoViewIfNeeded();
+  await expect(page.locator('#reader-header')).toHaveClass(/compact/);await waitForHeaderTransitions(page);await story.scrollIntoViewIfNeeded();
+  const y=await page.evaluate(()=>scrollY),id=await story.getAttribute('data-story');
   await story.click();await expect(page.locator('#article-dialog')).toBeVisible();await expect(page.locator('#article-title')).toBeFocused();
   await page.goBack();await expect(page.locator('#article-dialog')).toBeHidden();expect(Math.abs(await page.evaluate(()=>scrollY)-y)).toBeLessThan(5);await expect(page.locator(`[data-story="${id}"]`)).toBeFocused();
   await page.goForward();await expect(page.locator('#article-dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#article-dialog')).toBeHidden();

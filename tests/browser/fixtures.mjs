@@ -41,6 +41,11 @@ export async function loadReader(page, {fail = false, catalog: selected = catalo
   await page.getByRole('button', {name: 'Dismiss feed status'}).click();
 }
 
+export async function waitForHeaderTransitions(page) {
+  // Loading spinners may keep animating; only the header's finite transitions matter.
+  await expect.poll(() => page.locator('#reader-header').evaluate(node => node.getAnimations({subtree:true}).filter(animation => animation instanceof CSSTransition).length)).toBe(0);
+}
+
 async function prepareContext(context, {baseURL, selected, published, bodies}) {
   const unexpected = [];
   const origin = new URL(baseURL).origin;

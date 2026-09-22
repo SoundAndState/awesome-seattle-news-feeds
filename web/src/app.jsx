@@ -46,6 +46,14 @@ class ReadingViewport extends Component {
 function pickBounds(node) {const {top, bottom} = node.getBoundingClientRect(); return {top, bottom};}
 
 function Header({state, site, menuOpen, setMenuOpen, compact, children}) {
+  const header = useRef(null);
+  useLayoutEffect(() => {
+    const views = header.current.querySelector('#library-views');
+    const measure = () => header.current.style.setProperty('--library-view-width', `${views.getBoundingClientRect().width}px`);
+    const observer = new ResizeObserver(measure);
+    measure(); observer.observe(views);
+    return () => observer.disconnect();
+  }, []);
   const {mode, view, query} = state.route;
   const current = [...state.articles.values()].filter(item => itemMode(item, state.feedMap) === mode);
   const savedCount = [...state.articles.keys()].filter(id => state.states.get(id)?.saved).length;
@@ -55,7 +63,7 @@ function Header({state, site, menuOpen, setMenuOpen, compact, children}) {
   const separator = site.name.indexOf('&');
   const before = separator < 0 ? site.name : site.name.slice(0, separator);
   const after = separator < 0 ? undefined : site.name.slice(separator + 1);
-  return <div className={`reader-header${menuOpen ? ' menu-open' : ''}${compact ? ' compact' : ''}`} id="reader-header">
+  return <div ref={header} className={`reader-header${menuOpen ? ' menu-open' : ''}${compact ? ' compact' : ''}`} id="reader-header">
     <header className="masthead">
       <a className="wordmark" href="./" aria-label={site.homeLabel} onClick={event => {if (event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate({mode: site.capabilities.articles ? 'articles' : 'posts', view: state.preferredView, source: '', category: '', query: '', unavailableOnly: false});}}>
         <img className="brand-icon" src={site.assets.logo} width="48" height="48" alt=""/><span className="brand-copy"><span className="brand-name">{after === undefined ? site.name : <>{before}<i>&amp;</i>{after}</>}</span><small>{site.tagline}</small></span>
@@ -124,6 +132,7 @@ function ListContent({state, site, items, sources}) {
 export function App({store, site, navigationPosition}) {
   const state = useStore(store), {route} = state;
   const [menuOpen, setMenuOpen] = useState(false), [scrollState, setScrollState] = useState({compact: window.scrollY > 100, top: window.scrollY >= 500});
+  const headerPosition = useRef({y: window.scrollY, restoredY: null, initialized: false});
   const scrolling = useRef(null), stories = useRef(null);
   const announcedRoute = useRef(route);
   const items = useMemo(() => selectItems(state), [state.articles, state.states, state.route, state.feedMap, state.excluded, state.retainedRead]);
@@ -163,9 +172,17 @@ export function App({store, site, navigationPosition}) {
     const key = event => {document.documentElement.classList.remove('pointer-navigation'); if (event.key === 'Escape') {closeMenu(); document.querySelector('#reading-options').open = false;}};
     const pointer = () => document.documentElement.classList.add('pointer-navigation');
     const scroll = () => {
-      // Header height affects pointer targets. Commit a threshold crossing before
-      // the browser dispatches the next pointer event, including Safari taps.
-      flushSync(() => setScrollState(previous => {const next = {compact: window.scrollY > 100, top: window.scrollY >= 500}; return previous.compact === next.compact && previous.top === next.top ? previous : next;}));
+      const y = window.scrollY, position = headerPosition.current;
+      const restored = position.restoredY !== null && Math.abs(y - position.restoredY) < 1;
+      if (!restored) position.restoredY = null;
+      // Restoring a tab's position must not resize its controls. Once scrolling
+      // resumes, expand near the top only when moving up, not down a fresh tab.
+      flushSync(() => setScrollState(previous => {
+        const compact = restored ? previous.compact : y > 100 ? true : y < position.y || y <= 0 ? false : previous.compact;
+        const top = y >= 500;
+        return previous.compact === compact && previous.top === top ? previous : {compact, top};
+      }));
+      position.y = y;
       if (window.scrollY > 200 && !document.querySelector('dialog[open]')) store.getState().rememberReading();
     };
     document.addEventListener('click', click); document.addEventListener('focusin', focus); document.addEventListener('keydown', key); document.addEventListener('pointerdown', pointer, true); window.addEventListener('scroll', scroll, {passive: true});
@@ -182,16 +199,28 @@ export function App({store, site, navigationPosition}) {
     setMenuOpen(false);
     document.querySelector('#reading-options').open = false;
     const position = navigationPosition.current;
-    if (position) {window.scrollTo({top: position.y, behavior: 'instant'}); navigationPosition.current = null;}
+    if (position) {
+      window.scrollTo({top: position.y, behavior: 'instant'});
+      const y = window.scrollY, initial = !headerPosition.current.initialized;
+      headerPosition.current = {y, restoredY: y, initialized: true};
+      setScrollState(previous => ({compact: initial ? y > 100 : previous.compact, top: y >= 500}));
+      navigationPosition.current = null;
+    }
     scrolling.current?.sync();
   }, [route]);
   useLayoutEffect(() => {scrolling.current?.sync();}, [state.articles, state.pending, route.limit]);
+  const backToTop = () => {
+    headerPosition.current.restoredY = null;
+    setScrollState({compact: false, top: false});
+    window.scrollTo({top: 0, behavior: 'instant'});
+    scrolling.current?.sync();
+  };
   const filterActive = route.category || route.source || route.query;
   return <>
     <a className="skip-link" href="#main" onClick={event => {event.preventDefault(); document.querySelector('#main').focus();}}>Skip to stories</a>
     <Header state={state} site={site} menuOpen={menuOpen} setMenuOpen={setMenuOpen} compact={scrollState.compact}>
       <FeedStatus state={state}><details id="reading-options" hidden={['sources', 'saved', 'excluded'].includes(route.view)}><summary aria-label="Reading options" title="Reading options"><svg className="status-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4m4 0h10M3 17h10m4 0h4"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg><span className="status-action-label">Reading options</span></summary><div className="options-content"><label className="scroll-read-control"><input id="scroll-read" type="checkbox" checked={state.markReadOnScroll} onChange={event => state.setMarkReadOnScroll(event.target.checked)}/>Mark items read as I scroll past them</label><button id="mark-read" className="secondary-button" disabled={!unread} onClick={async () => {await state.bulkRead(); document.querySelector('#reading-options').open = false; document.querySelector('#undo-read').focus({preventScroll: true});}}>Mark {unread.toLocaleString()} matching {route.mode} read</button><p className="hint">Mark every item that matches your filters and search as read, including items you have not scrolled to or opened with Show more.</p></div></details></FeedStatus>
-      <button id="new-items" className="new-items" hidden={!pendingCount} onClick={() => {flushSync(() => state.revealPending()); window.scrollTo({top: 0, behavior: 'instant'}); scrolling.current?.sync(); document.querySelector('#heading').focus({preventScroll: true});}}>Show {pendingCount} new {route.mode}</button>
+      <button id="new-items" className="new-items" hidden={!pendingCount} onClick={() => {flushSync(() => state.revealPending()); backToTop(); document.querySelector('#heading').focus({preventScroll: true});}}>Show {pendingCount} new {route.mode}</button>
     </Header>
     <ReadingViewport state={state}><main id="main" tabIndex={-1}>
       <section id="page-heading" className={`page-heading${!['saved', 'sources', 'excluded'].includes(route.view) ? ' sr-only' : ''}`}><h1 id="heading" tabIndex={-1}>{heading}</h1><p id="description" hidden/></section>
@@ -212,7 +241,7 @@ export function App({store, site, navigationPosition}) {
       <button id="load-more" className="load-more" hidden={sourceView || items.length <= route.limit} onClick={() => state.navigate({limit: route.limit + 60}, {replace: true, keepScroll: true})}>Show more ↓</button>
       <footer className="reader-footer">{site.repository && <a href={site.repository}>{state.catalog?.title || site.name} on GitHub</a>}</footer>
     </main></ReadingViewport>
-    <button id="back-to-top" className="secondary-button" hidden={!scrollState.top} onClick={() => {window.scrollTo({top: 0, behavior: 'instant'}); document.querySelector('.wordmark').focus({preventScroll: true}); scrolling.current?.sync();}}>↑ Back to top</button>
+    <button id="back-to-top" className="secondary-button" hidden={!scrollState.top} onClick={() => {backToTop(); document.querySelector('.wordmark').focus({preventScroll: true});}}>↑ Back to top</button>
     <ReaderDialogs state={state} site={site}/>
   </>;
 }
