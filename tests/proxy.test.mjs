@@ -73,9 +73,16 @@ test('cache freshness follows header precedence and subtracts age before the 15-
   for (const value of ['max-age=-1','max-age=1.5','max-age=60, max-age=120']) assert.equal(policy({'Cache-Control':value}), 'no-store');
 });
 
-test('a stalled publisher times out without holding the request open', async () => {
-  const handle = createHandler({feedMap, timeoutMs: 10, fetcher: async (_url, {signal}) => new Promise((_resolve, reject) => {signal.addEventListener('abort', () => reject(new Error('Aborted')));})});
-  const response = await handle(request(), env);
+test('a stalled publisher times out after eight seconds without holding the request open', async t => {
+  t.mock.timers.enable({apis:['setTimeout']});
+  const entered = Promise.withResolvers();
+  const handle = createHandler({feedMap, fetcher: async (_url, {signal}) => new Promise((_resolve, reject) => {signal.addEventListener('abort', () => reject(new Error('Aborted'))); entered.resolve(signal);})});
+  const pending = handle(request(), env);
+  const signal = await entered.promise;
+  t.mock.timers.tick(7999);
+  assert.equal(signal.aborted, false);
+  t.mock.timers.tick(1);
+  const response = await pending;
   assert.equal(response.status, 502);
   assert.match((await response.json()).error, /too long/);
   assert.equal(response.headers.get('cache-control'), 'no-store');

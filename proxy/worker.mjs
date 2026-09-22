@@ -35,7 +35,7 @@ export async function readLimited(response, maxBytes = MAX_BYTES) {
   return bytes;
 }
 
-export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 15000} = {}) {
+export function createHandler({feedMap = feeds, fetcher = fetch, timeoutMs = 8000} = {}) {
   return async (request, env) => {
     const origin = request.headers.get('origin');
     const allowed = new Set((env.ALLOWED_ORIGINS || '').split(','));
