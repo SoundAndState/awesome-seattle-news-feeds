@@ -2,10 +2,11 @@ import {useLayoutEffect, useRef, useState} from 'react';
 import {cleanText} from '../content.mjs';
 import {itemMode, feedMode} from '../reader-state.mjs';
 import {focusControl} from '../ui-effects.mjs';
+import {dismissPreviewWithSwipe} from '../preview-swipe.mjs';
 import {ExternalLink, ItemMetadata, ItemLinks, SaveButton, SafeContent, categoryName} from './items.jsx';
 import {FeedListHelp, AboutHelp} from './reader-help.jsx';
 
-export function Dialog({id, titleId, open, close, returnTo, initialFocus, children, className = ''}) {
+export function Dialog({id, titleId, open, close, returnTo, initialFocus, children, className = '', swipeClose = false}) {
   const ref = useRef(null), returnRef = useRef(returnTo);
   useLayoutEffect(() => {
     const dialog = ref.current;
@@ -19,6 +20,9 @@ export function Dialog({id, titleId, open, close, returnTo, initialFocus, childr
     }
   }, [open, returnTo, initialFocus]);
   useLayoutEffect(() => () => {if (ref.current?.open) ref.current.close();}, []);
+  useLayoutEffect(() => {
+    if (open && swipeClose) return dismissPreviewWithSwipe(ref.current, close);
+  }, [open, swipeClose, close]);
   return <dialog id={id} ref={ref} className={className} aria-labelledby={titleId} onCancel={event => {event.preventDefault(); close();}} onClick={event => {
     if (event.target !== event.currentTarget) return;
     const r = event.currentTarget.getBoundingClientRect();
@@ -66,8 +70,8 @@ export function ReaderDialogs({state, site}) {
       <div className="dialog-top"><h2 id="filter-title">Filter {route.mode}</h2><CloseButton label="Close filters" close={close}/></div>
       {route.filters && <FilterContent state={state}/>}
     </Dialog>
-    <Dialog id="article-dialog" titleId="article-title" open={Boolean(route.article) && !social} close={close} className="article-preview" initialFocus="#article-title" returnTo={{kind: 'story', id: route.article, index: [...document.querySelectorAll('#stories .story')].findIndex(card => card.dataset.article === route.article)}}>
-      <div className="dialog-top article-dialog-actions"><span id="article-save" hidden={!item}>{item && <SaveButton item={item} saved={state.states.get(item.id)?.saved} actions={state}/>}</span><CloseButton label="Close story" close={close}/></div>
+    <Dialog id="article-dialog" titleId="article-title" open={Boolean(route.article) && !social} close={close} className="article-preview" initialFocus="#article-title" swipeClose returnTo={{kind: 'story', id: route.article, index: [...document.querySelectorAll('#stories .story')].findIndex(card => card.dataset.article === route.article)}}>
+      <div className="dialog-top article-dialog-actions"><span className="preview-drag-handle" aria-hidden="true"/><span id="article-save" hidden={!item}>{item && <SaveButton item={item} saved={state.states.get(item.id)?.saved} actions={state}/>}</span><CloseButton label="Close story" close={close}/></div>
       <div id="article-body">{item ? <>
         <h2 id="article-title" className="article-title" tabIndex={-1}><ExternalLink href={item.url}>{item.title || 'Untitled article'}</ExternalLink></h2>
         <ItemMetadata item={item} state={state} className="article-meta" preview/>
