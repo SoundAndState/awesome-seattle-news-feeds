@@ -1,4 +1,4 @@
-import {test, expect, catalog, browserCatalog, proxyRoute} from './fixtures.mjs';
+import {test, expect, catalog, browserCatalog, proxyRoute, waitForHeaderTransitions} from './fixtures.mjs';
 import {rssFeed, postItem, postUrl, postId} from '../fixtures/feeds.mjs';
 
 const source = catalog.feeds.find(feed => feed.category === 'bluesky');
@@ -121,15 +121,20 @@ test('read posts dim and show an inset bar without shifting text, including scro
     const text = node.getBoundingClientRect(), card = node.closest('.story').getBoundingClientRect();
     return {x:text.x - card.x, y:text.y - card.y, width:text.width, height:text.height, cardHeight:card.height};
   });
+  const expectGeometry = async before => {
+    // Subpixel coordinates can change floating-point precision after scrolling.
+    for (const [dimension, value] of Object.entries(await geometry())) expect(value, dimension).toBeCloseTo(before[dimension], 2);
+  };
   const unreadColor = await text.evaluate(node => getComputedStyle(node).color);
   for (const width of [1440, 390]) {
     await page.setViewportSize({width, height:900});
+    await waitForHeaderTransitions(page);
     const before = await geometry();
     await card.locator('.read-button').click();
     await expect(card).toHaveClass(/is-read/);
     await expect(text).toHaveCSS('color', 'rgb(99, 99, 94)');
     expect(await marker()).toEqual({content:'""', width:'4px', color:'rgb(218, 217, 214)', pointerEvents:'none'});
-    expect(await geometry()).toEqual(before);
+    await expectGeometry(before);
     await expect(text).toHaveCSS('text-decoration-line', 'none');
     await expect(text).toHaveCSS('cursor', 'pointer');
     if (testInfo.project.name === 'chromium') await card.screenshot({path:testInfo.outputPath(`read-post-${width}.png`)});
@@ -137,7 +142,7 @@ test('read posts dim and show an inset bar without shifting text, including scro
     await expect(card).not.toHaveClass(/is-read/);
     await expect(text).toHaveCSS('color', unreadColor);
     expect((await marker()).content).toBe('none');
-    expect(await geometry()).toEqual(before);
+    await expectGeometry(before);
   }
   await card.locator('.save-button').click();
   await page.setViewportSize({width:390, height:568});

@@ -1,4 +1,4 @@
-import {test, expect, catalog, browserCatalog, mockCatalog, proxyRoute, proxyFeedUrl} from './fixtures.mjs';
+import {test, expect, catalog, browserCatalog, mockCatalog, proxyRoute, proxyFeedUrl, waitForHeaderTransitions} from './fixtures.mjs';
 import {defaultFeed as fixture, rssFeed, NOW} from '../fixtures/feeds.mjs';
 
 const news = catalog.feeds.filter(feed => feed.category !== 'bluesky').slice(0, 3);
@@ -252,6 +252,8 @@ test('loading reflows on phones, tablets, desktop, landscape, and enlarged text'
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(await page.locator('#feed-loading').evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
   await page.screenshot({path: testInfo.outputPath('loading-enlarged.png')});
+  // Viewport changes can animate the header; compare loading geometry at rest.
+  await waitForHeaderTransitions(page);
   const height = (await page.locator('#feed-loading').boundingBox()).height;
   const top = await page.locator('.story').evaluate(node => node.getBoundingClientRect().top + scrollY);
   await finish(news[1], {empty:true}); await finish(news[2], {empty:true});

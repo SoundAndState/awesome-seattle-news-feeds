@@ -362,22 +362,27 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
 }
 @media(max-width:760px) {
   .masthead,.mode-bar,.header-tools,.header-status,main {padding-inline:20px}
-  .masthead {padding-block:12px 4px;align-items:center;flex-wrap:nowrap}
-  .wordmark {gap:6px;min-height:52px}
-  .brand-icon {width:44px;height:44px}
-  .brand-name {font-size:28px}
-  .wordmark small {font-size:10px;line-height:1.4;margin-top:4px}
+  .reader-header {--header-ease:220ms ease-out;--header-row-ease:110ms ease-out}
+  .masthead {padding-block:12px 4px;align-items:center;flex-wrap:nowrap;transition:padding-block var(--header-ease)}
+  .wordmark {gap:6px;min-height:52px;transition:min-height var(--header-ease)}
+  .brand-icon {width:44px;height:44px;transition:width var(--header-ease),height var(--header-ease)}
+  .brand-name {font-size:28px;transition:font-size var(--header-ease)}
+  .wordmark small {font-size:10px;line-height:1.4;margin-top:4px;max-height:28px;overflow:hidden;opacity:1;transition:max-height var(--header-ease),margin-top var(--header-ease),opacity var(--header-ease)}
   #menu-toggle {display:flex;flex-shrink:0}
   #menu-filter-button {display:block}
-  .masthead #resource-menu {display:none;position:absolute;top:68px;right:16px;width:min(320px,calc(100% - 32px));max-height:calc(100dvh - 100px);overflow-y:auto;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:0 10px 30px #0003;z-index:11}
+  .masthead #resource-menu {display:none;position:absolute;top:68px;right:16px;width:min(320px,calc(100% - 32px));max-height:calc(100dvh - 100px);overflow-y:auto;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:0 10px 30px #0003;z-index:11;transition:top var(--header-ease)}
   .menu-open .masthead #resource-menu {display:flex;flex-direction:column;align-items:stretch;gap:4px}
   .masthead #resource-menu a,.masthead #resource-menu button {padding:8px}
   .theme-control {padding:4px 8px;justify-content:space-between}
   #github-link {display:inline-flex}
   .mode-switch {gap:20px}
   .mode-switch button {font-size:16px;padding:8px 4px}
-  .header-tools {gap:8px;flex-wrap:wrap;padding-top:4px;padding-bottom:8px}
-  .header-tools .view-nav {order:1;flex-basis:100%}
+  /* Move search sideways before lifting its row, and lower it before widening. */
+  .header-tools {position:relative;display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;padding-top:56px;padding-bottom:8px;transition:padding-top var(--header-row-ease)}
+  .header-tools:has(#filter-button[hidden]) {grid-template-columns:minmax(0,1fr)}
+  .header-tools .view-nav {position:absolute;top:4px;left:20px}
+  .header-tools .view-nav button {padding-inline:6px}
+  #search-panel {transition:margin-inline-start var(--header-row-ease) 110ms}
   .header-status .status-row {flex-wrap:nowrap;gap:4px}
   .header-status .feed-progress {flex-wrap:nowrap;gap:8px}
   .header-status .checked-at {min-width:0}
@@ -396,14 +401,12 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
   .compact .brand-name {font-size:22px}
   .compact .brand-icon {width:30px;height:30px}
   .compact .wordmark {min-height:36px}
-  .compact .wordmark small {display:none}
+  .compact .wordmark small {max-height:0;margin-top:0;opacity:0}
   .compact .masthead {padding-block:4px}
   .compact .masthead #resource-menu {top:52px}
-  .compact .header-tools {flex-wrap:nowrap}
-  .compact .header-tools .view-nav {flex-basis:auto}
-  .compact #search-panel {order:2;flex-basis:auto}
-  .compact .header-tools .view-nav button {padding-inline:6px}
-  .compact #clear-search {width:32px;min-width:32px}
+  .compact .header-tools {padding-top:4px;transition-delay:110ms}
+  .compact #search-panel {margin-inline-start:calc(var(--library-view-width) + 8px);transition-delay:0s}
+  #clear-search {width:32px;min-width:32px}
   .story {padding-block:0}
   dialog,#feed-list-dialog {width:calc(100% - 32px);max-width:calc(100% - 32px);height:calc(100dvh - 48px);max-height:calc(100dvh - 48px);margin:auto}
   .dialog-top,.article-preview .article-dialog-actions {padding:8px 16px;min-height:61px}
@@ -413,6 +416,7 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
 }
 @media(max-width:360px) {
   .masthead,.mode-bar,.header-tools,.header-status,main {padding-inline:16px}
+  .header-tools .view-nav {left:16px}
   .brand-name {font-size:24px}
   .brand-icon {width:36px;height:36px}
   .wordmark small {font-size:9px}

@@ -1,4 +1,4 @@
-import {test, expect, catalog, proxyRoute} from './fixtures.mjs';
+import {test, expect, catalog, proxyRoute, waitForHeaderTransitions} from './fixtures.mjs';
 import {rssFeed, UPDATED} from '../fixtures/feeds.mjs';
 
 const source = 'transit-news';
@@ -101,6 +101,7 @@ test('article rows adapt to their available width and preserve full metadata and
   await load(page);
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({width, height:900});
+    await waitForHeaderTransitions(page);
     await noHorizontalOverflow(page, 'html');
     for (const card of await page.locator('.article-card').all()) {
       expect(await card.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
