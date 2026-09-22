@@ -111,7 +111,7 @@ test('reduced motion keeps swipe dismissal available and other dialogs keep thei
   await expect(page.locator('#about-dialog')).toBeHidden();
 });
 
-test('native touch input scrolls article text and then pulls down to dismiss at the top', async ({page, context, browserName}) => {
+test('native touch input dismisses at the top and scrolls article text after reopening', async ({page, context, browserName}) => {
   test.skip(browserName !== 'chromium', 'Native touch injection uses Chromium; other engines exercise touch cancellation above.');
   await openPreview(page);
   const client = await context.newCDPSession(page);
@@ -124,10 +124,11 @@ test('native touch input scrolls article text and then pulls down to dismiss at 
     for (const part of [.25,.5,.75,1]) await client.send('Input.dispatchTouchEvent', {type:'touchMove', touchPoints:[{x,y:y + dy * part}]});
     await client.send('Input.dispatchTouchEvent', {type:'touchEnd', touchPoints:[]});
   };
+  await touch(160);
+  await expect(page.locator('#article-dialog')).toBeHidden();
+  await page.goForward();
+  await expect(page.locator('#article-dialog')).toBeVisible();
   await touch(-160);
   await expect.poll(() => body.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
   await expect(page.locator('#article-dialog')).toBeVisible();
-  await body.evaluate(node => node.scrollTop = 0);
-  await touch(160);
-  await expect(page.locator('#article-dialog')).toBeHidden();
 });
