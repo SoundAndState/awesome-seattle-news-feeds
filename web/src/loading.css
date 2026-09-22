@@ -1,8 +1,11 @@
 /* The native progress element exposes real feed counts to assistive technology. */
 .feed-loading {display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:0 4px;margin:8px 0 4px;padding:4px 8px 8px;border:1px solid var(--line);border-radius:4px;background:var(--wash);color:var(--ink)}
+.feed-loading[data-pending=true] {grid-template-columns:minmax(0,1fr)}
 .loading-copy {align-self:center;min-width:0}
-.loading-heading {display:flex;align-items:center;flex-wrap:wrap;gap:0 8px;line-height:1.4}
+.loading-heading {display:flex;align-items:center;flex-wrap:wrap;gap:0 8px;min-height:44px;line-height:1.4}
 .loading-heading strong {font-size:.875rem;overflow-wrap:anywhere}
+.new-items {flex:1;min-width:0;min-height:44px;padding:6px 0;background:none;color:var(--accent);font-size:.875rem;font-weight:600;line-height:1.4;text-align:left;overflow-wrap:anywhere;text-decoration:underline;text-underline-offset:.2em}
+.new-items:disabled {color:var(--ink);opacity:1;text-decoration:none}
 #loading-count {display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0 .3em;max-width:100%;margin-left:auto;font-size:.75rem;font-variant-numeric:tabular-nums;text-align:right}
 #loading-count-value {white-space:nowrap}
 .loading-symbol {display:grid;place-items:center;width:24px;height:20px;flex-shrink:0}
@@ -11,7 +14,7 @@
 .loading-messages {display:grid}
 .loading-messages p {grid-area:1/1;margin:0;font-size:.8125rem;line-height:1.4;overflow-wrap:anywhere}
 .loading-dismiss {align-self:center;width:44px;height:44px;padding:0;background:none;border-radius:4px;font-size:24px;line-height:1}
-/* Both messages and the close button reserve their space in every phase. */
+/* Keep the loading and finished states the same height until acknowledged. */
 .feed-loading[data-state=loading] :is(.loading-mark,#loading-result,.loading-dismiss),
 .feed-loading:not([data-state=loading]) :is(.sk-flow,#loading-guidance) {visibility:hidden}
 .feed-loading:not([data-state=loading]) .sk-flow-dot {animation:none}
