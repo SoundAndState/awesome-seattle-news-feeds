@@ -1,5 +1,5 @@
 import {test, expect, catalog, browserCatalog, mockCatalog, proxyRoute, proxyFeedUrl, waitForHeaderTransitions} from './fixtures.mjs';
-import {defaultFeed as fixture, rssFeed, NOW} from '../fixtures/feeds.mjs';
+import {defaultFeed as fixture, articleItem, postItem, rssFeed, NOW} from '../fixtures/feeds.mjs';
 
 const news = catalog.feeds.filter(feed => feed.category !== 'bluesky').slice(0, 3);
 const posts = catalog.feeds.filter(feed => feed.category === 'bluesky').slice(0, 2);
@@ -14,10 +14,10 @@ async function prepare(page, feedsCatalog = smallCatalog) {
     if (requests.get(id)?.request() === request) requests.delete(id);
   });
   await page.route(proxyRoute, route => {requests.set(route.request().url().split('/').pop(), route);});
-  const finish = async (feed, {fail = false, empty = false} = {}) => {
+  const finish = async (feed, {fail = false, empty = false, body = fixture(feed.id)} = {}) => {
     await expect.poll(() => requests.has(feed.id)).toBe(true);
     const route = requests.get(feed.id); requests.delete(feed.id);
-    await route.fulfill({status: fail ? 502 : 200, contentType: fail ? 'application/json' : 'application/xml', body: fail ? '{"error":"Publisher unavailable"}' : empty ? rssFeed([]) : fixture(feed.id)});
+    await route.fulfill({status: fail ? 502 : 200, contentType: fail ? 'application/json' : 'application/xml', body: fail ? '{"error":"Publisher unavailable"}' : empty ? rssFeed([]) : body});
   };
   // Release intercepted requests after cancellation, including WebKit requests
   // that have not reached the network yet. The reader must ignore late responses.
@@ -161,10 +161,43 @@ test('progress counts finished checks, including failures, and stays until dismi
   await expect(page.locator('.story')).toHaveCount(2);
   await finish(news[1]);
   await expect(bar).toHaveAccessibleName('Feed check complete');
-  await expect(page.locator('#new-items')).toContainText('1 new articles');
-  await page.getByRole('button', {name:'Dismiss feed status'}).click();
+  await expect(page.locator('#feed-loading #new-items')).toHaveText('Show 1 new article');
+  await expect(page.getByRole('button', {name:'Dismiss feed status'})).toBeHidden();
+  await page.locator('#new-items').click();
   await expect(page.locator('#feed-loading')).toBeHidden();
-  await expect(page.locator('#refresh')).toBeFocused();
+  await expect(page.locator('#new-items')).toBeHidden();
+  await expect(page.locator('#heading')).toBeFocused();
+});
+
+for (const mode of ['articles', 'posts']) test(`new ${mode} share the progress panel and one action reveals them and clears the status`, async ({page}, testInfo) => {
+  const feeds = mode === 'posts' ? posts : news;
+  const finish = await prepare(page);
+  await page.goto(`./#mode=${mode}&view=all`);
+  for (const feed of feeds) await finish(feed);
+  await expect(page.getByRole('progressbar', {name:'Feed check complete'})).toBeVisible();
+  await page.getByRole('button', {name:'Dismiss feed status'}).click();
+  await page.clock.fastForward(16 * 60 * 1000);
+  const items = Array.from({length:12}, (_, index) => (mode === 'posts' ? postItem : articleItem)(`new-${index}`));
+  await finish(feeds[0], {body:rssFeed(items)});
+  const panel = page.locator('#feed-loading'), button = panel.locator('#new-items');
+  await expect(button).toHaveText(`12 new ${mode}`);
+  await expect(button).toBeDisabled();
+  await expect(panel.getByRole('progressbar')).toHaveAttribute('value', '1');
+  await expect(page.locator('.story')).toHaveCount(feeds.length);
+  const height = (await panel.boundingBox()).height;
+  expect(height).toBeLessThanOrEqual(60);
+  await page.screenshot({path:testInfo.outputPath('combined-checking.png')});
+  for (const feed of feeds.slice(1)) await finish(feed);
+  await expect(button).toHaveText(`Show 12 new ${mode}`);
+  await expect(button).toBeEnabled();
+  await expect(page.getByRole('button', {name:'Dismiss feed status'})).toBeHidden();
+  expect((await panel.boundingBox()).height).toBeCloseTo(height, 1);
+  await page.screenshot({path:testInfo.outputPath('combined-ready.png')});
+  await button.focus(); await page.keyboard.press('Enter');
+  await expect(panel).toBeHidden();
+  await expect(page.locator('.story')).toHaveCount(feeds.length + items.length);
+  await expect(page.locator('#heading')).toBeFocused();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
 });
 
 test('opening the library and catalog does not show feed progress, including an outage', async ({page}) => {
@@ -232,7 +265,7 @@ test('loading reflows on phones, tablets, desktop, landscape, and enlarged text'
       fits:document.documentElement.scrollWidth<=innerWidth,
       panel:document.querySelector('#feed-loading').getBoundingClientRect().toJSON(),
       bar:document.querySelector('#loading-bar').getBoundingClientRect().toJSON(),
-      labels:['loading-label','loading-count','loading-guidance'].map(id=>document.getElementById(id).getBoundingClientRect().toJSON()),
+      labels:['loading-label','loading-count'].map(id=>document.getElementById(id).getBoundingClientRect().toJSON()),
     }));
     expect(fits).toBe(true);
     expect(bar.width).toBeGreaterThan(200);

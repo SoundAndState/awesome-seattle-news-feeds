@@ -68,7 +68,6 @@ summary {cursor:pointer;min-height:44px;padding:10px 0;font-size:14px;font-weigh
 .secondary-button {display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border:1px solid var(--border);border-radius:4px;background:transparent;font-size:14px;line-height:1.5;min-height:44px;text-decoration:none}
 .notice {border:1px solid var(--border);background:var(--wash);padding:10px 14px;font-size:14px;margin:10px 0;overflow-wrap:anywhere}
 #undo-bar {display:flex;align-items:center;justify-content:space-between;gap:12px}
-.new-items {width:100%;border:1px solid var(--ink);background:var(--wash);border-radius:4px;padding:10px;margin:8px 0;font-size:15px}
 .story {--read-text:var(--muted);--read-marker:var(--line);border-top:1px solid var(--line);padding:22px 0;max-width:100%;overflow-wrap:anywhere}
 .story-copy {position:relative;min-width:0;max-width:none;padding-inline-start:0}
 .story h2 {margin:0 0 8px;font:normal 26px/1.3 var(--serif);text-wrap:pretty}
@@ -319,7 +318,6 @@ dialog::backdrop {background:#132e2ad1;backdrop-filter:blur(3px)}
 .header-status #reading-options {margin-left:auto}
 .header-status summary {font-size:13px;white-space:nowrap}
 .header-status .options-content {left:auto;right:0;max-height:calc(100dvh - 300px);overflow:auto}
-.header-status .new-items {margin:4px 0 0;padding:6px 10px}
 .reader-header :is(button,input,summary) {scroll-margin:0}
 #saved-button {padding:6px 8px}
 #back-to-top {position:fixed;bottom:20px;right:20px;z-index:9;background:var(--surface);box-shadow:0 2px 12px #0002}
@@ -358,11 +356,11 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
 @media(min-width:761px) {
   .masthead nav {font-size:14px}
   .header-status {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 16px;align-items:center}
-  .header-status:has(.feed-loading[hidden]) .status-row,.header-status .new-items {grid-column:1/-1}
+  .header-status:has(.feed-loading[hidden]) .status-row {grid-column:1/-1}
 }
 @media(max-width:760px) {
   .masthead,.mode-bar,.header-tools,.header-status,main {padding-inline:20px}
-  .reader-header {--header-ease:220ms ease-out;--header-row-ease:110ms ease-out}
+  .reader-header {--header-ease:220ms ease-out}
   .masthead {padding-block:12px 4px;align-items:center;flex-wrap:nowrap;transition:padding-block var(--header-ease)}
   .wordmark {gap:6px;min-height:52px;transition:min-height var(--header-ease)}
   .brand-icon {width:44px;height:44px;transition:width var(--header-ease),height var(--header-ease)}
@@ -377,12 +375,11 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
   #github-link {display:inline-flex}
   .mode-switch {gap:20px}
   .mode-switch button {font-size:16px;padding:8px 4px}
-  /* Move search sideways before lifting its row, and lower it before widening. */
-  .header-tools {position:relative;display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;padding-top:56px;padding-bottom:8px;transition:padding-top var(--header-row-ease)}
+  .header-tools {position:relative;display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;padding-top:4px;padding-bottom:8px}
   .header-tools:has(#filter-button[hidden]) {grid-template-columns:minmax(0,1fr)}
   .header-tools .view-nav {position:absolute;top:4px;left:20px}
   .header-tools .view-nav button {padding-inline:6px}
-  #search-panel {transition:margin-inline-start var(--header-row-ease) 110ms}
+  #search-panel {margin-inline-start:calc(var(--library-view-width) + 8px)}
   .header-status .status-row {flex-wrap:nowrap;gap:4px}
   .header-status .feed-progress {flex-wrap:nowrap;gap:8px}
   .header-status .checked-at {min-width:0}
@@ -404,8 +401,6 @@ dialog :is(button,a,summary,[tabindex]) {scroll-margin:12px}
   .compact .wordmark small {max-height:0;margin-top:0;opacity:0}
   .compact .masthead {padding-block:4px}
   .compact .masthead #resource-menu {top:52px}
-  .compact .header-tools {padding-top:4px;transition-delay:110ms}
-  .compact #search-panel {margin-inline-start:calc(var(--library-view-width) + 8px);transition-delay:0s}
   #clear-search {width:32px;min-width:32px}
   .story {padding-block:0}
   dialog,#feed-list-dialog {width:calc(100% - 32px);max-width:calc(100% - 32px);height:calc(100dvh - 48px);max-height:calc(100dvh - 48px);margin:auto}

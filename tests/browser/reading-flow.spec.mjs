@@ -100,6 +100,7 @@ test('header controls stay available, filters follow search, and showing new art
   await page.clock.fastForward(16 * 60 * 1000);
   const newsCount = catalog.feeds.filter(feed => feed.category !== 'bluesky').length - failed.size;
   await expect(page.locator('#new-items')).toContainText(`${newsCount} new articles`);
+  await expect(page.locator('#new-items')).toBeEnabled();
   for (const selector of ['#search', '#filter-button', '#feed-loading', '#refresh', '#reading-options', '#new-items']) {
     await expect(page.locator(`#reader-header ${selector}`)).toBeInViewport();
   }
@@ -112,7 +113,7 @@ test('header controls stay available, filters follow search, and showing new art
   await expect(page.locator('#new-items')).toBeHidden();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await expect(page.locator('.story').first()).not.toHaveClass(/is-read/);
-  await page.getByRole('button', {name: 'Dismiss feed status'}).click();
+  await expect(page.locator('#feed-loading')).toBeHidden();
   if (page.viewportSize().width <= 760) {
     for (const width of [320, 390, 430]) {
       await page.setViewportSize({width, height: 844});

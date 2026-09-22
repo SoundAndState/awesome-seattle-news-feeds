@@ -6,10 +6,13 @@ const clickVisible = async (page, selector) => {
 };
 const logoHeight = page => page.locator('.brand-icon').evaluate(node => node.getBoundingClientRect().height);
 
-test('the mobile header eases its logo and search row between sizes without hiding controls', async ({page}, testInfo) => {
+test('the mobile header eases its logo while search stays beside the views at both sizes', async ({page}, testInfo) => {
   await page.setViewportSize({width:390, height:844});
   await loadReader(page);
   await page.evaluate(() => document.fonts.ready);
+  const expandedSearch = await page.locator('#search-panel').boundingBox(), expandedViews = await page.locator('#library-views').boundingBox();
+  expect(expandedSearch.x).toBeGreaterThanOrEqual(expandedViews.x + expandedViews.width);
+  expect(expandedSearch.y).toBeCloseTo(expandedViews.y, 1);
   const expanded = (await page.locator('#reader-header').boundingBox()).height;
   const samples = await page.evaluate(async () => {
     const header = document.querySelector('#reader-header'), logo = header.querySelector('.brand-icon');
@@ -23,9 +26,10 @@ test('the mobile header eases its logo and search row between sizes without hidi
     return values;
   });
   const compact = samples.at(-1).height;
-  expect(compact).toBeLessThan(expanded - 50);
+  expect(compact).toBeLessThan(expanded - 15);
+  expect((await page.locator('#search-panel').boundingBox()).width).toBeCloseTo(expandedSearch.width, 1);
   expect(samples.some(sample => sample.logo > 31 && sample.logo < 43)).toBe(true);
-  expect(new Set(samples.map(sample => Math.round(sample.height))).size).toBeGreaterThan(3);
+  expect(samples.some(sample => sample.height > compact + .5 && sample.height < expanded - .5)).toBe(true);
   expect(samples.some(sample => sample.overlap)).toBe(false);
   const steps = samples.slice(1).map((sample, index) => Math.abs(sample.height - samples[index].height));
   expect(Math.max(...steps)).toBeLessThan((expanded - compact) * .65);
@@ -37,6 +41,10 @@ test('the mobile header eases its logo and search row between sizes without hidi
   await expect.poll(async () => (await page.locator('#reader-header').boundingBox()).height).toBeCloseTo(expanded, 1);
   if (testInfo.project.name === 'webkit-mobile') await page.screenshot({path:testInfo.outputPath('header-expanded.png')});
   await page.setViewportSize({width:320, height:568});
+  await waitForHeaderTransitions(page);
+  const narrowSearch = await page.locator('#search-panel').boundingBox(), narrowViews = await page.locator('#library-views').boundingBox();
+  expect(narrowSearch.x).toBeGreaterThanOrEqual(narrowViews.x + narrowViews.width);
+  expect(narrowSearch.y).toBeCloseTo(narrowViews.y, 1);
   await page.evaluate(() => scrollTo(0, 240));
   await expect.poll(() => logoHeight(page)).toBe(30);
   await waitForHeaderTransitions(page);
