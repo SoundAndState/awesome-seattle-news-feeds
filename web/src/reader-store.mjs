@@ -351,6 +351,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         commitStates(updates, {undoRead: []});
         announce('The reader restored each item’s previous read or unread mark.');
       });},
+      dismissUndo() {set({undoRead: []});},
       revealPending() {
         resetSelection();
         const state = get(), articles = new Map(state.articles), pending = new Map(state.pending);

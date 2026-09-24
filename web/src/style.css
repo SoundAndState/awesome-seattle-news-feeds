@@ -68,6 +68,7 @@ summary {cursor:pointer;min-height:44px;padding:10px 0;font-size:14px;font-weigh
 .secondary-button {display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border:1px solid var(--border);border-radius:4px;background:transparent;font-size:14px;line-height:1.5;min-height:44px;text-decoration:none}
 .notice {border:1px solid var(--border);background:var(--wash);padding:10px 14px;font-size:14px;margin:10px 0;overflow-wrap:anywhere}
 #undo-bar {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.undo-actions {display:flex;align-items:center;gap:12px;flex-shrink:0}
 .story {--read-text:var(--muted);--read-marker:var(--line);border-top:1px solid var(--line);padding:22px 0;max-width:100%;overflow-wrap:anywhere}
 .story-copy {position:relative;min-width:0;max-width:none;padding-inline-start:0}
 .story h2 {margin:0 0 8px;font:normal 26px/1.3 var(--serif);text-wrap:pretty}
