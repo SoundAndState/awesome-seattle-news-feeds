@@ -24,8 +24,9 @@ for (const mode of ['articles', 'posts']) test(`dismissing the ${mode} read conf
     await expect(close).toBeInViewport();
     await expect(page.locator('#undo-read')).toBeInViewport();
     const box = await close.boundingBox();
-    expect(box.width).toBeGreaterThanOrEqual(44);
-    expect(box.height).toBeGreaterThanOrEqual(44);
+    // Firefox can report a 44px target as 43.999984px after viewport resizing.
+    expect(Math.round(box.width * 100) / 100).toBeGreaterThanOrEqual(44);
+    expect(Math.round(box.height * 100) / 100).toBeGreaterThanOrEqual(44);
     expect(await page.locator('#undo-bar').evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
     if (mode === 'articles' && ((testInfo.project.name === 'webkit-mobile' && width === 320) || (testInfo.project.name === 'chromium' && width === 1280))) {
       await page.screenshot({path:testInfo.outputPath(`read-confirmation-${width}.png`)});
