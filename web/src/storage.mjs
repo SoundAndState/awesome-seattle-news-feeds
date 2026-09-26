@@ -1,3 +1,4 @@
+import {messages} from './localization.mjs';
 import Dexie from 'dexie';
 import {LIBRARY_TABLES, LIBRARY_VERSION, configureLibrarySchema} from './library-schema.mjs';
 
@@ -69,7 +70,7 @@ export function createBrowserLibrary({storageNamespace, capabilities}, {createDa
         } catch (error) {
           persistent = false;
           if (error.code === 'newer-library') db.close();
-          warning((error.code === 'newer-library' ? 'This reader cannot open a library created by a newer version. Your stored library has not changed. Reload the page to get the current reader. Changes during this visit will be lost when you reload.' : 'The reader cannot save changes in this browser. You can keep reading, but you will lose new saves and read marks when you close or reload this page.') + (capabilities?.backups ? ' Open About this reader and choose Export reading backup before you leave.' : ''));
+          warning((error.code === 'newer-library' ? messages.storage.newerLibrary : messages.storage.unavailable) + (capabilities?.backups ? messages.storage.backupHint : ''));
         }
       }
       const staged = observed;

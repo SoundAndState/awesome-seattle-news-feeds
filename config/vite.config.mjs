@@ -2,6 +2,8 @@ import {defineConfig} from 'vite';
 import fs from 'node:fs/promises';
 import {renderOpml} from '../scripts/render.mjs';
 import {loadReaderConfig} from './reader-config.mjs';
+import {messages, formatMessage} from '../web/src/localization.mjs';
+import {escapeHtml} from '../web/src/source-adapters/text.mjs';
 
 const {site: config, catalog, opmlCatalog, origins, publicDir} = await loadReaderConfig();
 
@@ -24,7 +26,7 @@ export default defineConfig({
     name: 'curated-catalog',
     async transformIndexHtml(html) {
       const image = new URL(config.assets.socialImage, config.url).href;
-      const imageAlt = `${config.name} — ${config.description}`;
+      const imageAlt = formatMessage(messages.reader.socialImageAlt, {name: config.name, description: config.description});
       const metadata = [
         ['name', 'application-name', config.name],
         ['name', 'description', config.description],
@@ -33,7 +35,7 @@ export default defineConfig({
         ['property', 'og:title', config.title],
         ['property', 'og:description', config.description],
         ['property', 'og:url', config.url],
-        ['property', 'og:locale', 'en_US'],
+        ['property', 'og:locale', messages.socialLocale],
         ['property', 'og:image', image],
         ['property', 'og:image:type', 'image/png'],
         ['property', 'og:image:width', '1200'],
@@ -45,8 +47,12 @@ export default defineConfig({
         ['name', 'twitter:image', image],
         ['name', 'twitter:image:alt', imageAlt],
       ];
-      const shell = html.replace('__FEED_CONNECT_ORIGINS__', origins.join(' ')).replace('href="./favicon.svg"', `href="${config.assets.logo}"`);
-      return {html: config.opmlUrl ? shell : shell.replace(/<noscript>[\s\S]*?<\/noscript>/, '<noscript><p>This reader needs JavaScript to show its collection.</p></noscript>'), tags: [
+      const noScript = config.opmlUrl ? formatMessage(escapeHtml(messages.startup.noScriptWithDownload), {
+        download: `<a href="${escapeHtml(config.opmlUrl)}">${escapeHtml(messages.startup.noScriptDownload)}</a>`,
+      }) : escapeHtml(messages.startup.noScript);
+      const shell = html.replace('__FEED_CONNECT_ORIGINS__', origins.join(' ')).replace('href="./favicon.svg"', `href="${config.assets.logo}"`)
+        .replace('__READER_LANGUAGE__', escapeHtml(messages.language)).replace('__READER_NOSCRIPT__', noScript);
+      return {html: shell, tags: [
         {tag: 'title', children: config.title.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;'), injectTo: 'head'},
         {tag: 'link', attrs: {rel: 'canonical', href: config.url}, injectTo: 'head'},
         ...metadata.map(([attribute, key, content]) => ({tag: 'meta', attrs: {[attribute]: key, content}, injectTo: 'head'})),
@@ -55,7 +61,7 @@ export default defineConfig({
     async buildStart() {
       this.emitFile({type: 'asset', fileName: 'catalog.json', source: JSON.stringify(catalog)});
       this.emitFile({type: 'asset', fileName: 'feeds.opml', source: renderOpml(opmlCatalog)});
-      let notices = 'Third-party software included in this reader\n\n';
+      let notices = `${messages.help.creditsHeading}\n\n`;
       for (const pkg of ['react', 'react-dom', 'scheduler', 'zustand', 'feedsmith', 'dexie', 'dompurify', 'entities', 'feedsmith/node_modules/fast-xml-parser', 'strnum', 'fast-xml-builder', 'xml-naming', 'path-expression-matcher', 'is-unsafe', '@nodable/entities']) {
         const dir = `node_modules/${pkg}`;
         try {

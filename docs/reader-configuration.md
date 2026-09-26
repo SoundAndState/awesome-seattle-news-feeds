@@ -14,6 +14,13 @@ mixing, but browser storage is not a security boundary between apps on one origi
 
 ## Site configuration
 
+Sound & State's default configuration selects `"copy": "en"` to load its brand,
+metadata, category labels, and About disclosures from
+[`web/src/locales/en.json`](../web/src/locales/en.json). The same file owns the
+reader's interface text; see [editing reader copy](reader-copy.md). Explicit
+configuration fields override that default copy. Another collection should
+omit `copy` and provide its own brand and disclosures as shown below.
+
 Create a JSON file such as `my-reader/site.json`:
 
 ```json

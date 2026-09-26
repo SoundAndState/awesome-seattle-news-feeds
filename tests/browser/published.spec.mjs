@@ -1,6 +1,6 @@
 import {test, expect, expectResourceFocus, openMenu} from './fixtures.mjs';
 import {readFile} from 'node:fs/promises';
-import site from '../../config/site.config.json' with {type:'json'};
+import {site} from '../../web/src/site-config.mjs';
 
 // These checks verify shipped metadata and native downloads, which browser route
 // mocks do not intercept consistently. Publisher responses remain fixtures.
