@@ -1,3 +1,4 @@
+import {messages} from './localization.mjs';
 import {safeUrl} from './links.mjs';
 import {validTimestamp} from './dates.mjs';
 import {feedMode} from './source-model.mjs';
@@ -32,6 +33,7 @@ export const MAX_ITEM_ID_LENGTH = ITEM_LIMITS.id;
  * @property {string} [guid] Stable publisher identifier for linkless entries.
  * @property {string} [nativeId] Optional platform identity independent of URL.
  * @property {string} [identityDate] Original date used by legacy identity fallback.
+ * @property {string} [identityTitle] Original title token used by legacy identity fallback.
  * @property {number} published
  * @property {boolean} publishedDateOnly
  * @property {number} updated
@@ -63,8 +65,8 @@ export function storyKey(url, feedId, guid) {
 /** @param {SourceEntry} entry */
 export function createSourceItem(entry, source, now) {
   const url = safeUrl(entry.url, source.website);
-  const id = entry.nativeId || storyKey(url, source.id, entry.guid || `${entry.title}:${entry.identityDate || ''}`);
-  if (!validItemId(id)) throw new Error('The item identity exceeds the 4,096-character limit.');
+  const id = entry.nativeId || storyKey(url, source.id, entry.guid || `${entry.identityTitle ?? entry.title}:${entry.identityDate || ''}`);
+  if (!validItemId(id)) throw new Error(messages.itemModel.longId);
   const item = {
     id, url, kind: feedMode(source), title: entry.title.slice(0, ITEM_LIMITS.title),
     html: entry.html.slice(0, ITEM_LIMITS.html), author: entry.author.slice(0, ITEM_LIMITS.author),
@@ -81,10 +83,10 @@ export function createSourceItem(entry, source, now) {
 // changing their identity or inventing a publication date.
 export function validateItem(item, {requireSourceName = false} = {}) {
   if (!item || !validItemId(item.id) || !Array.isArray(item.feedIds) || item.feedIds.length > ITEM_LIMITS.feedIds || item.feedIds.some(id => typeof id !== 'string' || id.length > ITEM_LIMITS.feedId) || typeof item.title !== 'string' || typeof item.html !== 'string' || item.html.length > ITEM_LIMITS.html || (requireSourceName && typeof item.sourceName !== 'string') || !Number.isFinite(item.published) || !Number.isFinite(item.firstSeen)) {
-    throw invalidItem('invalid-item', 'The item does not match the reader item contract.');
+    throw invalidItem('invalid-item', messages.itemModel.invalidItem);
   }
-  if (item.updated !== undefined && item.updated !== 0 && !validTimestamp(item.updated)) throw invalidItem('invalid-updated', 'The item has an invalid update date.');
-  if (item.kind !== undefined && !['articles', 'posts'].includes(item.kind)) throw invalidItem('invalid-kind', 'The item has an invalid content kind.');
+  if (item.updated !== undefined && item.updated !== 0 && !validTimestamp(item.updated)) throw invalidItem('invalid-updated', messages.itemModel.invalidDate);
+  if (item.kind !== undefined && !['articles', 'posts'].includes(item.kind)) throw invalidItem('invalid-kind', messages.itemModel.invalidKind);
   return item;
 }
 
@@ -105,7 +107,7 @@ export function prepareItem(item, cleanText) {
 
 export function mergeSourceItem(existing, incoming, source, feedMap, cleanText) {
   validateItem(incoming);
-  if (existing && existing.id !== incoming.id) throw new Error('Only items with the same identity can be merged.');
+  if (existing && existing.id !== incoming.id) throw new Error(messages.itemModel.mergeMismatch);
   const mixedKinds = existing && itemMode(existing, feedMap) !== itemMode(incoming, feedMap);
   const keepArticle = mixedKinds && itemMode(existing, feedMap) === 'articles';
   const feedIds = [...new Set([...(mixedKinds && !keepArticle ? [source.id] : []), ...(existing?.feedIds || []), ...incoming.feedIds, source.id])];

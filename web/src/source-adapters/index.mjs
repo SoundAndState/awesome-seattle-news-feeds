@@ -1,3 +1,4 @@
+import {messages, formatMessage} from '../localization.mjs';
 import {readXml} from './xml.mjs';
 import {readJsonFeed, readPostsJson} from './json.mjs';
 
@@ -7,7 +8,7 @@ export const adapters = Object.freeze({rss: readXml, atom: readXml, 'json-feed':
 // RSS before its publisher switches to Atom or JSON Feed. Posts JSON is explicit.
 export function readSourceEntries(text, source, now) {
   const requested = (source.format || 'auto').toLowerCase();
-  if (requested !== 'auto' && !Object.hasOwn(adapters, requested)) throw new Error(`The reader does not support the feed format: ${requested}.`);
+  if (requested !== 'auto' && !Object.hasOwn(adapters, requested)) throw new Error(formatMessage(messages.feeds.unsupportedFormat, {requested: requested}));
   const detected = /^[\s\uFEFF]*[\[{]/.test(text) ? 'json-feed' : 'rss';
   const format = ['auto', 'rss', 'atom'].includes(requested) ? detected : requested;
   return adapters[format](text, source, now);

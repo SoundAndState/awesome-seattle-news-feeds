@@ -1,3 +1,4 @@
+import {messages, formatMessage} from './localization.mjs';
 import {createStore} from 'zustand/vanilla';
 import {normalizeCatalog} from './catalog.mjs';
 import {inBatches, nextRefresh} from './refresh-policy.mjs';
@@ -21,7 +22,7 @@ function prunableItems(items, states, feedMap, now) {
 }
 
 export function sourceName(item, state) {
-  return state.feedMap.get(item.feedIds[0])?.name || item.sourceName || 'Previously saved source';
+  return state.feedMap.get(item.feedIds[0])?.name || item.sourceName || messages.sources.previouslySaved;
 }
 
 export function selectSources(state, all = false) {
@@ -189,7 +190,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         if (run.controller.signal.aborted) return;
         const failures = (previous.failures || 0) + 1;
         const now = runtime.now();
-        const status = {...previous, id: feed.id, lastAttempt: now, failures, nextCheck: nextRefresh(failures, now), error: error.message.slice(0, 420)};
+        const status = {...previous, id: feed.id, lastAttempt: now, failures, nextCheck: nextRefresh(failures, now), error: error.message.slice(0, 420), errorKind: error.code || ''};
         set(state => ({health: new Map(state.health).set(feed.id, status)}));
         await save('feeds', [status]);
       } finally {
@@ -202,7 +203,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       const state = get();
       if (!started || !state.catalog || ['saved', 'excluded'].includes(state.route.view) || !runtime.isVisible()) return;
       if (activeRun) {retryAgain = {retryFailed, only}; return;}
-      if (!runtime.isOnline()) {notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.'); return;}
+      if (!runtime.isOnline()) {notice(messages.notices.offline); return;}
       const due = feed => (retryFailed && get().health.get(feed.id)?.error) || !get().health.get(feed.id)?.nextCheck || get().health.get(feed.id).nextCheck <= runtime.now();
       const queue = selectSources(state).filter(feed => (!state.excluded.has(feed.id) || state.route.source === feed.id || only === feed.id || state.route.view === 'sources') && (!only || feed.id === only) && due(feed));
       if (!queue.length) return;
@@ -220,20 +221,20 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         const remaining = queue.filter(due);
         if (!remaining.length) return;
         run.total = remaining.length; loadingRun = run; publishRun();
-        announce(`${get().route.view === 'sources' ? 'Checking sources. Checking availability.' : `Loading ${run.mode}. Wait to start reading.`}`);
+        announce(get().route.view === 'sources' ? messages.announcements.checkingSources : formatMessage(messages.announcements.loading, {kind: messages.kinds[run.mode]}));
         await inBatches(remaining, async feed => {if (!run.controller.signal.aborted) await fetchSource(feed, run);});
       };
       try {
         await runtime.withLock(`${site.storageNamespace}-refresh`, run.controller.signal, work);
         if (!run.controller.signal.aborted) await prune(() => !run.controller.signal.aborted);
       } catch (error) {
-        if (!run.controller.signal.aborted) notice('The reader could not finish checking for new items. You can still read your library. Choose Refresh to try again.');
+        if (!run.controller.signal.aborted) notice(messages.notices.refreshFailed);
       } finally {
         run.finished = true; run.completed = !run.controller.signal.aborted && run.done === run.total;
         if (activeRun === run) {
           activeRun = null;
           publishRun();
-          if (!run.controller.signal.aborted && run.mode === get().route.mode && get().route.view !== 'saved') announce(run.completed ? 'Feed check complete.' : 'Feed check paused.');
+          if (!run.controller.signal.aborted && run.mode === get().route.mode && get().route.view !== 'saved') announce(run.completed ? messages.announcements.feedCheckComplete : messages.announcements.feedCheckPaused);
           if (retryAgain && started) {const next = retryAgain; retryAgain = null; refresh(next);}
         }
       }
@@ -264,7 +265,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
           if (remote.error) {
             if (!library.articles.length) throw remote.error;
             catalog = {feeds: [], categories: []}; catalogFallback = true;
-            notice('The reader could not download the feed list. You can still browse the items it already has in your library. Check your connection and reload the page to try again.');
+            notice(messages.notices.catalogUnavailable);
           } else {catalog = remote.value; await save('settings', [{id: 'catalog', value: catalog}]);}
         }
         if (!started || epoch !== generation) return;
@@ -309,12 +310,12 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
         set({ready: true, failed: false});
         if (cached) remotePromise.then(async remote => {
           if (!started || epoch !== generation) return;
-          if (remote.error) {notice('The reader could not download the latest feed list, so it is using an earlier copy. You can still browse your library. Reload the page to try again.'); return;}
+          if (remote.error) {notice(messages.notices.cachedCatalog); return;}
           await save('settings', [{id: 'catalog', value: remote.value}]);
-          if (started && epoch === generation && JSON.stringify(remote.value) !== JSON.stringify(catalog)) notice('The reader found a newer feed list. Reload the page when you’re ready to use it.');
+          if (started && epoch === generation && JSON.stringify(remote.value) !== JSON.stringify(catalog)) notice(messages.notices.newCatalog);
         });
-        const offline = () => {activeRun?.controller.abort(); publishRun(); notice('You’re offline. You can still read any items this reader already has in your library. Reconnect to load new items.');};
-        const online = () => {notice('You’re back online. The reader can check for new items again.'); refresh();};
+        const offline = () => {activeRun?.controller.abort(); publishRun(); notice(messages.notices.offline);};
+        const online = () => {notice(messages.notices.online); refresh();};
         const reconcile = () => {syncLibrary().then(() => {if (isCurrent()) refresh();});};
         const visibility = () => {if (!runtime.isVisible()) {activeRun?.controller.abort(); publishRun();} else reconcile();};
         removeListeners = runtime.subscribe({offline, online, visibility, tick: () => {if (runtime.isVisible()) {set({now: runtime.now()}); reconcile();}}});
@@ -331,8 +332,8 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       switchMode(mode) {if (navigation) navigation.switchMode(mode); else navigate({mode});},
       closeDialog() {if (navigation) navigation.close(); else {queuedNavigation = null; set(state => ({route: {...state.route, article: '', about: false, filters: false, feedList: false}}));}},
       endSearch() {navigation?.endSearch();},
-      async toggleSaved(id) {await setItemState(id, current => ({saved: !current?.saved})); announce(get().states.get(id)?.saved ? 'The reader saved this item.' : 'The reader removed this item from Saved.');},
-      async toggleRead(id) {await setItemState(id, current => ({read: !current?.read})); announce(get().states.get(id)?.read ? 'The reader marked this item as read.' : 'The reader marked this item as unread.');},
+      async toggleSaved(id) {await setItemState(id, current => ({saved: !current?.saved})); announce(get().states.get(id)?.saved ? messages.announcements.saved : messages.announcements.unsaved);},
+      async toggleRead(id) {await setItemState(id, current => ({read: !current?.read})); announce(get().states.get(id)?.read ? messages.announcements.read : messages.announcements.unread);},
       markScrolled(ids) {const version = selectionVersion; return queueStateWrite(async () => {
         const state = get();
         const {states: updates} = await updateStates(ids.filter(id => state.articles.has(id)).map(id => ({id, read: true})));
@@ -349,29 +350,29 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       undo() {return queueStateWrite(async () => {
         const {states: updates} = await updateStates(get().undoRead);
         commitStates(updates, {undoRead: []});
-        announce('The reader restored each item’s previous read or unread mark.');
+        announce(messages.announcements.undo);
       });},
       dismissUndo() {set({undoRead: []});},
       revealPending() {
         resetSelection();
         const state = get(), articles = new Map(state.articles), pending = new Map(state.pending);
         for (const [id, item] of pending) if (itemMode(item, state.feedMap) === state.route.mode) {articles.set(id, item); pending.delete(id);}
-        set({articles, pending}); announce(pending.size < state.pending.size ? 'The reader added new items to the list.' : 'The reader refreshed the list.');
+        set({articles, pending}); announce(pending.size < state.pending.size ? messages.announcements.newItems : messages.announcements.refreshed);
       },
       async toggleExcluded(id) {
         const excluded = new Set(get().excluded);
         if (excluded.has(id)) excluded.delete(id); else excluded.add(id);
         await setPreference('excluded', excluded, {id: 'excludedSources', value: [...excluded]});
-        announce(excluded.has(id) ? 'The reader excluded this source from your feeds. Saved items remain available.' : 'The reader included this source in your feeds.');
+        announce(excluded.has(id) ? messages.announcements.excluded : messages.announcements.included);
       },
-      async setTheme(value) {const theme = ['light', 'dark'].includes(value) ? value : 'auto'; await setPreference('theme', theme, {id: 'theme', value: theme}); announce(theme === 'auto' ? 'The reader now follows your device’s theme.' : `The reader now uses the ${theme === 'dark' ? 'Dark' : 'Light'} theme.`);},
-      async setMarkReadOnScroll(enabled) {await setPreference('markReadOnScroll', enabled, {id: 'markReadOnScroll', enabled}); announce(enabled ? 'The reader will mark items read as you scroll past them.' : 'The reader will wait for you to mark items read.');},
+      async setTheme(value) {const theme = ['light', 'dark'].includes(value) ? value : 'auto'; await setPreference('theme', theme, {id: 'theme', value: theme}); announce(theme === 'auto' ? messages.announcements.autoTheme : formatMessage(messages.announcements.theme, {theme: theme === 'dark' ? messages.common.dark : messages.common.light}));},
+      async setMarkReadOnScroll(enabled) {await setPreference('markReadOnScroll', enabled, {id: 'markReadOnScroll', enabled}); announce(enabled ? messages.announcements.scrollReadEnabled : messages.announcements.scrollReadDisabled);},
       rememberReading() {if (!['saved', 'sources'].includes(get().route.view)) readingStarted.add(get().route.mode);},
       toggleExpanded(id) {const expandedPosts = new Set(get().expandedPosts); if (expandedPosts.has(id)) expandedPosts.delete(id); else expandedPosts.add(id); set({expandedPosts});},
       dismissLoading() {loadingRun = null; publishRun();},
       async exportBackup() {
         const state = await exportSnapshot(), now = new Date(runtime.now());
-        set({backupStatus: 'Check your browser’s downloads for a backup of your saved items and which items you have read.'});
+        set({backupStatus: messages.backup.exported});
         return {content: JSON.stringify(readingBackup(state, site, now)), type: 'application/json', filename: `${site.storageNamespace}-${now.toISOString().slice(0, 10)}.json`};
       },
       async exportSaved() {
@@ -382,9 +383,9 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
       async importBackup(file) {
         if (!file) return;
         try {
-          if (file.size > 20 * 1024 * 1024) throw new Error('The reader cannot restore a backup larger than 20 MB. Choose a smaller backup.');
+          if (file.size > 20 * 1024 * 1024) throw new Error(messages.backup.tooLarge);
           let data;
-          try {data = JSON.parse(await file.text());} catch {throw new Error('The reader cannot read this file as a JSON backup. Choose a file from Export reading backup.');}
+          try {data = JSON.parse(await file.text());} catch {throw new Error(messages.backup.invalidJson);}
           await queueStateWrite(async () => {
             const current = get();
             const restored = restoreReadingBackup(data, {states: new Map(), articles: new Map([...current.pending, ...current.articles])}, cleanText, site);
@@ -399,7 +400,7 @@ export function createReaderStore(site, {library, loadFeed, cleanText, loadCatal
               articles.set(item.id, local && local !== previous ? local : item);
               pending.delete(item.id);
             }
-            commitStates(result.states, {articles, pending, backupStatus: `The reader combined ${result.added} saved items and the backup’s read marks with your library.`});
+            commitStates(result.states, {articles, pending, backupStatus: formatMessage(messages.backup.restored, {added: result.added})});
           });
         } catch (error) {set({backupStatus: error.message});}
       },

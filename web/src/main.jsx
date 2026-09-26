@@ -1,3 +1,4 @@
+import {messages} from './localization.mjs';
 import {Component, StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {App} from './app.jsx';
@@ -11,7 +12,7 @@ class ReaderErrorBoundary extends Component {
   state = {failed: false};
   static getDerivedStateFromError() {return {failed: true};}
   render() {
-    return this.state.failed ? <main><h1>The reader could not display your library.</h1><p>Your browser’s stored library has not been cleared. Reload the page to try again.</p><a href="./">Reload reader</a></main> : this.props.children;
+    return this.state.failed ? <main><h1>{messages.startup.renderError}</h1><p>{messages.startup.reloadHint}</p><a href="./">{messages.startup.reloadReader}</a></main> : this.props.children;
   }
 }
 

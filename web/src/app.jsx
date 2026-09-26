@@ -1,3 +1,4 @@
+import {messages, formatMessage, countMessage} from './localization.mjs';
 import {Component, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {useStore} from 'zustand';
 import {flushSync} from 'react-dom';
@@ -10,12 +11,11 @@ import {StoryCard, SourceCard, categoryName} from './components/items.jsx';
 import {ReaderDialogs} from './components/dialogs.jsx';
 
 function headingFor({view, mode, unavailableOnly}) {
-  return view === 'excluded' ? 'Excluded sources' : view === 'saved' ? 'Saved items' : view === 'sources' ? unavailableOnly ? 'Unavailable sources' : mode === 'posts' ? 'Accounts' : 'Publications' : `${view === 'unread' ? 'Unread' : 'Latest'} ${mode}`;
+  return view === 'excluded' ? messages.common.excludedSources : view === 'saved' ? messages.common.savedItems : view === 'sources' ? unavailableOnly ? messages.common.unavailableSources : mode === 'posts' ? messages.common.accounts : messages.common.publications : formatMessage(view === 'unread' ? messages.headings.unread : messages.headings.latest, {kind: messages.kinds[mode]});
 }
 
-const counted = (count, plural) => `${count.toLocaleString()} ${count === 1 ? plural.slice(0, -1) : plural}`;
-const checkedTime = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: '2-digit'});
-const checkedDay = new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric'});
+const checkedTime = new Intl.DateTimeFormat(messages.locale, {hour: 'numeric', minute: '2-digit'});
+const checkedDay = new Intl.DateTimeFormat(messages.locale, {month: 'short', day: 'numeric'});
 
 // Capture browser geometry immediately before React changes the list. Stable keys
 // preserve controls; when a row disappears, restore focus to its next neighbour.
@@ -60,7 +60,7 @@ function Header({state, site, menuOpen, setMenuOpen, compact, onSearch, children
   const {mode, view, query} = state.route;
   const current = [...state.articles.values()].filter(item => itemMode(item, state.feedMap) === mode);
   const savedCount = [...state.articles.keys()].filter(id => state.states.get(id)?.saved).length;
-  const searchLabel = view === 'excluded' ? 'Search excluded sources' : view === 'saved' ? 'Search saved items' : view === 'sources' ? `Search ${mode === 'posts' ? 'accounts' : 'publications'}` : `Search ${mode}`;
+  const searchLabel = view === 'excluded' ? messages.search.excluded : view === 'saved' ? messages.search.saved : view === 'sources' ? formatMessage(messages.search.sources, {kind: messages.kinds[mode === 'posts' ? 'accounts' : 'publications']}) : formatMessage(messages.search.items, {kind: messages.kinds[mode]});
   const navigate = state.navigate;
   const open = key => navigate({[key]: true, limit: state.route.limit}, {keepScroll: true});
   const separator = site.name.indexOf('&');
@@ -71,21 +71,21 @@ function Header({state, site, menuOpen, setMenuOpen, compact, onSearch, children
       <a className="wordmark" href="./" aria-label={site.homeLabel} onClick={event => {if (event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); navigate({mode: site.capabilities.articles ? 'articles' : 'posts', view: state.preferredView, source: '', category: '', query: '', unavailableOnly: false});}}>
         <img className="brand-icon" src={site.assets.logo} width="48" height="48" alt=""/><span className="brand-copy"><span className="brand-name">{after === undefined ? site.name : <>{before}<i>&amp;</i>{after}</>}</span><small>{site.tagline}</small></span>
       </a>
-      <button id="menu-toggle" className="icon-button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} aria-controls="resource-menu" onClick={() => setMenuOpen(!menuOpen)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-      <nav id="resource-menu" aria-label="Resources">
-        <button id="publications-button" className="text-button" onClick={() => navigate({view: 'sources', source: '', category: '', query: '', unavailableOnly: false})}>{mode === 'posts' ? 'Accounts' : 'Publications'}</button>
-        <button id="menu-filter-button" className="text-button" onClick={() => navigate({view: ['all', 'unread'].includes(view) ? view : state.preferredView, filters: true, limit: state.route.limit}, {keepScroll: true})}>Filter feeds</button>
-        <button id="excluded-button" className="text-button" onClick={() => navigate({view: 'excluded', source: '', category: '', query: '', unavailableOnly: false})}>Excluded sources <span id="excluded-count" className="count">{state.excluded.size}</span></button>
-        <label className="theme-control" htmlFor="theme">Theme <select id="theme" value={state.theme} onChange={event => state.setTheme(event.target.value)}><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
-        <button id="about-button" className="text-button" onClick={() => open('about')}>About this reader</button>
-        {site.opmlUrl && <button id="feed-list-button" className="text-button" aria-haspopup="dialog" aria-controls="feed-list-dialog" onClick={() => open('feedList')}>Download feed list</button>}
-        {site.repository && <a id="github-link" href={site.repository}>GitHub ↗︎</a>}
+      <button id="menu-toggle" className="icon-button" aria-label={menuOpen ? messages.common.closeMenu : messages.common.openMenu} aria-expanded={menuOpen} aria-controls="resource-menu" onClick={() => setMenuOpen(!menuOpen)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <nav id="resource-menu" aria-label={messages.common.resources}>
+        <button id="publications-button" className="text-button" onClick={() => navigate({view: 'sources', source: '', category: '', query: '', unavailableOnly: false})}>{mode === 'posts' ? messages.common.accounts : messages.common.publications}</button>
+        <button id="menu-filter-button" className="text-button" onClick={() => navigate({view: ['all', 'unread'].includes(view) ? view : state.preferredView, filters: true, limit: state.route.limit}, {keepScroll: true})}>{messages.reader.filterFeeds}</button>
+        <button id="excluded-button" className="text-button" onClick={() => navigate({view: 'excluded', source: '', category: '', query: '', unavailableOnly: false})}>{messages.common.excludedSources}{' '}<span id="excluded-count" className="count">{state.excluded.size}</span></button>
+        <label className="theme-control" htmlFor="theme">{messages.common.theme}{' '}<select id="theme" value={state.theme} onChange={event => state.setTheme(event.target.value)}><option value="auto">{messages.common.auto}</option><option value="light">{messages.common.light}</option><option value="dark">{messages.common.dark}</option></select></label>
+        <button id="about-button" className="text-button" onClick={() => open('about')}>{messages.common.aboutThisReader}</button>
+        {site.opmlUrl && <button id="feed-list-button" className="text-button" aria-haspopup="dialog" aria-controls="feed-list-dialog" onClick={() => open('feedList')}>{messages.common.downloadFeedList}</button>}
+        {site.repository && <a id="github-link" href={site.repository}>{messages.reader.gitHub}</a>}
       </nav>
     </header>
-    <div className="mode-bar"><nav aria-label="Reading mode" className="mode-switch">{['articles', 'posts'].filter(kind => site.capabilities[kind]).map(kind => <button key={kind} data-mode={kind} aria-pressed={['all', 'unread'].includes(view) && mode === kind} onClick={() => state.switchMode(kind)}>{kind === 'articles' ? 'Articles' : 'Posts'}</button>)}</nav><button id="saved-button" data-view="saved" aria-pressed={view === 'saved'} onClick={() => navigate({view: 'saved', savedKind: 'all', source: '', category: '', query: '', unavailableOnly: false})}>Saved <span id="saved-count" className="count">{savedCount}</span></button></div>
-    <div className="header-tools"><nav id="library-views" className="view-nav" aria-label={mode === 'posts' ? 'Post view' : 'Article view'}>{[['all', 'Latest', current.length], ['unread', 'Unread', current.filter(item => !state.states.get(item.id)?.read).length]].map(([kind, label, count]) => <button key={kind} data-view={kind} aria-pressed={view === kind} onClick={() => navigate({view: kind, unavailableOnly: false})}>{label} <span id={`${kind}-count`} className="count sr-only">{count}</span></button>)}</nav>
-      <div id="search-panel"><div className="search"><span className="sr-only" id="search-label">{searchLabel}</span><input id="search" type="search" placeholder={`${searchLabel}…`} aria-labelledby="search-label" aria-describedby="search-help" value={query} onChange={event => onSearch(event.target.value, {search: true})} onKeyDown={event => {if (event.key === 'Enter' && !event.nativeEvent.isComposing) {event.preventDefault(); onSearch(query, {search: true});}}} onBlur={state.endSearch}/><button id="clear-search" type="button" aria-label="Clear search" hidden={!query} onClick={() => {onSearch(''); document.querySelector('#search').focus({preventScroll: true}); state.announce('Search cleared.');}}>×</button></div><p id="search-help" className="sr-only">{view === 'excluded' ? 'Search the sources you have excluded.' : view === 'sources' ? `Search the ${mode === 'posts' ? 'accounts' : 'publications'} in this list.` : 'Search the items this reader has loaded in your current view.'}</p></div>
-      <button id="filter-button" className="icon-button" aria-label="Filters" title="Filters" aria-haspopup="dialog" hidden={['saved', 'excluded'].includes(view)} onClick={() => open('filters')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg></button>
+    <div className="mode-bar"><nav aria-label={messages.navigation.readingMode} className="mode-switch">{['articles', 'posts'].filter(kind => site.capabilities[kind]).map(kind => <button key={kind} data-mode={kind} aria-pressed={['all', 'unread'].includes(view) && mode === kind} onClick={() => state.switchMode(kind)}>{kind === 'articles' ? messages.common.articles : messages.common.posts}</button>)}</nav><button id="saved-button" data-view="saved" aria-pressed={view === 'saved'} onClick={() => navigate({view: 'saved', savedKind: 'all', source: '', category: '', query: '', unavailableOnly: false})}>{messages.common.saved}{' '}<span id="saved-count" className="count">{savedCount}</span></button></div>
+    <div className="header-tools"><nav id="library-views" className="view-nav" aria-label={mode === 'posts' ? messages.navigation.postView : messages.navigation.articleView}>{[['all', messages.common.latest, current.length], ['unread', messages.common.unread, current.filter(item => !state.states.get(item.id)?.read).length]].map(([kind, label, count]) => <button key={kind} data-view={kind} aria-pressed={view === kind} onClick={() => navigate({view: kind, unavailableOnly: false})}>{label} <span id={`${kind}-count`} className="count sr-only">{count}</span></button>)}</nav>
+      <div id="search-panel"><div className="search"><span className="sr-only" id="search-label">{searchLabel}</span><input id="search" type="search" placeholder={formatMessage(messages.search.placeholder, {label: searchLabel})} aria-labelledby="search-label" aria-describedby="search-help" value={query} onChange={event => onSearch(event.target.value, {search: true})} onKeyDown={event => {if (event.key === 'Enter' && !event.nativeEvent.isComposing) {event.preventDefault(); onSearch(query, {search: true});}}} onBlur={state.endSearch}/><button id="clear-search" type="button" aria-label={messages.search.clear} hidden={!query} onClick={() => {onSearch(''); document.querySelector('#search').focus({preventScroll: true}); state.announce(messages.announcements.searchCleared);}}>×</button></div><p id="search-help" className="sr-only">{view === 'excluded' ? messages.search.excludedHint : view === 'sources' ? formatMessage(messages.search.sourceHint, {kind: messages.kinds[mode === 'posts' ? 'accounts' : 'publications']}) : messages.search.itemsHint}</p></div>
+      <button id="filter-button" className="icon-button" aria-label={messages.common.filters} title={messages.common.filters} aria-haspopup="dialog" hidden={['saved', 'excluded'].includes(view)} onClick={() => open('filters')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg></button>
     </div>
     <div className="header-status">{children}</div>
   </div>;
@@ -100,21 +100,21 @@ function FeedStatus({state, pendingCount, onReveal, children}) {
   const feeds = selectSources(state, true), failures = feeds.filter(feed => state.health.get(feed.id)?.error);
   const attempts = feeds.map(feed => state.health.get(feed.id)?.lastAttempt || state.health.get(feed.id)?.lastSuccess || 0).filter(Boolean);
   const lastChecked = attempts.length ? Math.max(...attempts) : 0;
-  const checkedLabel = lastChecked ? `Checked ${dateLabel(lastChecked, true)}` : 'Feeds not checked yet.';
-  const compactChecked = lastChecked ? `Checked ${(new Date(lastChecked).toDateString() === new Date(state.now).toDateString() ? checkedTime : checkedDay).format(lastChecked)}` : 'Not checked';
-  const label = view === 'sources' ? 'Sources' : mode === 'posts' ? 'Posts' : 'Articles';
+  const checkedLabel = lastChecked ? formatMessage(messages.loading.checked, {date: dateLabel(lastChecked, true)}) : messages.loading.notCheckedYet;
+  const compactChecked = lastChecked ? formatMessage(messages.loading.checked, {date: (new Date(lastChecked).toDateString() === new Date(state.now).toDateString() ? checkedTime : checkedDay).format(lastChecked)}) : messages.loading.notChecked;
+  const label = view === 'sources' ? messages.common.sources : mode === 'posts' ? messages.common.posts : messages.common.articles;
   return <>
     <div id="feed-loading" className="feed-loading" hidden={!visible} data-state={active ? 'loading' : 'finished'} data-pending={pendingCount > 0}>
-      <div className="loading-copy"><div className="loading-heading"><span className="loading-symbol" aria-hidden="true"><span className="sk-flow"><span className="sk-flow-dot"/><span className="sk-flow-dot"/><span className="sk-flow-dot"/></span><span className="loading-mark">{!run || run.completed ? '✓' : 'Ⅱ'}</span></span><strong id="loading-label" hidden={pendingCount > 0}>{label}</strong><button id="new-items" className="new-items" hidden={!pendingCount} disabled={active} onClick={onReveal}>{active ? '' : 'Show '}{counted(pendingCount, `new ${mode}`)}</button><span id="loading-count" hidden={!run}><span id="loading-count-value">{run ? `${String(run.done).padStart(String(run.total).length, '\u2007')} / ${run.total}` : ''}</span><span>feeds</span></span></div>
-        <div className="loading-messages sr-only"><p id="loading-guidance" aria-hidden={!active}>{view === 'sources' ? 'Checking availability.' : 'Wait to start reading.'}</p><p id="loading-result" aria-hidden={active}>{!run || run.completed ? view === 'sources' ? 'Sources checked.' : 'Ready to read.' : 'Check paused.'}</p></div>
+      <div className="loading-copy"><div className="loading-heading"><span className="loading-symbol" aria-hidden="true"><span className="sk-flow"><span className="sk-flow-dot"/><span className="sk-flow-dot"/><span className="sk-flow-dot"/></span><span className="loading-mark">{!run || run.completed ? '✓' : 'Ⅱ'}</span></span><strong id="loading-label" hidden={pendingCount > 0}>{label}</strong><button id="new-items" className="new-items" hidden={!pendingCount} disabled={active} onClick={onReveal}>{countMessage((active ? messages.newItems : messages.showNewItems)[mode], pendingCount)}</button><span id="loading-count" hidden={!run}><span id="loading-count-value">{run ? `${String(run.done).padStart(String(run.total).length, '\u2007')} / ${run.total}` : ''}</span><span>{messages.loading.feeds}</span></span></div>
+        <div className="loading-messages sr-only"><p id="loading-guidance" aria-hidden={!active}>{view === 'sources' ? messages.loading.checkingAvailability : messages.loading.waitToRead}</p><p id="loading-result" aria-hidden={active}>{!run || run.completed ? view === 'sources' ? messages.loading.sourcesChecked : messages.loading.ready : messages.loading.paused}</p></div>
       </div>
-      <button id="dismiss-loading" className="loading-dismiss" aria-label="Dismiss feed status" hidden={pendingCount > 0} disabled={active} onClick={() => {state.dismissLoading(); document.querySelector('#refresh').focus({preventScroll: true});}}>×</button>
-      <progress id="loading-bar" hidden={!run} max={run?.total || 1} value={run?.done || 0} aria-label={active ? view === 'sources' ? 'Checking sources' : `Loading ${mode}` : run?.completed ? 'Feed check complete' : 'Feed check paused'} aria-valuetext={`${run?.done || 0} of ${run?.total || 0} feeds checked`} aria-describedby={active ? 'loading-guidance' : 'loading-result'}/>
+      <button id="dismiss-loading" className="loading-dismiss" aria-label={messages.loading.dismiss} hidden={pendingCount > 0} disabled={active} onClick={() => {state.dismissLoading(); document.querySelector('#refresh').focus({preventScroll: true});}}>×</button>
+      <progress id="loading-bar" hidden={!run} max={run?.total || 1} value={run?.done || 0} aria-label={active ? view === 'sources' ? messages.loading.checkingSources : formatMessage(messages.loading.label, {kind: messages.kinds[mode]}) : run?.completed ? messages.loading.completeLabel : messages.loading.pausedLabel} aria-valuetext={formatMessage(messages.loading.progress, {done: run?.done || 0, total: run?.total || 0})} aria-describedby={active ? 'loading-guidance' : 'loading-result'}/>
     </div>
-    <div className="status-row"><div id="feed-progress" className="feed-progress">{view === 'saved' ? <span>Your saved articles and posts</span> : <>
+    <div className="status-row"><div id="feed-progress" className="feed-progress">{view === 'saved' ? <span>{messages.loading.savedDescription}</span> : <>
       {!checking && <span className="checked-at" hidden={visible} title={checkedLabel}><span className="status-full">{checkedLabel}</span><span className="status-compact" aria-hidden="true">{compactChecked}</span></span>}
-      {failures.length > 0 && <button className="text-button status-link" onClick={() => state.navigate({view: 'sources', unavailableOnly: true, source: '', category: '', query: ''})}>{failures.length} unavailable</button>}
-    </>}</div>{children}<button id="refresh" className="text-button" aria-label="Refresh" title={checking ? 'Checking feeds' : 'Refresh'} aria-busy={checking} hidden={['saved', 'excluded'].includes(view)} disabled={checking} onClick={() => state.refresh({retryFailed: true, resetList: true})}><span className="refresh-symbol" aria-hidden="true">↻</span><span className="status-action-label">{checking ? ' Checking' : ' Refresh'}</span></button></div>
+      {failures.length > 0 && <button className="text-button status-link" onClick={() => state.navigate({view: 'sources', unavailableOnly: true, source: '', category: '', query: ''})}>{formatMessage(messages.loading.unavailable, {count: failures.length})}</button>}
+    </>}</div>{children}<button id="refresh" className="text-button" aria-label={messages.common.refresh} title={checking ? messages.loading.checkingFeeds : messages.common.refresh} aria-busy={checking} hidden={['saved', 'excluded'].includes(view)} disabled={checking} onClick={() => state.refresh({retryFailed: true, resetList: true})}><span className="refresh-symbol" aria-hidden="true">↻</span><span className="status-action-label">{checking ? messages.loading.checkingAction : messages.loading.refreshAction}</span></button></div>
   </>;
 }
 
@@ -122,15 +122,15 @@ function EmptyState({title, children}) {return <div className="empty-state"><h2 
 
 function ListContent({state, site, items, sources}) {
   const {view, mode, query, category, source, savedKind} = state.route;
-  if (state.failed) return <EmptyState title="The reader could not load the feed list.">Check your connection and reload the page.{site.opmlUrl && ' You can also choose Download feed list to use another reader.'}</EmptyState>;
-  if (!state.ready) return <EmptyState title="Opening your library…">The reader checks this browser for previously stored items.</EmptyState>;
-  if (['sources', 'excluded'].includes(view)) return sources.length ? sources.map(feed => <SourceCard key={feed.id} feed={feed} state={state}/>) : <EmptyState title={view === 'excluded' && !query ? 'No excluded sources.' : 'No sources match.'}>{view === 'excluded' ? 'Select a publisher’s name in the feed to exclude a source, or clear your search.' : 'Clear your filters to see more sources.'}</EmptyState>;
+  if (state.failed) return <EmptyState title={messages.empty.catalogError}>{messages.empty.reloadHint}{site.opmlUrl && messages.empty.downloadHint}</EmptyState>;
+  if (!state.ready) return <EmptyState title={messages.empty.openingLibrary}>{messages.empty.checkingStorage}</EmptyState>;
+  if (['sources', 'excluded'].includes(view)) return sources.length ? sources.map(feed => <SourceCard key={feed.id} feed={feed} state={state}/>) : <EmptyState title={view === 'excluded' && !query ? messages.empty.noExcluded : messages.empty.noSources}>{view === 'excluded' ? messages.empty.excludedHint : messages.empty.sourcesHint}</EmptyState>;
   if (items.length) return items.slice(0, state.route.limit).map(item => <StoryCard key={item.id} item={item} state={state} site={site}/>);
   const anySaved = [...state.states.values()].some(mark => mark.saved && state.articles.has(mark.id));
   const active = state.session && state.session.mode === mode && view !== 'saved';
   const filtered = query || category || source || (view === 'saved' && savedKind !== 'all');
-  const title = view === 'saved' ? anySaved ? 'No saved items match.' : 'You have not saved any items yet.' : active ? `Loading ${mode}…` : filtered ? 'No items match.' : view === 'unread' ? 'You’re caught up.' : 'The reader has not loaded any items yet.';
-  return <EmptyState title={title}>{view === 'saved' && !anySaved ? 'Save an article or post to find it here.' : filtered ? 'Clear your filters or try another search. The reader searches only the items it has loaded in this view.' : active ? 'The reader adds items as each feed finishes loading.' : 'Choose Refresh to check for new items, or open Filters and browse sources to see which feeds could not load.'}</EmptyState>;
+  const title = view === 'saved' ? anySaved ? messages.empty.noSavedMatches : messages.empty.noSaved : active ? formatMessage(messages.loading.empty, {kind: messages.kinds[mode]}) : filtered ? messages.empty.noMatches : view === 'unread' ? messages.empty.caughtUp : messages.empty.noItems;
+  return <EmptyState title={title}>{view === 'saved' && !anySaved ? messages.empty.savedHint : filtered ? messages.empty.filteredHint : active ? messages.empty.loadingHint : messages.empty.refreshHint}</EmptyState>;
 }
 
 export function App({store, site, navigationPosition}) {
@@ -141,11 +141,11 @@ export function App({store, site, navigationPosition}) {
   const announcedRoute = useRef(route);
   const items = useMemo(() => selectItems(state), [state.articles, state.states, state.route, state.feedMap, state.excluded, state.retainedRead]);
   const sourceView = ['sources', 'excluded'].includes(route.view);
-  const sources = (route.view === 'excluded' ? [...state.excluded].map(id => state.feedMap.get(id) || {id, name: id, description: 'This source is no longer in the catalog.'}) : selectSources(state)).filter(feed => (!route.unavailableOnly || state.health.get(feed.id)?.error) && (!route.query || `${feed.name} ${feed.description}`.toLocaleLowerCase().includes(route.query.trim().toLocaleLowerCase()))).sort((a, b) => a.name.localeCompare(b.name));
+  const sources = (route.view === 'excluded' ? [...state.excluded].map(id => state.feedMap.get(id) || {id, name: id, description: messages.sources.removedDescription}) : selectSources(state)).filter(feed => (!route.unavailableOnly || state.health.get(feed.id)?.error) && (!route.query || `${feed.name} ${feed.description}`.toLocaleLowerCase().includes(route.query.trim().toLocaleLowerCase()))).sort((a, b) => a.name.localeCompare(b.name));
   const pendingCount = ['all', 'unread'].includes(route.view) ? selectItems({...state, articles: state.pending}, {retainRead: false}).length : 0;
   const unread = items.filter(item => !state.states.get(item.id)?.read).length;
   const savedCount = [...state.articles.keys()].filter(id => state.states.get(id)?.saved).length;
-  const result = state.failed ? 'The reader could not open your library.' : !state.ready ? 'The reader is opening your library…' : sourceView ? counted(sources.length, `${route.unavailableOnly ? 'unavailable ' : ''}sources`) : `${counted(items.length, route.view === 'saved' ? 'saved items' : route.mode)} · Newest first`;
+  const result = state.failed ? messages.announcements.libraryError : !state.ready ? messages.announcements.openingLibrary : sourceView ? countMessage(messages.counts[route.unavailableOnly ? 'unavailable' : 'sources'], sources.length) : formatMessage(messages.reader.sortedCount, {items: countMessage(messages.counts[route.view === 'saved' ? 'saved' : route.mode], items.length)});
   const active = Boolean(state.loadingRun && state.loadingRun.mode === route.mode && route.view !== 'saved' && !state.loadingRun.finished && !state.loadingRun.controller.signal.aborted);
   const heading = headingFor(route);
   useEffect(() => {
@@ -199,7 +199,7 @@ export function App({store, site, navigationPosition}) {
   }, [store]);
   useLayoutEffect(() => {scrolling.current?.setEnabled(state.markReadOnScroll);}, [state.markReadOnScroll]);
   useLayoutEffect(() => {
-    document.title = `${heading} — ${site.name}`;
+    document.title = formatMessage(messages.reader.documentTitle, {heading, name: site.name});
     setMenuOpen(false);
     document.querySelector('#reading-options').open = false;
     const position = navigationPosition.current;
@@ -230,30 +230,30 @@ export function App({store, site, navigationPosition}) {
   };
   const filterActive = route.category || route.source || route.query;
   return <>
-    <a className="skip-link" href="#main" onClick={event => {event.preventDefault(); document.querySelector('#main').focus();}}>Skip to stories</a>
+    <a className="skip-link" href="#main" onClick={event => {event.preventDefault(); document.querySelector('#main').focus();}}>{messages.reader.skipToStories}</a>
     <Header state={state} site={site} menuOpen={menuOpen} setMenuOpen={setMenuOpen} compact={scrollState.compact} onSearch={search}>
-      <FeedStatus state={state} pendingCount={pendingCount} onReveal={revealNew}><details id="reading-options" hidden={['sources', 'saved', 'excluded'].includes(route.view)}><summary aria-label="Reading options" title="Reading options"><svg className="status-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4m4 0h10M3 17h10m4 0h4"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg><span className="status-action-label">Reading options</span></summary><div className="options-content"><label className="scroll-read-control"><input id="scroll-read" type="checkbox" checked={state.markReadOnScroll} onChange={event => state.setMarkReadOnScroll(event.target.checked)}/>Mark items read as I scroll past them</label><button id="mark-read" className="secondary-button" disabled={!unread} onClick={async () => {await state.bulkRead(); document.querySelector('#reading-options').open = false; document.querySelector('#undo-read').focus({preventScroll: true});}}>Mark {unread.toLocaleString()} matching {route.mode} read</button><p className="hint">Mark every item that matches your filters and search as read, including items you have not scrolled to or opened with Show more.</p></div></details></FeedStatus>
+      <FeedStatus state={state} pendingCount={pendingCount} onReveal={revealNew}><details id="reading-options" hidden={['sources', 'saved', 'excluded'].includes(route.view)}><summary aria-label={messages.reading.options} title={messages.reading.options}><svg className="status-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4m4 0h10M3 17h10m4 0h4"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg><span className="status-action-label">{messages.reading.options}</span></summary><div className="options-content"><label className="scroll-read-control"><input id="scroll-read" type="checkbox" checked={state.markReadOnScroll} onChange={event => state.setMarkReadOnScroll(event.target.checked)}/>{messages.reading.markOnScroll}</label><button id="mark-read" className="secondary-button" disabled={!unread} onClick={async () => {await state.bulkRead(); document.querySelector('#reading-options').open = false; document.querySelector('#undo-read').focus({preventScroll: true});}}>{formatMessage(messages.reading.markAll, {count: unread.toLocaleString(messages.locale), kind: messages.kinds[route.mode]})}</button><p className="hint">{messages.reading.markAllHint}</p></div></details></FeedStatus>
     </Header>
     <ReadingViewport state={state}><main id="main" tabIndex={-1}>
       <section id="page-heading" className={`page-heading${!['saved', 'sources', 'excluded'].includes(route.view) ? ' sr-only' : ''}`}><h1 id="heading" tabIndex={-1}>{heading}</h1><p id="description" hidden/></section>
-      <nav id="saved-kinds" className="view-nav" aria-label="Saved item type" hidden={route.view !== 'saved'}>{['all', 'articles', 'posts'].map(kind => <button key={kind} data-kind={kind} aria-pressed={route.savedKind === kind} onClick={() => state.navigate({savedKind: kind})}>{kind === 'all' ? 'All' : kind === 'articles' ? 'Articles' : 'Posts'}</button>)}</nav>
-      <div id="filter-chips" className="filter-chips" aria-label="Active filters" hidden={!filterActive}>
+      <nav id="saved-kinds" className="view-nav" aria-label={messages.navigation.savedKind} hidden={route.view !== 'saved'}>{['all', 'articles', 'posts'].map(kind => <button key={kind} data-kind={kind} aria-pressed={route.savedKind === kind} onClick={() => state.navigate({savedKind: kind})}>{kind === 'all' ? messages.common.all : kind === 'articles' ? messages.common.articles : messages.common.posts}</button>)}</nav>
+      <div id="filter-chips" className="filter-chips" aria-label={messages.filters.active} hidden={!filterActive}>
         {route.category && <button className="filter-chip" onClick={() => state.navigate({category: ''})}>{categoryName(route.category, state)} ×</button>}
         {route.source && <button className="filter-chip" onClick={() => state.navigate({source: ''})}>{state.feedMap.get(route.source)?.name} ×</button>}
-        {route.query && <button className="filter-chip" onClick={() => state.navigate({query: ''})}>Search: {route.query} ×</button>}
-        {filterActive && <button className="text-button" onClick={() => state.navigate({category: '', source: '', query: ''})}>Clear all</button>}
+        {route.query && <button className="filter-chip" onClick={() => state.navigate({query: ''})}>{formatMessage(messages.search.chip, {query: route.query})}</button>}
+        {filterActive && <button className="text-button" onClick={() => state.navigate({category: '', source: '', query: ''})}>{messages.filters.clear}</button>}
       </div>
-      {route.query && !sourceView && <p className="hint search-scope">Searching items already loaded in this view.</p>}
-      <div className="reading-utility" hidden={route.view !== 'saved'}><button id="export-saved" className="text-button download-link" hidden={route.view !== 'saved'} disabled={!savedCount} aria-label="Export all saved items as CSV" onClick={async () => download(await state.exportSaved())}>Export saved items as CSV</button></div>
-      <div className="reading-bar"><span id="result-label" className="sr-only">{result}</span><button id="show-all-sources" className="text-button" hidden={route.view !== 'sources' || !route.unavailableOnly} onClick={() => state.navigate({unavailableOnly: false, category: '', source: '', query: ''})}>Show all sources</button></div>
+      {route.query && !sourceView && <p className="hint search-scope">{messages.search.scope}</p>}
+      <div className="reading-utility" hidden={route.view !== 'saved'}><button id="export-saved" className="text-button download-link" hidden={route.view !== 'saved'} disabled={!savedCount} aria-label={messages.exports.csvLabel} onClick={async () => download(await state.exportSaved())}>{messages.exports.csv}</button></div>
+      <div className="reading-bar"><span id="result-label" className="sr-only">{result}</span><button id="show-all-sources" className="text-button" hidden={route.view !== 'sources' || !route.unavailableOnly} onClick={() => state.navigate({unavailableOnly: false, category: '', source: '', query: ''})}>{messages.sources.showAll}</button></div>
       <div id="notice" className="notice" role="status" hidden={!state.notice}>{state.notice}</div>
-      <div id="undo-bar" className="notice" hidden={!state.undoRead.length}><span id="undo-message" role="status">The reader marked {state.undoRead.length} {route.mode} as read. </span><div className="undo-actions"><button id="undo-read" className="text-button" onClick={async () => {await state.undo(); document.querySelector('#heading').focus({preventScroll: true});}}>Undo</button><button id="dismiss-undo" className="icon-button" aria-label="Dismiss read confirmation" title="Dismiss read confirmation" onClick={() => {state.dismissUndo(); document.querySelector('#heading').focus({preventScroll: true});}}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
+      <div id="undo-bar" className="notice" hidden={!state.undoRead.length}><span id="undo-message" role="status">{formatMessage(messages.reading.marked, {count: state.undoRead.length, kind: messages.kinds[route.mode]})}</span><div className="undo-actions"><button id="undo-read" className="text-button" onClick={async () => {await state.undo(); document.querySelector('#heading').focus({preventScroll: true});}}>{messages.common.undo}</button><button id="dismiss-undo" className="icon-button" aria-label={messages.reading.dismissConfirmation} title={messages.reading.dismissConfirmation} onClick={() => {state.dismissUndo(); document.querySelector('#heading').focus({preventScroll: true});}}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
       <p id="announcement" className="sr-only" role="status" aria-live="polite">{state.announcement}</p>
-      <section id="stories" ref={stories} className={sourceView ? 'source-grid' : ''} aria-label={route.view === 'saved' ? 'Saved items' : sourceView ? 'Sources' : route.mode === 'posts' ? 'Posts' : 'Articles'} aria-busy={active} aria-describedby={active ? 'loading-guidance' : undefined} onPointerDown={state.rememberReading} onKeyDown={state.rememberReading}><ListContent state={state} site={site} items={items} sources={sources}/></section>
-      <button id="load-more" className="load-more" hidden={sourceView || items.length <= route.limit} onClick={() => state.navigate({limit: route.limit + 60}, {replace: true, keepScroll: true})}>Show more ↓</button>
-      <footer className="reader-footer">{site.repository && <a href={site.repository}>{state.catalog?.title || site.name} on GitHub</a>}</footer>
+      <section id="stories" ref={stories} className={sourceView ? 'source-grid' : ''} aria-label={route.view === 'saved' ? messages.common.savedItems : sourceView ? messages.common.sources : route.mode === 'posts' ? messages.common.posts : messages.common.articles} aria-busy={active} aria-describedby={active ? 'loading-guidance' : undefined} onPointerDown={state.rememberReading} onKeyDown={state.rememberReading}><ListContent state={state} site={site} items={items} sources={sources}/></section>
+      <button id="load-more" className="load-more" hidden={sourceView || items.length <= route.limit} onClick={() => state.navigate({limit: route.limit + 60}, {replace: true, keepScroll: true})}>{messages.reader.showMore}</button>
+      <footer className="reader-footer">{site.repository && <a href={site.repository}>{formatMessage(messages.reader.repository, {name: state.catalog?.title || site.name})}</a>}</footer>
     </main></ReadingViewport>
-    <button id="back-to-top" className="secondary-button" hidden={!scrollState.top} onClick={() => {backToTop(); document.querySelector('.wordmark').focus({preventScroll: true});}}>↑ Back to top</button>
+    <button id="back-to-top" className="secondary-button" hidden={!scrollState.top} onClick={() => {backToTop(); document.querySelector('.wordmark').focus({preventScroll: true});}}>{messages.reader.backToTop}</button>
     <ReaderDialogs state={state} site={site}/>
   </>;
 }

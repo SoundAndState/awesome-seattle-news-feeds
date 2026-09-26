@@ -1,3 +1,4 @@
+import {messages, formatMessage} from '../localization.mjs';
 import {useLayoutEffect, useRef, useState} from 'react';
 import {cleanText} from '../content.mjs';
 import {itemMode, feedMode} from '../reader-state.mjs';
@@ -40,13 +41,13 @@ function FilterContent({state}) {
   const feeds = state.catalog?.feeds.filter(feed => feedMode(feed) === mode) || [];
   const shown = feeds.filter(feed => feed.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())).sort((a, b) => a.name.localeCompare(b.name));
   const select = changes => state.navigate({...changes, view: view === 'sources' ? 'all' : view, unavailableOnly: false}, {replace: true});
-  const label = mode === 'posts' ? 'Find an account' : 'Find a publication';
+  const label = mode === 'posts' ? messages.filters.findAccount : messages.filters.findPublication;
   const categories = (state.catalog?.categories || []).filter(section => feeds.some(feed => feed.category === section.id));
   return <div className="filter-content">
-    <button id="browse-sources" className="secondary-button" onClick={() => state.navigate({view: 'sources', source: '', category: '', query: '', unavailableOnly: false}, {replace: true})}>Browse {mode === 'posts' ? 'accounts' : 'publications'} <span id="sources-count" className="count">{feeds.length}</span></button>
-    <section id="section-filter" hidden={mode === 'posts' && categories.length <= 1}><h3>Sections</h3><p className="hint">Choose a section to see sources that cover that area or topic. Individual items may cover other topics.</p><nav id="categories" className="category-nav" aria-label="Sections">{categories.map(section => <button key={section.id} data-category={section.id} aria-pressed={category === section.id} onClick={() => select({category: category === section.id ? '' : section.id, source: ''})}><span>{categoryName(section.id, state)}</span><span className="count">{feeds.filter(feed => feed.category === section.id).length}</span></button>)}</nav></section>
-    <h3 id="source-picker-title">{mode === 'posts' ? 'Accounts' : 'Publications'}</h3><label className="search"><span className="sr-only" id="source-search-label">{label}</span><input id="source-search" type="search" placeholder={`${label}…`} aria-labelledby="source-search-label" value={search} onChange={event => setSearch(event.target.value)}/></label>
-    <div id="source-choices" className="source-choices">{shown.map(feed => <button key={feed.id} className="source-choice" data-source={feed.id} aria-pressed={source === feed.id} onClick={() => select({source: feed.id, category: ''})}>{feed.name}</button>)}</div><p id="source-choice-status" className="hint" role="status">{shown.length ? `${shown.length} ${mode === 'posts' ? 'accounts' : 'publications'}` : 'No sources match this search.'}</p>
+    <button id="browse-sources" className="secondary-button" onClick={() => state.navigate({view: 'sources', source: '', category: '', query: '', unavailableOnly: false}, {replace: true})}>{formatMessage(messages.filters.browse, {kind: messages.kinds[mode === 'posts' ? 'accounts' : 'publications']})} <span id="sources-count" className="count">{feeds.length}</span></button>
+    <section id="section-filter" hidden={mode === 'posts' && categories.length <= 1}><h3>{messages.common.sections}</h3><p className="hint">{messages.filters.sectionsHint}</p><nav id="categories" className="category-nav" aria-label={messages.common.sections}>{categories.map(section => <button key={section.id} data-category={section.id} aria-pressed={category === section.id} onClick={() => select({category: category === section.id ? '' : section.id, source: ''})}><span>{categoryName(section.id, state)}</span><span className="count">{feeds.filter(feed => feed.category === section.id).length}</span></button>)}</nav></section>
+    <h3 id="source-picker-title">{mode === 'posts' ? messages.common.accounts : messages.common.publications}</h3><label className="search"><span className="sr-only" id="source-search-label">{label}</span><input id="source-search" type="search" placeholder={formatMessage(messages.search.placeholder, {label})} aria-labelledby="source-search-label" value={search} onChange={event => setSearch(event.target.value)}/></label>
+    <div id="source-choices" className="source-choices">{shown.map(feed => <button key={feed.id} className="source-choice" data-source={feed.id} aria-pressed={source === feed.id} onClick={() => select({source: feed.id, category: ''})}>{feed.name}</button>)}</div><p id="source-choice-status" className="hint" role="status">{shown.length ? formatMessage(messages.filters.sourceCount, {count: shown.length, kind: messages.kinds[mode === 'posts' ? 'accounts' : 'publications']}) : messages.filters.noMatches}</p>
   </div>;
 }
 
@@ -67,20 +68,20 @@ export function ReaderDialogs({state, site}) {
   }, [route.article, item?.id]);
   return <>
     <Dialog id="filter-dialog" titleId="filter-title" open={route.filters} close={close} returnTo={{element: '#filter-button'}}>
-      <div className="dialog-top"><h2 id="filter-title">Filter {route.mode}</h2><CloseButton label="Close filters" close={close}/></div>
+      <div className="dialog-top"><h2 id="filter-title">{formatMessage(messages.filters.title, {kind: messages.kinds[route.mode]})}</h2><CloseButton label={messages.dialogs.closeFilters} close={close}/></div>
       {route.filters && <FilterContent state={state}/>}
     </Dialog>
     <Dialog id="article-dialog" titleId="article-title" open={Boolean(route.article) && !social} close={close} className="article-preview" initialFocus="#article-title" swipeClose returnTo={{kind: 'story', id: route.article, index: [...document.querySelectorAll('#stories .story')].findIndex(card => card.dataset.article === route.article)}}>
-      <div className="dialog-top article-dialog-actions"><span className="preview-drag-handle" aria-hidden="true"/><span id="article-save" hidden={!item}>{item && <SaveButton item={item} saved={state.states.get(item.id)?.saved} actions={state}/>}</span><CloseButton label="Close story" close={close}/></div>
+      <div className="dialog-top article-dialog-actions"><span className="preview-drag-handle" aria-hidden="true"/><span id="article-save" hidden={!item}>{item && <SaveButton item={item} saved={state.states.get(item.id)?.saved} actions={state}/>}</span><CloseButton label={messages.dialogs.closeStory} close={close}/></div>
       <div id="article-body">{item ? <>
-        <h2 id="article-title" className="article-title" tabIndex={-1}><ExternalLink href={item.url}>{item.title || 'Untitled article'}</ExternalLink></h2>
+        <h2 id="article-title" className="article-title" tabIndex={-1}><ExternalLink href={item.url}>{item.title || messages.common.untitledArticle}</ExternalLink></h2>
         <ItemMetadata item={item} state={state} className="article-meta" preview/>
         <div className="article-links"><ItemLinks item={item} state={state} site={site}/></div>
         <SafeContent item={item} website={state.feedMap.get(item.feedIds[0])?.website}/>
-        <footer className="article-preview-footer">{cleanText(item.html).length >= 220 && <div className="article-links"><ItemLinks item={item} state={state} site={site}/></div>}<p className="feed-note">The publisher may include only part of the article in its feed. Choose Read at publisher for the full article and any updates.</p></footer>
-      </> : <><h2 id="article-title" className="article-title" tabIndex={-1}>The reader cannot find this item in your library</h2><p>It may appear after feeds finish loading. Close this preview to browse available items.</p></>}</div>
+        <footer className="article-preview-footer">{cleanText(item.html).length >= 220 && <div className="article-links"><ItemLinks item={item} state={state} site={site}/></div>}<p className="feed-note">{messages.preview.partialFeed}</p></footer>
+      </> : <><h2 id="article-title" className="article-title" tabIndex={-1}>{messages.preview.notFound}</h2><p>{messages.preview.notFoundHint}</p></>}</div>
     </Dialog>
-    <Dialog id="feed-list-dialog" titleId="feed-list-title" open={route.feedList} close={close} initialFocus="#feed-list-title" returnTo={{element: '#feed-list-button'}}><div className="dialog-top"><span>Download feed list</span><CloseButton label="Close feed list guide" close={close}/></div><FeedListHelp site={site}/></Dialog>
-    <Dialog id="about-dialog" titleId="about-title" open={route.about} close={close} initialFocus="#about-title" returnTo={{element: '#about-button'}}><div className="dialog-top"><span>About this reader</span><CloseButton label="Close about" close={close}/></div><AboutHelp site={site} state={state}/></Dialog>
+    <Dialog id="feed-list-dialog" titleId="feed-list-title" open={route.feedList} close={close} initialFocus="#feed-list-title" returnTo={{element: '#feed-list-button'}}><div className="dialog-top"><span>{messages.common.downloadFeedList}</span><CloseButton label={messages.dialogs.closeFeedListGuide} close={close}/></div><FeedListHelp site={site}/></Dialog>
+    <Dialog id="about-dialog" titleId="about-title" open={route.about} close={close} initialFocus="#about-title" returnTo={{element: '#about-button'}}><div className="dialog-top"><span>{messages.common.aboutThisReader}</span><CloseButton label={messages.dialogs.closeAbout} close={close}/></div><AboutHelp site={site} state={state}/></Dialog>
   </>;
 }

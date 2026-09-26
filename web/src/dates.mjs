@@ -1,6 +1,7 @@
-const compactDate = new Intl.DateTimeFormat('en-US', {month:'short', day:'numeric', year:'numeric'});
-const dateOnly = new Intl.DateTimeFormat('en-US', {month:'short', day:'numeric', year:'numeric', timeZone:'UTC'});
-const fullDate = new Intl.DateTimeFormat('en-US', {month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short'});
+import {messages} from './localization.mjs';
+const compactDate = new Intl.DateTimeFormat(messages.locale, {month:'short', day:'numeric', year:'numeric'});
+const dateOnly = new Intl.DateTimeFormat(messages.locale, {month:'short', day:'numeric', year:'numeric', timeZone:'UTC'});
+const fullDate = new Intl.DateTimeFormat(messages.locale, {month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit', timeZoneName:'short'});
 
 export function validTimestamp(value) {
   return Number.isFinite(value) && value > 0 && value <= 8640000000000000;
@@ -24,7 +25,7 @@ export function feedDates(item, now) {
 }
 
 export function dateLabel(timestamp, full = false, onlyDate = false) {
-  if (!validTimestamp(timestamp)) return 'No date in feed';
+  if (!validTimestamp(timestamp)) return messages.common.noDateInFeed;
   return (onlyDate ? dateOnly : full ? fullDate : compactDate).format(timestamp);
 }
 

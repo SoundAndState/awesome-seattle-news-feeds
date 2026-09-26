@@ -1,3 +1,4 @@
+import {messages} from './localization.mjs';
 import {validItemId, validateItem, prepareItem} from './item-model.mjs';
 
 export const BACKUP_VERSION = 1;
@@ -14,15 +15,15 @@ export function readingBackup({states, articles}, site, now = new Date()) {
 // Validate the entire file before applying any part of it to the library.
 export function restoreReadingBackup(data, {states, articles}, normalizeText, site = {storageNamespace: LEGACY_COLLECTION}) {
   if (!data || data.format !== 'sound-and-state' || data.version !== BACKUP_VERSION || !Array.isArray(data.state) || !Array.isArray(data.savedArticles) || data.state.length > 100000 || data.savedArticles.length > 5000) {
-    throw new Error('The reader cannot restore this file. Choose a JSON backup from Export reading backup.');
+    throw new Error(messages.backup.invalidFormat);
   }
   if ((data.collection === undefined ? LEGACY_COLLECTION : data.collection) !== site.storageNamespace) {
-    throw new Error('This backup belongs to another collection. Restore it in the reader where you exported it. Your library has not changed.');
+    throw new Error(messages.backup.wrongCollection);
   }
   const mergedStates = new Map();
   for (const item of data.state) {
     if (!item || !validItemId(item.id) || (item.read !== undefined && typeof item.read !== 'boolean') || (item.saved !== undefined && typeof item.saved !== 'boolean')) {
-      throw new Error('The reader cannot read which items this backup marks as read or saved. Choose another backup.');
+      throw new Error(messages.backup.invalidMarks);
     }
     const previous = mergedStates.get(item.id) || states.get(item.id);
     mergedStates.set(item.id, {id: item.id, read: Boolean(item.read || previous?.read), saved: Boolean(item.saved || previous?.saved)});
@@ -34,9 +35,9 @@ export function restoreReadingBackup(data, {states, articles}, normalizeText, si
       validateItem(item, {requireSourceName: true});
       if (!savedIds.has(item.id)) throw new Error('The item has no saved mark.');
     } catch (error) {
-      if (error.code === 'invalid-updated') throw new Error('The reader cannot read an item’s update date in this backup. Choose another backup.');
-      if (error.code === 'invalid-kind') throw new Error('The reader cannot read an item’s type in this backup. Choose another backup.');
-      throw new Error('The reader cannot read a saved item in this backup. Choose another backup.');
+      if (error.code === 'invalid-updated') throw new Error(messages.backup.invalidDate);
+      if (error.code === 'invalid-kind') throw new Error(messages.backup.invalidKind);
+      throw new Error(messages.backup.invalidItem);
     }
     // Existing content wins both in memory and on disk. Restoring an older file
     // must not silently replace a current item after the next reload.
