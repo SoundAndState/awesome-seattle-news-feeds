@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "dexie": "4.4.6",
-    "dompurify": "3.4.15",
+    "dompurify": "3.4.16",
     "feedsmith": "2.9.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
